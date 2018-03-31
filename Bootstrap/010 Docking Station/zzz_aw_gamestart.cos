@@ -1,0 +1,16 @@
+**
+** zzz_aw_gamestart
+**
+** Game Variables
+** ==============
+**
+** Game Status = Offline
+sets game "status" "offline"
+sets game "aw_status" "offline"
+** User of this World = Not Set
+sets game "user_of_this_world" ""
+
+rgam
+** Move to Docking Station Hub
+rtar 3 3 103
+cmrt 0
