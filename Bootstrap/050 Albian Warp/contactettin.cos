@@ -1,0 +1,233 @@
+*New Albian Warp contact book, aka ContactEttin
+
+***remove add to contact book from web script
+**This was really clunky in the original netbabel and I think 
+*we can do way better.
+scrx 1 1 157 2468
+
+*Create a New Contact
+scrp 1 1 157 1000
+	inst
+*in the old version, _p1_ is the user ID
+*but we don't do user IDs anymore, just names.
+
+*	dbg: outs "CONTACT BOOK ADD EVENT"
+*	dbg: outs "_p1_ is:"
+*	dbg: outs _p1_
+*	dbg: outs "_p2_ is:"
+*	dbg: outv _p2_
+
+*	check whether _p1_ is not a string
+	doif type _p1_ ne 2
+*		WRONG TYPE
+		stop
+	endi
+
+* make sure we are in WWR, so net: ulin is fast
+* and for warning icon script 1 1 157 137 below
+*	lock
+*	net: whon _p1_
+	inst
+	sets va79 _p1_
+	adds va79 "_contact"
+
+*	check whether this is a new (to you) user
+	doif game va79 eq 0
+*		it is, create the variables
+		inst
+*va79 is [contactname]_contact right now
+		setv game va79 1
+
+		sets va00 _p1_
+		sets va01 "_nick"
+		adds va00 va01
+*va00 is [contactname]_nick right now
+*which we're going to just set back to the username
+*this is kinda pointless but it means less work editing
+*the caos right now
+		sets game va00 _p1_
+	endi
+
+*	if this is you, get rid of contact entry
+	sets va99 game "user_of_this_world"
+	doif va99 eq _p1_
+		sets va00 _p1_
+		adds va00 "_contact"
+		delg va00
+		stop
+	endi
+
+*The rest is this is somehow related to portals and hasn't been 
+*tested or modified for AW at all
+
+*	check whether type of _p2_ is not integer
+	doif type _p2_ ne 0
+*		WRONG TYPE
+		stop
+	endi
+
+*	trigger event to set up who's wanted register if it's a portal
+	doif _p2_ gt 0 and _p2_ lt 11
+		setv va66 _p2_
+		subv va66 1
+*		look for the right portal
+		enum 3 9 1
+			doif ov00 eq va66
+
+*				dbg: outs "SENT whos wanted info for portals"
+
+				mesg wrt+ targ 1005 _p1_ 0 0
+			endi
+		next
+*	otherwise set up who's wanted register for comms screen	
+	elif _p2_ eq 0
+*			dbg: outs "SENT whos wanted info for contact book (nothing to do)"
+*			dbg: outs _p1_
+*			Nothing special to do here now
+	endi
+
+
+*	check whether paramter was actually sent
+	doif _p2_ eq 0
+
+*	if comms is in view contacts mode refresh the screen
+		rtar 1 2 210
+		doif targ ne null
+			doif ov00 eq 1
+*			lock
+*			reps 2
+*				mesg writ targ 1000
+*				wait 5
+*			repe
+
+*			mesg wrt+ targ 1011 10 0 5
+*			mesg wrt+ targ 1010 0 0 10
+
+				mesg writ targ 1100
+
+			endi
+		endi
+*		no parameter - stop
+		stop
+	endi
+*	see if parameter is negative
+	doif _p2_ lt 0
+*		set temp string to receive
+		sets va02 "receive"
+*		and get absolute value of _p2_		
+		absv _p2_
+	elif _p2_ gt 0
+*		set temp string to send					
+		sets va02 "send"
+	endi
+
+*	create the first bit of string for the portal ID
+	doif _p2_ eq 1
+		sets va01 "_portal0"
+	elif _p2_ eq 2
+		sets va01 "_portal1"
+	elif _p2_ eq 3
+		sets va01 "_portal2"
+	elif _p2_ eq 4
+		sets va01 "_portal3"
+	elif _p2_ eq 5
+		sets va01 "_portal4"
+	elif _p2_ eq 6
+		sets va01 "_portal5"
+	elif _p2_ eq 7
+		sets va01 "_portal6"
+	elif _p2_ eq 8
+		sets va01 "_portal7"
+	elif _p2_ eq 9
+		sets va01 "_portal8"
+	elif _p2_ eq 10
+		sets va01 "_portal9"
+	elif _p2_ eq 11
+		sets va01 "_containment"
+	endi
+*	add the 'send/receive' string to the portal ID
+	adds va01 va02
+*	add the user ID to create string name
+	sets va00 _p1_
+	adds va00 va01
+
+*		set variable
+
+*	dbg: outs "creating game variable"
+*	dbg: outs va00
+
+	setv game va00 1
+
+*	dbg: outs "CONTACT BOOK entry created"
+*	dbg: outs va00
+
+endm
+
+
+***owner has just gone online -- originally, this script looped through
+*the contacts book to see if anthing didn't have nickname but that's 
+*kind of irelevent now since all we have are nicknames
+scrp 1 1 157 135
+
+endm
+
+***WWR user online event - do warning icons etc.
+**IN PROGRESS right now since we don't currently get indicators
+**when someone comes online/goes offline
+scrp 1 1 157 137
+	inst
+
+*!* should we consider having a net: stat-equse AW agent?
+
+*	only do this if you've already been online a while.
+*	net: stat va90 va91 va92 va93
+*	check time online
+*	doif va90 gt 5000
+
+*		dbg: outs "contact book WWR event"
+
+*	build search string
+	sets va00 _p1_
+	adds va00 "_contact"
+	adds va00 "_group"
+	doif game va00 eq 2
+*	if this person is classed as a friend ...
+		rtar 1 1 164
+*		tell the warning icon controller about it	
+		doif targ ne null
+			mesg wrt+ targ 1000 4 _p1_ 0
+		endi
+		targ ownr
+	endi
+
+endm
+
+***WWR user offline event - do warning icons etc.
+**Again, not working right now since that functionality
+**is not in AW
+scrp 1 1 157 138
+	inst
+
+*	only do this if not just gone online
+	net: stat va90 va91 va92 va93
+*	check time online
+	doif va90 gt 5000
+
+*	build search string
+		sets va00 _p1_
+		adds va00 "_group"
+		doif game va00 eq 2
+*	if this person is classed as a friend ...
+*		only do this though if you are online
+			doif net: line eq 1
+				rtar 1 1 164
+*		tell the warning icon controller about it	
+				doif targ ne null
+					mesg wrt+ targ 1000 6 _p1_ 0
+				endi
+			endi
+		endi
+		targ ownr
+	endi
+endm
+
