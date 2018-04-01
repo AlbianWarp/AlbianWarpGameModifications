@@ -1,0 +1,58 @@
+*Replacement scripts for those found in ds gui - topleft.cos
+
+*remove some scripts we will never use:
+scrx 1 2 14 135
+scrx 1 2 14 136
+
+scrp 1 2 14 1003
+	inst
+	* call the go offline script
+	enum 1 1 35700
+		mesg wrt+ targ 1100 0 0 0
+	next
+endm
+
+
+* Set Online Indicator to ONLINE
+scrp 1 2 14 500
+	call 1004 0 0
+	snde "yes_"
+	part 7
+	pose 1
+	call 1005 0 0
+endm
+
+* Set Online Indicator to OFFLINE
+scrp 1 2 14 501
+	call 1004 0 0
+	snde "no__"
+	part 7
+	pose 0
+	enum 1 1 210
+		kill targ
+	next
+	enum 1 1 217
+		kill targ
+	next
+	call 1005 0 0
+endm
+
+rscr
+** Kill the GUI TopLeft
+enum 1 2 14
+	kill targ
+next
+scrx 1 2 14 1002
+scrx 1 2 14 127
+scrx 1 2 14 8
+scrx 1 2 14 120
+scrx 1 2 14 120
+scrx 1 2 14 1000
+scrx 1 2 14 1001
+scrx 1 2 14 1002
+scrx 1 2 14 1003
+scrx 1 2 14 1004
+scrx 1 2 14 1005
+scrx 1 2 14 76
+scrx 1 2 14 500
+scrx 1 2 14 501

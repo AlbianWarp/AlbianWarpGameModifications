@@ -1,0 +1,213 @@
+*AW_message interpreter (mailgrendel!)
+
+scrp 1 1 205 1101
+	inst
+	sets va00 ""
+* Is there a Subject?
+	part 25
+	sets va99 ptxt
+	doif va99 = ""
+		snde "buzz"
+		part 33
+		ptxt read "Message Centre Text" 14
+		stop
+	endi
+** Is there a message?
+	part 21
+	sets va00 ptxt
+	doif va00 = ""
+		snde "buzz"
+		part 33
+		ptxt read "Message Centre Text" 15
+		stop
+	endi
+** If it gets to this point, there is a message and a recipient... so it can be sent! :o)
+* va00 				= Message
+* name "recipient_nick"		= NickName
+* name "recipient_userID"	= User ID
+* va99 				= subject
+*****************************************
+*  CREATE   THE   MESSAGE   AGENT (AW)  *
+*****************************************
+	seta va79 targ
+	new: simp 1 1 35753 "blnk" 1 0 0
+	sets name "aw_recipient" mame "recipient_nick"
+	sets name "type" "mail_message"
+	sets name "subject" va99
+	sets name "message" va00
+
+	targ va79
+
+* We're assuming it's always successful...
+*	doif va80 eq 0
+	lock
+	sets va99 read "Message Centre Text" 16
+	adds va99 "<tint 70 210 255>"
+	adds va99 name "recipient_nick"
+	part 33
+	ptxt va99
+** Change the focus
+	targ game "c3_default_focus"
+	part game "c3_default_focus_part"
+	fcus
+	targ ownr
+*	else
+*		dbg: asrt "something" = "is wrong"
+*		va81 has more info on this error!
+*	endi
+	wait 20
+** Current State
+	sets name "oldstate" name "state"
+	sets name "state" "inbox"
+** Message Recipient
+	sets name "recipient_nick" ""
+	sets name "recipient_userID" ""
+** reply subject
+	sets name "reply_subject" ""
+** Clean Up!
+	call 2000 0 0
+	wait 5
+** Call Message Check
+	call 5000 0 0
+endm
+
+
+** Message Interpreter Timer
+scrp 1 1 206 9
+	inst
+	dbg: outs "message timer ticking"
+*	If Offline, Stop! :)
+	doif game "aw_status" = "offline"
+		stop
+	endi
+	dbg: outs "we're online"
+
+*	Does a Mail Message exist?
+	seta va00 null
+	enum 1 1 35754
+		doif name "type" = "mail_message"
+			seta va00 targ
+			dbg: outs "message from "
+			dbg: outs name "aw_sender"
+		endi
+	next
+*	If none found, stop.	
+	doif va00 eq null
+		stop
+	endi
+	targ va00
+*	Put the Message Sender's Name into VA01
+*
+
+	sets va01 name "aw_sender"
+	sets va78 name "aw_sender"
+	adds va78 "_contact"
+*		If the User is unknown - make a new contact! :-)
+	doif game va78 = 0
+		rtar 1 1 157
+		doif targ ne null
+			mesg wrt+ targ 1000 va01 0 0
+		else
+			stop
+		endi
+		targ va00
+	else
+*		The User is already known to you, is it a foe? !O_O!
+		sets va02 "_group"
+		sets va03 va01
+		adds va03 va02
+*			Are you a foe, little User? ;O)		
+		doif game va03 = 3
+*				Trash the foe's message!
+			kill va00
+*				And stop further processing! :0)
+			stop
+		endi
+	endi
+*	Find the nickname of this user...
+*	sets va02 va01
+*	adds va02 "_nick"
+*
+*	If you have no entry for this contact yet, wait until contact book has sorted itself out!
+**	Make sure contact details have been obtained... :-)
+*	setv va84 0
+*	loop
+*		doif type game va02 = 0
+*			delg va02
+*			wait 1
+*		elif type game va02 = 2
+*			setv va84 1
+*		else
+*			wait 1
+*		endi
+*	untl va84 = 1
+	inst
+**	Get the Nickname...
+*	sets va03 game va02
+*	Convert the Message to a Message Agent... :o)
+*     =============================================
+*
+	sets va01 name "aw_sender"
+	sets va02 name "subject"
+	sets va03 name "aw_date"
+	sets va04 name "message"
+	sets va05 name "aw_sender"
+	inst
+*
+*	Add to the user's Message Log :)
+
+
+	sets va99 uppa game "user_of_this_world"
+	adds va99 read "Message Archive Text" 0
+	file oope 1 va99 1
+	outs "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
+	outs read "Message Archive Text" 1
+	outs va05
+	outs read "Message Archive Text" 2
+	outs va01
+	outs ")\n"
+	outs read "Message Archive Text" 3
+	outs va03
+	outs "\n"
+	outs read "Message Archive Text" 4
+	outs va02
+	outs "\n"
+	outs read "Message Archive Text" 5
+	outs va04
+	outs "\n"
+	file oclo
+
+
+*	Create a Message Agent
+*	======================
+	inst
+	new: simp 1 1 207 "blnk" 0 0 0
+	attr 16
+*> Save the Sender's UserID
+	sets name "Sender UserID" va01
+*> Save the Subject
+	sets name "Subject" va02
+*> Save the Date Sent
+	sets name "Date Sent" va03
+*> Save the Message
+	sets name "Message" va04
+*> Save the Sender Nickname
+	sets name "Sender Nickname" va05
+*
+*
+*
+	targ ownr
+*	Delete the pray file!
+	kill va00
+*	Trigger Refresh Inbox
+	rtar 1 1 205
+	doif targ ne null
+		mesg writ targ 5000
+	endi
+	targ ownr
+*	Trigger Warning Icons
+	rtar 1 1 164
+	doif targ ne null
+		mesg wrt+ targ 1000 3 0 0
+	endi
+endm

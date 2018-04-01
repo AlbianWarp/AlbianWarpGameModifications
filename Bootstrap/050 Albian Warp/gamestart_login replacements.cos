@@ -1,0 +1,22 @@
+**This just undoes everything that zzz_gamestart_login does without having to replace it:
+
+enum 1 2 206
+	kill targ
+next
+enum 1 2 26
+	kill targ
+next
+** UnPause the World
+wpau 0
+enum 1 0 0
+	paus 0
+next
+enum 2 0 0
+	paus 0
+next
+enum 3 0 0
+	paus 0
+next
+enum 4 0 0
+	paus 0
+next
