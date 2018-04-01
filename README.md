@@ -9,3 +9,7 @@ The Bootstrap directory must be copied into the Docking Station installation dir
 ## Usage
 
 The Game Modification by itself are not very usefull, as they are only used by the [AlbianWarpClient](https://github.com/AlbianWarp/AlbianWarpClient).
+
+## License
+
+This project is licensed under the GPL3 License - see the [LICENSE.md](/LICENSE.md) file for details
