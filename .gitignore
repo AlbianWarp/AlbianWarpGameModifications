@@ -1,2 +1,14 @@
+# Ignore everything
+/*
 
-Bootstrap/050 Albian Warp/messages.cosp
+#except these files:
+!.gitignore
+!LICENSE.md
+!README.md
+
+# And the Bootstrap modifications
+!Bootstrap/
+Bootstrap/*
+!Bootstrap/050 Albian warp/
+Bootstrap/000 Switcher/*
+!Bootstrap/000 Switcher/AW eame vars.cos
