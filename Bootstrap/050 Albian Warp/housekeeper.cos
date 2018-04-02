@@ -2,20 +2,57 @@ new: simp 1 1 35700 "blnk" 1 0 0
 tick 200
 
 scrp 1 1 35700 9
-doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
-	sets game "aw_status" "offline"
-	sets game "status" "offline"
-	enum 1 2 14
-		mesg writ targ 501
-	next
-elif game "aw_online_indicator" eq 1 and game "aw_status" eq "offline"
-	sets game "aw_status" "online"
-	sets game "status" "online"
-	enum 1 2 14
-		mesg writ targ 500
-	next
-endi
-setv game "aw_online_indicator" 0
+	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
+		sets game "aw_status" "offline"
+		sets game "status" "offline"
+		enum 1 2 14
+			mesg writ targ 501
+		next
+	elif game "aw_online_indicator" eq 1 and game "aw_status" eq "offline"
+		sets game "aw_status" "online"
+		sets game "status" "online"
+		enum 1 2 14
+			mesg writ targ 500
+		next
+	endi
+	setv game "aw_online_indicator" 0
+
+** This part here checks for available creatures
+** with a "warp" chunktype!
+** If the creature has a NAME variable "Pray Extra recipient_userID" that is the same
+** as the GAME variable "user_of_this_world" it is then Imported!
+** Because this import is a cloned import
+	doif game "aw_status" eq "online"
+		pray refr
+		sets va00 ""
+		doif pray coun "warp" gt 0
+			outv pray coun "warp"
+			outs "\n"
+			sets va01 pray next "warp" va00
+			sets va00 va01
+			outs va01
+			sets va10 pray agts va01 "Pray Extra recipient_userID" "Unknown"
+			sets va11 pray agts va01 "Pray Extra sender_user_ID" "Unknown"
+			outs "\n"
+			outs va10
+			outs "\n"
+			outs va11
+			doif va10 eq game "user_of_this_world"
+				outs "this is a norn for me"
+				enum 1 1 154
+					mesg wrt+ targ 1001 va01 0 0
+				next
+				setv va99 pray impo va01 1 0
+				mvft 5250 9450
+		        aslp 0
+		        pose 59
+		        stim writ targ 95 1
+		        outs name "aw_creature_name"
+		        outs gtos 0
+		        hist name gtos 0 name "aw_creature_name"
+			endi
+		endi
+	endi
 endm
 
 ***
