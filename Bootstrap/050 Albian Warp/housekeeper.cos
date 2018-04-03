@@ -1,10 +1,22 @@
 new: simp 1 1 35700 "blnk" 1 0 0
 tick 200
-
+*ov00 is going to account for RACE-- the time the last tick took in MS
+setv ov00 0
 scrp 1 1 35700 9
+inst
+*if race is less than 50, we're in fast ticks, so don't go on until you
+*total is at least 50 (should be about the equivlent of not being in fast ticks).
+	addv ov00 race
+	doif ov00 lt 50
+		stop
+	else
+		setv ov00 0
+	endi
+
 	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
 		sets game "aw_status" "offline"
 		sets game "status" "offline"
+
 		enum 1 2 14
 			mesg writ targ 501
 		next
@@ -43,6 +55,7 @@ scrp 1 1 35700 9
 					mesg wrt+ targ 1001 va01 0 0
 				next
 				setv va99 pray impo va01 1 0
+**eventually need to refine/replace this since coords can vary in coming in through portals!
 				mvft 5250 9450
 		        aslp 0
 		        pose 59
@@ -92,3 +105,8 @@ scrp 1 1 35700 1000
 	endi
 	unlk
 endm
+
+rscr
+enum 1 1 35700
+kill targ
+next
