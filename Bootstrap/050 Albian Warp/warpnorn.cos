@@ -111,7 +111,6 @@ scrp 1 1 184 9
 	gsub guion
 	wait 10
 	inst
-
 *	if there is no warped creature waiting stop
 	doif pray coun "warp" eq 0
 *		if can't find any, refresh for next time
@@ -136,10 +135,50 @@ scrp 1 1 184 9
 		sets va00 ov99
 	endi
 
-*	get the current chunk
-	sets va01 pray next "warp" va00
-	sets ov00 va01
+* Don't know how much of an effect this has right now but worth trying:
+	setv eame "engine_clone_upon_import" 0
+*!* Here is where we get the current creature:
+	sets va76 ""
+	loop
+	setv va77 1
+*		get the current chunk
+		sets va01 pray fore "warp" va76
 
+*		if a creature of that moniker already exists in your world, skip it.
+*		get the moniker
+		doif va01 ne ""
+			setv va78 strl va01
+			subv va78 5
+			sets va80 subs va01 1 va78
+*		dbg: outs va80
+			enum 4 0 0
+				doif gtos 0 eq va80
+					setv va77 0
+					dbg: outs va01
+					dbg: outs "creature exists already"
+				endi
+			next
+*		if the recipent is not you, skip it
+			sets va11 pray agts va01 "Pray Extra recipient_userID" "Unknown"
+			doif game "user_of_this_world" ne va11
+				dbg: outs va01
+				setv va77 0
+				dbg: outs "creature is not for you!"
+			endi
+		endi
+*		barring those two situations... you should be good.
+		sets va76 va01
+	untl va76 eq "" or va77 eq 1
+	doif va76 eq ""
+		dbg: outs "no more creatures"
+		gsub guioff
+		stop
+	endi
+
+
+*	va01 is now the creature we're going to continue with
+
+	sets ov00 va01
 *	set va10 and ov01 to the string of the user this is from
 	sets va10 pray agts va01 "Pray Extra sender_user_ID" "Unknown"
 *	set va11 to the recipient (hopefully, this will be you)
@@ -784,6 +823,7 @@ scrp 1 1 184 9
 	retn
 *	turn 'something is arriving' gui off
 	subr guioff
+		setv eame "engine_clone_upon_import" 1
 		rtar 1 2 14
 		doif targ ne null
 			mesg writ targ 1005
