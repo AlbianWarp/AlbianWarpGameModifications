@@ -1,0 +1,876 @@
+*New Albian Warp warp-handling Scripts, aka WarpNorn
+
+
+**immigrant checker timer (overwrites the one in 'immigrant checker.cos')
+scrp 1 1 184 9
+	inst
+	lock
+*	this bit handles the travel sickness that prevents a
+*	creature from repeating warping. Each warp creature has
+*	a game variable created at point of immigration through portal
+*	<INT> game (moniker)_travel = worldtick
+*	this code checks whether current world tick is greater than time
+*	stamp for creature import (greater by 400)
+
+	setv va50 wtik
+	subv va50 400
+
+	sets va99 ""
+	sets va00 "_travel"
+*	need double loop because inner loop will terminate
+*	as soon as a game variable is deleted
+	loop
+*		flag to say 'i've deleted a variable this time
+		setv va66 0
+		loop
+			sets va10 gamn va99
+*			see if string contains string
+			setv va20 sins va10 1 va00
+			doif va20 ne -1
+*			it does
+*				see whether time stamp is acceptable
+				doif game va10 lt va50
+*				yes, delete variable
+					delg va10
+					setv va66 1
+				endi
+			endi
+			sets va99 va10
+		untl va10 eq ""
+	untl va66 eq 0
+
+
+*	this bit handles the rejection of creatures who've spent too
+*	long in quarantine.
+*	<INT> game (moniker)_quarantine = worldtick
+*	this code checks whether current world tick is greater than time
+*	stamp for creature import (greater by 72000)
+
+	setv va50 wtik
+	subv va50 72000
+
+*	dbg: outs "QUARANTINE CHECK"
+
+	sets va99 ""
+	sets va00 "_quarantine"
+*	need double loop because inner loop will terminate
+*	as soon as a game variable is deleted
+	loop
+*		flag to say 'i've deleted a variable this time
+		setv va66 0
+		loop
+			sets va10 gamn va99
+*			see if string contains string
+			setv va20 sins va10 1 va00
+			doif va20 ne -1
+*			it does
+*				see whether time stamp is acceptable
+				doif game va10 lt va50
+*				yes
+
+*					dbg: outs "Found a suitable reject"
+
+*				reject creature back to sender
+*					use substring to get moniker
+					subv va20 1
+					sets va21 subs va10 1 va20
+*					va21 is now moniker
+
+*					dbg: outs "Moniker is:"
+*					dbg: outs va21
+
+*					find the right creature
+					enum 4 0 0
+						doif gtos 0 eq va21
+*						here's the puppy, send it back
+							gsub toolong
+						endi
+					next
+
+*				delete variable
+
+					delg va10
+					setv va66 1
+				endi
+			endi
+			sets va99 va10
+		untl va10 eq ""
+	untl va66 eq 0
+
+
+
+**	immigrant check proper
+
+
+*	if you aren't online then stop
+	doif game "aw_status" = "offline"
+		stop
+	endi
+
+*	turn gui on to show that possible import taking place
+	gsub guion
+	wait 10
+	inst
+*	if there is no warped creature waiting stop
+	doif pray coun "warp" eq 0
+*		if can't find any, refresh for next time
+		pray refr
+		gsub guioff
+		stop
+	endi
+
+*	if you've reached max population - stop
+	setv va00 totl 4 0 0
+	doif va00 gt game "total_population"
+		gsub guioff
+		stop
+	endi
+
+*	check whether got stuck on your own creature last time
+	doif ov99 eq ""
+*		no, carry on normal
+		sets va00 ""
+	else
+*		start search from this sticky one
+		sets va00 ov99
+	endi
+
+* Don't know how much of an effect this has right now but worth trying:
+	setv eame "engine_clone_upon_import" 0
+*!* Here is where we get the current creature:
+	sets va76 ""
+	loop
+	setv va77 1
+*		get the current chunk
+		sets va01 pray fore "warp" va76
+
+*		if a creature of that moniker already exists in your world, skip it.
+*		get the moniker
+		doif va01 ne ""
+			setv va78 strl va01
+			subv va78 5
+			sets va80 subs va01 1 va78
+*		dbg: outs va80
+			enum 4 0 0
+				doif gtos 0 eq va80
+					setv va77 0
+					dbg: outs va01
+					dbg: outs "creature exists already"
+				endi
+			next
+*		if the recipent is not you, skip it
+			sets va11 pray agts va01 "Pray Extra recipient_userID" "Unknown"
+			doif game "user_of_this_world" ne va11
+				dbg: outs va01
+				setv va77 0
+				dbg: outs "creature is not for you!"
+			endi
+		endi
+*		barring those two situations... you should be good.
+		sets va76 va01
+	untl va76 eq "" or va77 eq 1
+	doif va76 eq ""
+		dbg: outs "no more creatures"
+		gsub guioff
+		stop
+	endi
+
+
+*	va01 is now the creature we're going to continue with
+
+	sets ov00 va01
+*	set va10 and ov01 to the string of the user this is from
+	sets va10 pray agts va01 "Pray Extra sender_user_ID" "Unknown"
+*	set va11 to the recipient (hopefully, this will be you)
+	sets va11 pray agts va01 "Pray Extra recipient_userID" "Unknown"
+	sets ov01 va10
+
+*	get your own user in VA09 and ov02
+	sets va09 game "user_of_this_world"
+	sets ov02 va09
+
+*	only trigger contact if doesn't exist
+	sets va81 va10
+	adds va81 "_contact"
+	doif game va81 ne 1
+*		send user ID to contact book
+		gsub contactadd
+	endi
+
+
+*	if this a creature someone rejected from you, let it in automatically
+	doif pray agti va01 "Pray Extra reject" 0 ne 0
+*		make sure there is room in chamber	
+		gsub chambercheck
+*		check if chamber is free
+		gsub chamberinactive
+*		first get ID of who it is from
+		sets va70 pray agts va01 "Pray Extra sender_user_ID" "Unknown"
+
+*		set game variable such that:
+*		game "<moniker>_immigrant" = <user ID>
+
+		sets va71 va01
+*		remove .warp from va01 string
+		setv va60 sins va71 1 ".warp"
+		doif va60 ne -1
+			subv va60 1
+			sets va61 subs va71 1 va60
+		endi
+*		at this point va61 is moniker
+*			copy it into va62 and ov03
+		sets va62 va61
+		sets ov03 va62
+
+		sets va72 "_immigrant"
+		adds va61 va72
+		sets game va61 va70
+*		import it
+
+		gsub chamberimport
+	endi
+
+
+*	see if this person is classed as foe
+	sets va02 "_group"
+	sets va03 va10
+	adds va03 va02
+*	if they are classed as foe ..
+	doif game va03 eq 3
+*		get rid of the creature - send it back
+		targ null
+		setv va88 pray impo va01 1 0
+		doif targ <> null
+*		set foe flag
+			setv name "Pray Extra foe" 1
+*		set reject flag too so creature will be imported
+			setv name "Pray Extra reject" 3
+*!* 			newww AW replacement for net: expo
+*!* 			remove: setv va88 net: expo "warp" va10
+**
+			seta va79 targ
+			rtar 1 1 35700
+			mesg wrt+ targ 1000 va79 va10 0
+**
+		endi
+*		clear 'last creature' flag
+		targ ownr
+		sets ov99 ""
+		gsub guioff
+*		and stop
+		stop
+	endi
+
+*	see if it's G or E
+	doif reaq "patch_level" eq 0
+		doif pray agti va01 "Genus" 1 ne 1
+*		send it back as a reject
+			targ null
+			setv va88 pray impo va01 1 0
+			doif targ <> null
+				setv name "Pray Extra reject" 1
+*!* 				newww AW replacement for net: expo
+*!* 				remove: setv va88 net: expo "warp" va10
+**
+				seta va79 targ
+				rtar 1 1 35700
+				mesg wrt+ targ 1000 va79 va10 0
+**
+			endi
+			targ ownr
+			sets ov99 ""
+			gsub guioff
+			stop
+		endi
+	endi
+
+
+*	see if there is a random receive portal
+
+*	these strings will make up search string
+	sets va00 "_portal"
+	setv va02 0
+	sets va04 "receive"
+
+	seta va90 null
+
+*	gonna have to look through all portals (0-9) so need to loop
+
+	loop
+
+*	convert portal ID number to string
+		sets va03 vtos va02
+*	don't loose original strings, create copy
+*		start of search string
+		sets va05 va00
+*		add the portal number		
+		adds va05 va03
+*		add the 'receive' string		
+		adds va05 va04
+*	create the final search string		
+		sets va11 "!net: ruso"
+		adds va11 va05
+
+*	look to see if this variable exists
+		doif game va11 eq 1
+*	it does, which means this portal can be used
+*	find the portal with this ID
+			enum 3 9 1
+				doif ov00 eq va02
+*		save its TARG ID to variable				
+					seta va90 targ
+*		and set variable to jump out of loop, no need to carry on
+					setv va02 10
+				endi
+			next
+		else
+			delg va11
+		endi
+
+		addv va02 1
+	untl va02 ge 10
+
+
+*	if the search was successful, import the creature
+	doif va90 ne null
+		gsub portalimport
+	endi
+
+
+
+*	see if there is a friend portal
+*	these strings will make up search string
+	sets va00 "_portal"
+	setv va02 0
+	sets va04 "receive"
+
+	seta va90 null
+
+*	gonna have to look through all portals (0-9) so need to loop
+
+	loop
+
+*	convert portal ID number to string
+		sets va03 vtos va02
+*	don't loose original strings, create copy
+*		start of search string
+		sets va05 va00
+*		add the portal number		
+		adds va05 va03
+*		add the 'receive' string		
+		adds va05 va04
+*	create the final search string		
+		sets va11 "!friend"
+		adds va11 va05
+
+*	look to see if this variable exists
+		doif game va11 eq 1
+*	it does, which means this portal can be used
+*	find the portal with this ID
+			enum 3 9 1
+				doif ov00 eq va02
+*		save its TARG ID to variable				
+					seta va90 targ
+*		and set variable to jump out of loop, no need to carry on
+					setv va02 10
+				endi
+			next
+		else
+			delg va11
+		endi
+
+		addv va02 1
+	untl va02 ge 10
+
+*	if there is a friend portal, see if the sender is a friend
+	doif va90 ne null
+*	see if this person is classed as foe
+		sets va02 "_group"
+		sets va03 va10
+		adds va03 va02
+*	if they are classed as friend ..
+		doif game va03 eq 2
+*		fine
+		else
+*		otherwise, clear portal targ
+			seta va90 null
+		endi
+	endi
+
+
+
+*	if the search was successful, import the creature
+	doif va90 ne null
+		gsub portalimport
+	endi
+
+
+
+*	if not, find specific the portal they send to
+
+*	these strings will make up search string
+	sets va00 "_portal"
+	setv va02 0
+	sets va04 "receive"
+
+	seta va90 null
+
+*	gonna have to look through all portals (0-9) so need to loop
+
+	loop
+
+*	convert portal ID number to string
+		sets va03 vtos va02
+*	don't loose original strings, create copy
+*		start of search string
+		sets va05 va00
+*		add the portal number		
+		adds va05 va03
+*		add the 'receive' string		
+		adds va05 va04
+*	create the final search string		
+		sets va11 va10
+		adds va11 va05
+
+*	look to see if this variable exists
+		doif game va11 eq 1
+*	it does, which means this portal can be used
+*	find the portal with this ID
+			enum 3 9 1
+				doif ov00 eq va02
+*		save its TARG ID to variable				
+					seta va90 targ
+*		and set variable to jump out of loop, no need to carry on
+					setv va02 10
+				endi
+			next
+		else
+			delg va11
+		endi
+
+		addv va02 1
+	untl va02 ge 10
+
+*	if the search was successful, import the creature
+	doif va90 ne null
+		gsub portalimport
+	endi
+
+
+
+*	check containment chamber last
+	sets va00 "_containmentreceive"
+*	va10 is user this creature is from	
+	sets va11 va10
+
+
+*	first of all, check if it's set up for random receive
+	sets va12 "!net: ruso"
+	adds va12 va00
+	doif game va12 eq 1
+*		yes, random receive is ok
+
+*		make sure there is room in chamber
+		gsub chambercheck
+*		check if chamber is free
+		gsub chamberinactive
+*		first get ID of who it is from
+		sets va70 net: from va01
+
+*	set game variable such as:
+*	game "<moniker>_immigrant" = <user ID>
+
+		sets va71 va01
+*		remove .warp from va01 string
+		setv va60 sins va71 1 ".warp"
+		doif va60 ne -1
+			subv va60 1
+			sets va61 subs va71 1 va60
+		endi
+*		at this point va61 is moniker
+*		copy that to va62 for later use
+		sets va62 va61
+		sets ov03 va62
+		sets va72 "_immigrant"
+		adds va61 va72
+		sets game va61 va70
+
+		gsub chamberimport
+	else
+		delg va12
+	endi
+
+
+*	are they a friend?
+*		va11 is user ID
+	sets va59 va11
+	adds va59 "_group"
+*		see if they're a friend	
+	doif game va59 eq 2
+*		now look for friend setting in containment chamber
+		sets va59 va11
+		adds va59 "_containmentreceive"
+		doif game va59 eq 1
+*		yes, containment set to receive for friend
+*			import the creature
+*		make sure there is room in chamber
+			gsub chambercheck
+*		check if chamber is free
+			gsub chamberinactive
+*		first get ID of who it is from
+*		sets va70 net: from va01
+*!* 		AW mod... but really you already have who it's from..? Why.			
+			sets va70 va11
+
+*	set game variable such as:
+*	game "<moniker>_immigrant" = <user ID>
+
+			sets va71 va01
+*		remove .warp from va01 string
+			setv va60 sins va71 1 ".warp"
+			doif va60 ne -1
+				subv va60 1
+				sets va61 subs va71 1 va60
+			endi
+*		at this point va61 is moniker
+*		copy that to va62 for later use
+			sets va62 va61
+			sets ov03 va62
+			sets va72 "_immigrant"
+			adds va61 va72
+			sets game va61 va70
+
+			gsub chamberimport
+		endi
+	endi
+
+
+*	 nope, not a friend
+*	search for specific entry - add search string stub to user ID
+	adds va11 va00
+
+*	see if this variable exists *!*Modded to add contact
+	sets va69 va11
+	adds va69 "_contact"
+	doif game va69 eq 1
+*		it does, so put creature in there
+
+*		make sure there is room in chamber
+		gsub chambercheck
+*		check if chamber is free
+		gsub chamberinactive
+*		first get ID of who it is from
+*		sets va70 net: from va01
+*!* 		AW mod... but really you already have who it's from..? Why.			
+		sets va70 va11
+
+
+*	set game variable such as:
+*	game "<moniker>_immigrant" = <user ID>
+
+		sets va71 va01
+*		remove .warp from va01 string
+		setv va60 sins va71 1 ".warp"
+		doif va60 ne -1
+			subv va60 1
+			sets va61 subs va71 1 va60
+		endi
+*		at this point va61 is moniker
+*		copy that to va62 for later use
+		sets va62 va61
+		sets ov03 va62
+		sets va72 "_immigrant"
+		adds va61 va72
+		sets game va61 va70
+
+		gsub chamberimport
+	else
+		delg va11
+	endi
+
+
+
+*if you've got this far then creature has no suitable portal
+
+*	if this is the user who is YOU
+	doif va10 eq va09
+*		then set this creature pray ID in variable and don't worry about it.
+		sets ov99 va01
+		gsub guioff
+		stop
+	endi
+
+
+*otherwise send it back
+	targ null
+	setv va88 pray impo va01 1 0
+	doif targ <> null
+		setv name "Pray Extra reject" 4
+*!*		newww AW replacement for net: expo
+*!* 		remove: setv va88 net: expo "warp" va10
+**
+		seta va79 targ
+		rtar 1 1 35700
+		mesg wrt+ targ 1000 va79 va10 0
+**
+	endi
+
+	gsub guioff
+
+
+
+
+
+*	add a contact. User to add should be in ov01
+	subr contactadd
+		sets va66 ov01
+		rtar 1 1 157
+		doif targ ne null
+			mesg wrt+ targ 1000 va66 0 0
+		else
+			gsub guioff
+			stop
+		endi
+		targ ownr
+
+	retn
+
+*	make sure there is room in the chamber
+	subr chambercheck
+		rtar 1 1 154
+		doif targ ne null
+			seta va66 targ
+		else
+			gsub guioff
+			stop
+		endi
+		targ ownr
+		enum 4 0 0
+			doif va66 eq carr
+				addv va67 1
+			endi
+		next
+		doif va67 ge 6
+			gsub guioff
+			stop
+		endi
+	retn
+
+*	make sure that chamber is inactive at moment
+	subr chamberinactive
+		rtar 1 1 154
+		doif targ ne null
+			doif code ne -1
+				stop
+			endi
+		endi
+		targ ownr
+	retn
+
+*	import creature into chamber.
+*	ov03 is moniker of creature, ov00 is pray chunk to use
+	subr chamberimport
+*		
+		sets va62 ov03
+		sets va01 ov00
+*		see if chamber is running code at the moment
+		loop
+			rtar 1 1 154
+			doif targ ne null
+				doif code ne -1
+*			it is, wait a bit
+					lock
+					slow
+					wait 5
+					inst
+					setv va83 0
+				else
+					setv va83 1
+				endi
+			else
+				setv va83 1
+			endi
+		untl va83 eq 1
+		inst
+		rtar 1 1 154
+		doif targ ne null
+
+			seta va05 targ
+*			send it immigrant ahoy message
+			mesg wrt+ targ 1001 va62 0 0
+			targ null
+			setv va88 pray impo va01 1 0
+
+*			remove 'warp' from va01
+			setv va60 sins va01 1 ".warp"
+			doif va60 ne -1
+				subv va60 1
+				sets va61 subs va01 1 va60
+
+*			create the _quarantine game variable
+				sets va62 "_quarantine"
+				adds va61 va62
+				setv game va61 wtik
+
+*			create the name variable for who is was from
+				sets name "Pray Extra quarantine" mv01
+
+			endi
+
+			doif targ <> null
+				spas va05 targ
+				aslp 0
+				pose 59
+				doif dead eq 1
+					mesg writ targ 72
+				endi
+			endi
+			rtar 1 2 208
+			doif targ ne null
+				mesg writ targ 1065
+			endi
+			targ ownr
+		endi
+*		clear 'last creature flag'		
+		targ ownr
+		sets ov99 ""
+*		trigger change on topleft gui
+		gsub guioff
+*	stop now
+		stop
+	retn
+
+*	import creature to portal
+	subr portalimport
+		inst
+
+		lock
+*		get its position
+		targ va90
+		setv va03 posx
+		setv va04 posy
+		addv va04 50
+*		but make sure it's actually open!		
+		doif ov03 ne 0
+*			if it's open but not animating, send animate message	
+*			doif ov03 eq 1
+*				mesg writ targ 1003
+*				wait 5
+*			else
+**			send 'immigrant ahoy' event to portal
+*				mesg writ targ 1004
+*			endi
+			inst
+			targ ownr
+*			store who it is from in va92
+			sets va92 pray agts va01 "Pray Extra sender_user_ID" "Unknown"
+			setv va88 pray impo va01 1 0
+*			remove 'warp' from va01
+			setv va60 sins va01 1 ".warp"
+			doif va60 ne -1
+				subv va60 1
+				sets va61 subs va01 1 va60
+
+*			create the _travel game variable
+				sets va62 "_travel"
+				adds va61 va62
+				setv game va61 wtik
+
+			endi
+
+*		dbg: outv va90
+			doif targ <> null and targ <> ownr
+				mvft va03 va04
+				aslp 0
+				pose 59
+				wait 30
+*			store moniker in va91
+				sets va91 gtos 0
+
+
+				inst
+				stim writ targ 95 1
+			endi
+*		clear 'last creature flag'		
+			targ ownr
+			sets ov99 ""
+
+*		send portal the immigrant ahoy message
+			targ va90
+			doif targ ne null
+*			send creature moniker and user ID
+				mesg wrt+ targ 1004 va91 va92 0
+			endi
+			targ ownr
+
+
+
+*		trigger change on topleft gui
+			gsub guioff
+*		can stop running this script now
+			stop
+		endi
+	retn
+
+*	turn 'something is arriving' gui on
+	subr guion
+		rtar 1 2 14
+		doif targ ne null
+			part 8
+			anim [1 2 3 4 5 6 7 8 255]
+		endi
+		targ ownr
+	retn
+*	turn 'something is arriving' gui off
+	subr guioff
+		setv eame "engine_clone_upon_import" 1
+		rtar 1 2 14
+		doif targ ne null
+			mesg writ targ 1005
+		endi
+		targ ownr
+	retn
+
+*	routine to return-to-sender creatures that have been in 
+*	quarantine too long. On entry targ should be desired creature
+	subr toolong
+
+*		dbg: outs "too long routine"
+
+*		get who to send to (in name "Pray Extra quarantine")
+		sets va55 name "Pray Extra quarantine"
+		doif targ <> null
+
+*			dbg: outs "targ is not null ... sending to:"
+*			dbg: outs va55
+
+*			delete it's immigrant variable if it has one
+			sets va89 va21
+			adds va89 "_immigrant"
+			delg va89
+*			trash the foe flag too
+			setv name "Pray Extra foe" 0
+
+			setv name "Pray Extra reject" 2
+*!*			newww AW replacement for net: expo
+*!* 			remove: setv va88 net: expo "warp" va
+**
+			seta va79 targ
+			rtar 1 1 35700
+			mesg wrt+ targ 1000 va79 va55 0
+**
+*			refresh workshop screen
+			rtar 1 2 208
+			doif targ ne null
+				mesg writ targ 1065
+			endi
+*			trigger warp animation
+			rtar 1 1 154
+			doif targ ne null
+				mesg writ targ 1002
+			endi
+		else
+*			dbg: outs "targ is null"
+		endi
+	retn
+endm

@@ -1,0 +1,894 @@
+**AW-compatible Replacements for scripts in workshop_screen.cos
+**These just update things like checking for online status, etc, to AW versions
+
+****display info on warp selected creature
+scrp 1 2 208 1014
+	inst
+	doif ov16 ne null
+*	target the creature
+		targ ov16
+*	store the moniker in va00
+		sets va00 gtos 0
+*	store the name
+		sets va01 hist name va00
+		doif va01 eq ""
+*			sets va01 "unnamed "
+			sets va01 read "description" 12
+		endi
+*	store the gender
+		setv va02 hist gend va00
+		doif va02 eq 1
+			sets va02 read "gender" 0
+		elif va02 eq 2
+			sets va02 read "gender" 1
+		else
+			sets va02 " "
+		endi
+*	store the lifestage
+		setv va03 cage
+		doif va03 eq 0
+			sets va03 read "stage of life" 0
+		elif va03 eq 1
+			sets va03 read "stage of life" 1
+		elif va03 eq 2
+			sets va03 read "stage of life" 2
+		elif va03 eq 3
+			sets va03 read "stage of life" 3
+		elif va03 eq 4
+			sets va03 read "stage of life" 4
+		elif va03 eq 5
+			sets va03 read "stage of life" 5
+		elif va03 eq 6
+			sets va03 read "stage of life" 6
+		else
+			sets va03 " "
+		endi
+*	store the genus
+		setv va04 hist gnus va00
+		doif va04 eq 1
+			sets va04 read "genus" 0
+		elif va04 eq 2
+			sets va04 read "genus" 1
+		elif va04 eq 3
+			sets va04 read "genus" 2
+		else
+			sets va04 " "
+		endi
+*	get the original breeder (conceived event)
+		sets va05 hist netu va00 0
+*!*		We might have to change this later since I am not totally sure
+*!* 	how hist netu is set.. might be with net: user
+		doif va05 ne ""
+*!* AW altered a lot since nicknames aren't a needed thing anymore
+*		from this user ID, get the nickname
+
+*		find out if you know this user
+			sets va79 va05
+			adds va79 "_contact"
+			doif game va79 eq 0
+*			no, you don't know them
+*			see if online
+*			send event to contact book
+				rtar 1 1 157
+				doif targ eq null
+					stop
+				endi
+				mesg wrt+ targ 1000 va05 0 0
+			endi
+		endi
+		sets va98 "\n"
+		sets va99 read "description" 0
+		adds va99 va01
+		adds va99 va98
+		adds va99 read "description" 1
+		adds va99 va03
+		adds va99 va98
+		adds va99 read "description" 2
+		adds va99 va02
+		adds va99 va98
+		adds va99 read "description" 3
+		adds va99 va04
+		adds va99 va98
+		doif va05 ne ""
+			adds va99 read "description" 4
+			adds va99 va05
+		endi
+
+*	see if this creature is an immigrant
+*	show who it was from if this is the case
+		sets va95 ""
+		sets va90 ""
+		sets va91 "_immigrant"
+		loop
+			sets va92 gamn va90
+			setv va93 sins va92 1 va91
+			doif va93 ne -1
+				subv va93 1
+*		va94 will be the moniker of immigrant creature variable
+				sets va94 subs va92 1 va93
+*		see if this is the moniker of *this* creature
+				doif va00 eq va94
+*		yes, get the user ID
+					sets va95 game va92
+					sets va92 ""
+				endi
+			endi
+			sets va90 va92
+		untl va92 eq ""
+
+*	now find the nickname from this user ID (va95)
+		doif va95 ne ""
+			sets va90 ""
+			sets va91 "_nick"
+*		copy user id
+			sets va97 va95
+			adds va97 va91
+
+*		make sure it exists
+*		make sure contact details for sender have been obtained
+			setv va84 0
+			loop
+				doif type game va97 eq 0
+					delg va97
+					wait 1
+*			send event to contact book in case it got lost
+					rtar 1 1 157
+					doif targ eq null
+						stop
+					endi
+					mesg wrt+ targ 1000 va95 0 0
+					targ ownr
+				elif type game va97 eq 2
+					setv va84 1
+					sets va96 game va97
+				else
+					wait 1
+				endi
+			untl va84 eq 1
+
+
+***			VA96 should be nickname
+
+			adds va99 va98
+			adds va99 "\n*****IMMIGRANT*****\n"
+			adds va99 read "description" 5
+			adds va99 va96
+*		are you in immigrant mode?
+			targ ownr
+			doif ov01 eq 4
+*			yes, make sure lights are flashing
+				part 19
+				doif base eq -1
+
+
+*			create the accept button
+					pat: butt 19 "workshop" 10 3 -26 30 1 [] 1015 0
+					part 19
+					frat 3
+					pose 2
+
+*			create the cancel button
+					pat: butt 20 "workshop" 13 3 -26 219 1 [] 1016 0
+					part 20
+					frat 3
+					pose 2
+
+*			create the double accept button
+					pat: butt 21 "workshop" 19 3 -26 125 1 [] 1018 0
+					part 21
+					frat 3
+					pose 2
+				else
+					part 19
+					pose 2
+					part 20
+					pose 2
+					part 21
+					pose 2
+				endi
+*	put some explanatory text
+				targ ov16
+
+				doif name "Pray Extra foe" eq 1
+*				other person marked you as foe
+					targ ownr
+					part 20
+					pose 0
+					sets va00 va99
+					adds va00 "\n\n\n\n"
+					sets va81 read "workshop" 4
+					adds va00 va81
+					sets va99 va00
+
+				elif name "Pray Extra reject" eq 1
+*				user didn't want it
+					targ ownr
+					part 20
+					pose 0
+					sets va00 va99
+					adds va00 "\n\nREJECT\n"
+					adds va00 "\n\n\n\n"
+					sets va81 read "workshop" 3
+					adds va00 va81
+					sets va99 va00
+				elif name "Pray Extra reject" eq 2
+*				too long in quarantine
+					targ ownr
+					part 20
+					pose 0
+					sets va00 va99
+					adds va00 "\n\n\n\n"
+					sets va81 read "workshop" 8
+					adds va00 va81
+					sets va99 va00
+				elif name "Pray Extra reject" eq 4
+*				no way in for creature
+					targ ownr
+					part 20
+					pose 0
+					sets va00 va99
+					adds va00 "\n\n\n\n"
+					sets va81 read "workshop" 9
+					adds va00 va91
+					sets va99 va00
+				else
+					sets va00 va99
+					adds va00 "\n\n\n"
+					adds va00 read "description" 6
+					adds va00 "\n\n\n"
+					adds va00 read "description" 7
+					sets va99 va00
+				endi
+			endi
+		else
+*	it's not an immigrant
+*		are you in immigrant mode?
+			targ ownr
+			doif ov01 eq 4
+*			yes, stop the lights flashing then
+				part 19
+				doif base ne -1
+					pose 0
+					part 20
+					pose 0
+					part 21
+					pose 2
+				endi
+				sets va00 va99
+				adds va00 "\n\n\n\n\n"
+				adds va00 read "description" 8
+				sets va99 va00
+			endi
+
+		endi
+		targ ownr
+		part 5
+		ptxt va99
+	endi
+endm
+
+**reject immigrant
+scrp 1 2 208 1016
+	inst
+* get the creatures moniker
+*	ov16 is hightlighted creature
+	doif ov16 ne null
+		targ ov16
+		sets va00 gtos 0
+		sets va22 va00
+*		check for a warning icon with this moniker in ov03		
+		enum 1 2 46
+			doif type ov03 eq 2
+				doif va00 eq ov03
+*			get it's ID (ov02)
+					setv va01 ov02
+*			flag
+					setv va99 1
+				endi
+			endi
+		next
+*		if flag set then send shuffle
+		doif va99 eq 1
+			enum 1 2 46
+				mesg wrt+ targ 1000 va01 0 0
+			next
+		endi
+
+
+		targ mv16
+*	get the user ID of who sent it
+		adds va00 "_immigrant"
+		adds va22 "_quarantine"
+*		can only reject immigrants
+		doif type game va00 eq 2
+*			but can't reject ones who've been sent back!
+			doif name "Pray Extra reject" eq 1 or name "Pray Extra foe" eq 1
+				targ ownr
+				part 5
+				sets va81 read "description" 10
+				ptxt va81
+				stop
+			endi
+
+			sets va01 game va00
+
+			setv name "Pray Extra reject" 1
+			rtar 1 1 154
+			doif targ ne null
+				mesg writ targ 1002
+			endi
+			targ ownr
+			targ ov16
+*	send to this user	
+*!* AW replacement for net: expo
+*!* remove: setv va02 net: expo "warp" va01
+**
+			seta va79 targ
+			rtar 1 1 35700
+			mesg wrt+ targ 1000 va79 va01 0
+**
+*	clear game variable
+			delg va00
+			delg va22
+*	call the update faces event 
+			targ ownr
+			call 1065 0 0
+*	put some confirmation text up
+			part 5
+			sets va81 read "description" 11
+			ptxt va81
+			tick 30
+			sndc "wrp1"
+		endi
+	endi
+
+* call event to see if there are more immigrants
+	call 1017 0 0
+endm
+
+*****fill in all contacts event
+*!* This will need UPDATING! Right now it just shows all users as ONLINE
+*!* because we don't have an AW-compatible net: ulin yet!
+
+*_p1_ is which page to display
+*0=1st, 1=2nd etc
+scrp 1 2 208 1041
+	inst
+*	va15 is when to start displaying entries
+*	based on page number needed	
+	setv va15 _p1_
+	mulv va15 16
+*	set page number variable
+	setv ov03 _p1_
+*	va16 is how many legit entries had so far	
+	setv va16 0
+
+*	show back arrow if this isn't page 1
+	doif _p1_ ne 0
+		part 87
+*		frat 5
+		anim [0 1 1 1 1 1 255]
+	else
+		part 87
+		pose 0
+	endi
+
+*	clear all previous entries and highlighting
+	setv va00 38
+	loop
+		part va00
+		ptxt ""
+		addv va00 1
+	untl va00 eq 54
+	setv va00 66
+	loop
+		part va00
+		pose 0
+		addv va00 1
+	untl va00 eq 82
+
+
+
+*	va00 is which part # to use, incremented with each entry
+	setv va00 38
+*	va01 is how many entries added
+	setv va01 0
+*	va99 is which game variable to search, start at ""
+	sets va99 ""
+*	search string
+	sets va02 "_contact"
+*	loop through all game variables
+	loop
+		doif va01 gt 16
+			sets va99 ""
+		endi
+*	set va10 to the string of the current game variable
+		sets va10 gamn va99
+*	set va20 to the value where search string is contained
+*	in current game variable
+		setv va20 sins va10 1 va02
+*	if va20 ne -1 then the current string is what we are looking for
+		doif va20 ne -1
+
+**only do this if this is the page you need
+			addv va16 1
+			doif va16 ge va15
+
+
+*		chop up string so only head remains
+*		this makes va30 the USER ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+
+**		if in portal mode, ignore random user contact
+*				doif ov01 eq 3
+**			only do this if it isn't 'random online user'
+*					doif va30 ne "net: ruso"
+**		get nickname for this user
+*						sets va40 "_nick"
+**		copy user ID to another variable
+*						sets va41 va30
+**		create nickname string
+*						adds va41 va40
+**		get value from nickname string
+*						sets va42 game va41
+**  		put nickname in correct text box
+*						part va00
+*						ptxt va42
+**		increment part# to place text in
+*						addv va00 1
+**		increment counter
+*						addv va01 1
+*					endi
+*				else
+*		otherwise take care of all of them
+*		get nickname for this user
+				sets va40 "_nick"
+*		copy user ID to another variable
+				sets va41 va30
+*		create nickname string
+				adds va41 va40
+*		get value from nickname string
+				doif type game va41 ne 2
+					stop
+				endi
+				sets va42 game va41
+*  		put nickname in correct text box
+				part va00
+				doif va30 <> "!net: ruso" and va30 <> "!friend"
+*!* REPLACE THIS LATER with AW net:ulin equivlent
+*!* for now treat all users as online!
+*					doif net: ulin va30 = 1
+					sets va22 "<tint 128 224 128 128 128>"
+*					else
+*						sets va22 "<tint 224 128 128 128 128>"
+*					endi
+				else
+					sets va22 "<tint 255 255 255 128 128>"
+				endi
+				adds va22 va42
+				ptxt va22
+*		increment part# to place text in
+				addv va00 1
+*		increment counter
+				addv va01 1
+*				endi
+
+*	if this is enough entries to fill colum
+				doif va01 eq 16
+*		display forward arrow
+					part 88
+*					frat 5
+					anim [0 1 1 1 1 1 255]
+*		and set condition to exit loop
+					sets va10 ""
+				else
+*		don't show forward arrow
+					part 88
+					pose 0
+				endi
+			endi
+
+		endi
+*	carry on loop, increment current game variable
+		sets va99 va10
+*	keep going until you've scanned them all
+	untl va10 eq ""
+endm
+
+
+**This decides what to do with a norn you are warping
+**It needs an AW-specific net:ruso eventually but this is fine for now
+scrp 1 2 208 1066
+	inst
+
+*	dbg: outs "SENDING"
+*	dbg: outv _p1_
+
+
+*	if this is portal programming ...
+	doif ov01 eq 3
+		part 5
+		sets va81 read "programming" 9
+		ptxt va81
+		rtar 3 3 101
+		doif targ ne null
+			setv va00 posl
+			subv va00 50
+			setv va01 post
+			subv va01 200
+			cmra va00 va01 1
+		endi
+*	else if it's containment programming ...		
+	elif ov01 eq 2
+*		see if user is online	
+		doif game "aw_status" = "offline"
+			part 5
+			sets va81 read "programming" 15
+			ptxt va81
+			stop
+		endi
+
+*		trigger the containment warp anim
+		rtar 1 1 154
+		doif targ ne null
+			mesg writ targ 1002
+		endi
+		targ ownr
+
+		sets va81 read "programming" 10
+		sets va00 va81
+		seta va01 ov16
+		doif va01 ne null
+			targ va01
+*			get its moniker	
+			sets va02 gtos 0
+*			delete it's immigrant variable if it has one
+			sets va89 va02
+			adds va89 "_immigrant"
+			delg va89
+*			trash the reject/foe flag too
+			setv name "Pray Extra foe" 0
+			setv name "Pray Extra reject" 0
+*			make sure this moniker really exists
+*			doif ooww va02 ne 7
+*			get name
+			sets va03 hist name va02
+			doif va03 eq ""
+*				sets va03 "<un-named>"
+				sets va03 read "description" 12
+			endi
+			adds va03 " "
+*			else
+*				sets va03 "<unknown>"
+*			endi
+			targ ownr
+			adds va00 va03
+			sets va81 read "programming" 11
+			adds va00 va81
+*			get name of contact
+			sets va99 ""
+			sets va98 "_containmentsend"
+			sets va04 ""
+			sets va30 ""
+
+			loop
+				sets va10 gamn va99
+				setv va20 sins va10 1 va98
+				doif va20 ne -1
+
+					subv va20 1
+*			extract user ID			
+					sets va30 subs va10 1 va20
+
+*			get nickname from this
+					sets va31 va30
+
+*			if the user ID is random user, work out the random user					
+					doif va30 eq "!net: ruso"
+*!*					REPLACE THIS WITH AW NET:RUSO EQUIVLENT!
+*					right now this is going to just 
+*					pick a random user in your contacts
+
+*					so first... how many contacts do you have?
+						setv va48 game "contact_count"
+						subv va48 2
+
+						setv va49 rand 1 va48
+						sets va40 ""
+						sets va47 ""
+						sets va41 "_contact"
+						setv va45 0
+						loop
+							sets va42 gamn va40
+*						see if string contains search
+*						and also is an actual contact
+							doif va42 ne ""
+								doif subs va42 1 1 ne "!"
+									setv va43 sins va42 1 va41
+*							if it does
+									doif va43 ne -1
+										addv va45 1
+										doif va45 eq va49
+											sets va30 va42
+										endi
+									endi
+								endi
+							endi
+*						set 'previous entry' to current entry
+							sets va40 va42
+						untl va42 eq ""
+
+*					va30 now holds your random contact
+*					if null then there is no one on-line
+						sets va31 va30
+						doif va30 eq ""
+							part 5
+							sets va81 read "programming" 12
+							ptxt va81
+							stop
+						else
+*					need to generate contact entry for whoever you've chosen
+							part 5
+							sets va81 read "programming" 13
+							ptxt va81
+
+							targ ownr
+						endi
+
+*			if the user is a random friend ...
+					elif va30 eq "!friend"
+
+*						dbg: outs "DETECTED friend"
+
+						gsub friend
+
+
+
+
+
+					endi
+
+					adds va31 "_nick"
+
+					lock
+*					make sure contact details have been obtained
+					setv va84 0
+					loop
+						doif type game va31 eq 0
+							delg va31
+							wait 1
+						elif type game va31 eq 2
+							setv va84 1
+						else
+							wait 1
+						endi
+					untl va84 eq 1
+					inst
+
+					sets va04 game va31
+
+					sets va10 ""
+
+				endi
+				sets va99 va10
+
+			untl va10 eq ""
+
+			adds va00 va04
+			sndc "chm2"
+*			send the creature
+			targ ov16
+			doif targ ne null
+*				check there is a user ID after all this
+				doif va30 eq ""
+*					there isn't - probably no 'send to' specified.
+
+*					dbg: outs "No user ID"
+
+					targ ownr
+					part 5
+					sets va81 read "programming" 14
+					ptxt va81
+
+*					clear state flag
+					setv ov01 0
+*					stop flashing portal icon
+					part 86
+					pose 0
+*					stop flashing containment icon
+					part 1
+					pose 1
+*					clear portal ID
+					setv ov20 0
+					part 6
+					doif ov00 eq 0
+*						ptxt "Chamber Open"
+						ptxt read "chamber" 0
+					else
+*						ptxt "Chamber Closed"
+						ptxt read "chamber" 1
+					endi
+					tick 100
+					stop
+				endi
+
+*!* AW replacement for net: expo
+*!* remove: setv va88 net: expo "warp" va30
+**
+				seta va79 targ
+				rtar 1 1 35700
+				mesg wrt+ targ 1000 va79 va30 0
+**
+
+			endi
+
+
+			targ ownr
+*			redo faces
+
+*			dbg: outs "call faces"
+
+			call 1065 0 0
+
+*			dbg: outs "return faces"
+
+			doif _p2_ eq 1
+				adds ov99 va00
+				adds ov99 "\n"
+				doif _p1_ eq 0
+					sets va00 ov99
+					sets ov99 ""
+				endi
+			endi
+			doif _p1_ eq 0
+
+*				dbg: outs "immigrant check"
+
+*			check for more immigrants
+				call 1017 0 0
+
+				inst
+*	put some text on part 5
+				part 5
+*				dbg: outs "text on screen:"
+*				dbg: outs va00
+
+				ptxt va00
+				tick 100
+				sets ov99 ""
+			endi
+		endi
+	endi
+
+
+	doif _p1_ eq 0
+
+*		dbg: outs "tidy tidy"
+
+		targ ownr
+
+		call 1053 0 0
+
+*	clear state flag
+		setv ov01 0
+*	stop flashing portal icon
+		part 86
+		pose 0
+*	stop flashing containment icon
+		part 1
+		pose 1
+*	clear portal ID
+		setv ov20 0
+		part 6
+		doif ov00 eq 0
+*			ptxt "Chamber Open"
+			ptxt read "chamber" 0
+		else
+*			ptxt "Chamber Closed"
+			ptxt read "chamber" 1
+		endi
+	endi
+
+
+*	get a random friend routine
+*	will set va30 and va31 to be the userID of a friend
+	subr friend
+
+*		dbg: outs "FRIEND"
+
+*	first count how many friends you have	
+		sets va40 ""
+		sets va41 "_group"
+		loop
+			sets va42 gamn va40
+*			see if string contains search (portal)
+			setv va43 sins va42 1 va41
+*			if does
+			doif va43 ne -1
+*				see if group value = 2
+				doif game va42 eq 2
+					addv va45 1
+				endi
+			endi
+*			set 'previous entry' to current entry
+			sets va40 va42
+		untl va42 eq ""
+
+*		dbg: outs "found this many friends - "
+*		dbg: outv va45
+
+
+		doif va45 eq 0
+*		no friends - better tell them!
+			part 5
+			ptxt "I'm sorry. You don't appear to have any friends.\n\nYou can use the 'View Contacts' section of the Comms area to change this and make some of your contacts friends."
+*			clear state flag
+			setv ov01 0
+*			stop flashing portal icon
+			part 86
+			pose 0
+*			stop flashing containment icon
+			part 1
+			pose 1
+*			clear portal ID
+			setv ov20 0
+			part 6
+			doif ov00 eq 0
+*				ptxt "Chamber Open"
+				ptxt read "chamber" 0
+			else
+*				ptxt "Chamber Closed"
+				ptxt read "chamber" 1
+			endi
+			tick 150
+			stop
+		endi
+
+*	randomly choose someone between 1 and #friends
+		setv va46 rand 1 va45
+		setv va47 0
+
+*		dbg: outs "Chosen friend number:"
+*		dbg: outv va46
+
+
+*	now find that one
+		sets va40 ""
+		sets va41 "_group"
+		loop
+			sets va42 gamn va40
+
+*		see if string contains search (portal)
+			setv va43 sins va42 1 va41
+
+*			if does
+			doif va43 ne -1
+*		see if group value = 2
+				doif game va42 eq 2
+*				it does, is this the randomly chosen one?
+					addv va47 1
+					doif va47 eq va46
+*		chop up string so only head remains
+						subv va43 1
+						sets va30 subs va42 1 va43
+						sets va31 va30
+*						dbg: outs "this is the friend"
+					else
+*						dbg: outs "not this friend .."
+*		output it - user ID
+					endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va40 va42
+
+		untl va42 eq ""
+
+
+*		dbg: outs "Friend routine: va30 is"
+*		dbg: outs va30
+
+	retn
+
+endm

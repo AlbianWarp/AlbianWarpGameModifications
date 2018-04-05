@@ -75,12 +75,12 @@ endm
 ** Message Interpreter Timer
 scrp 1 1 206 9
 	inst
-	dbg: outs "message timer ticking"
+*	dbg: outs "message timer ticking"
 *	If Offline, Stop! :)
 	doif game "aw_status" = "offline"
 		stop
 	endi
-	dbg: outs "we're online"
+*	dbg: outs "we're online"
 
 *	Does a Mail Message exist?
 	seta va00 null
