@@ -150,7 +150,7 @@ scrp 1 1 184 9
 			setv va78 strl va01
 			subv va78 5
 			sets va80 subs va01 1 va78
-*		dbg: outs va80
+		dbg: outs va80
 			enum 4 0 0
 				doif gtos 0 eq va80
 					setv va77 0

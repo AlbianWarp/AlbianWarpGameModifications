@@ -55,9 +55,11 @@ scrp 1 1 157 1000
 			sets va42 gamn va40
 *			see if string contains search
 			setv va43 sins va42 1 va41
-*			if it does
+*			if it does, and is not an automation:
 			doif va43 ne -1
-				addv va45 1
+				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+					addv va45 1
+				endi
 			endi
 *	set 'previous entry' to current entry
 			sets va40 va42
