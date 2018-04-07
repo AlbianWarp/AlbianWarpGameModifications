@@ -47,24 +47,11 @@ scrp 1 1 157 1000
 *the caos right now
 		sets game va00 _p1_
 
-*update the number of contacts you currently have
-		sets va40 ""
-		sets va41 "_contact"
-		setv va45 0
-		loop
-			sets va42 gamn va40
-*			see if string contains search
-			setv va43 sins va42 1 va41
-*			if it does, and is not an automation:
-			doif va43 ne -1
-				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
-					addv va45 1
-				endi
-			endi
-*	set 'previous entry' to current entry
-			sets va40 va42
-		untl va42 eq ""
-		setv game "contact_count" va45
+*trigger the update contacts script
+		rtar 1 1 35700
+		mesg writ targ 1001
+		targ ownr
+
 	endi
 
 *	if this is you, get rid of contact entry
@@ -75,6 +62,8 @@ scrp 1 1 157 1000
 		delg va00
 		stop
 	endi
+
+
 
 *The rest is this is somehow related to portals and hasn't been 
 *tested or modified for AW at all

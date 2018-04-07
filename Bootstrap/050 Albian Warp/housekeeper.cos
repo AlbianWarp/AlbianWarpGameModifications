@@ -68,6 +68,29 @@ scrp 1 1 35700 1000
 	unlk
 endm
 
+scrp 1 1 35700 1001
+*sets number of real, actual contacts into game "contact_count"
+inst
+*update the number of contacts you currently have
+		sets va40 ""
+		sets va41 "_contact"
+		setv va45 0
+		loop
+			sets va42 gamn va40
+*			see if string contains search
+			setv va43 sins va42 1 va41
+*			if it does, and is not an automation:
+			doif va43 ne -1
+				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+					addv va45 1
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va40 va42
+		untl va42 eq ""
+		setv game "contact_count" va45
+endm
+
 rscr
 enum 1 1 35700
 kill targ
