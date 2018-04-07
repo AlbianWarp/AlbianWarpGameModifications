@@ -501,7 +501,7 @@ endm
 **It needs an AW-specific net:ruso eventually but this is fine for now
 scrp 1 2 208 1066
 	inst
-dbg: outs "trying to figure out what to do what a creature"
+	dbg: outs "trying to figure out what to do what a creature"
 *	dbg: outs "SENDING"
 *	dbg: outv _p1_
 
@@ -590,6 +590,12 @@ dbg: outs "trying to figure out what to do what a creature"
 *					right now this is going to just 
 *					pick a random user in your contacts
 *					so first... how many contacts do you have?
+
+*trigger the update contacts script
+						rtar 1 1 35700
+						mesg writ targ 1001
+						targ ownr
+
 						setv va48 game "contact_count"
 						dbg: outs "there are this many contacts"
 						dbg: outv va48
@@ -609,7 +615,7 @@ dbg: outs "trying to figure out what to do what a creature"
 *						see if string contains search
 *						and also is an actual contact
 							doif va42 ne ""
-							
+
 								setv va43 sins va42 1 va41
 *							if it does
 								doif va43 ne -1
@@ -622,7 +628,7 @@ dbg: outs "trying to figure out what to do what a creature"
 										endi
 									endi
 								endi
-								
+
 							endi
 *						set 'previous entry' to current entry
 							sets va40 va42
@@ -630,11 +636,11 @@ dbg: outs "trying to figure out what to do what a creature"
 
 *					va30 now holds your random contact with "_contact" appended
 *					You need to chop that off
-					setv va66 strl va30
-					subv va66 8
-					sets va30 subs va30 1 va66
-					dbg: outs "Random contact chosen: "
-					dbg: outs va30
+						setv va66 strl va30
+						subv va66 8
+						sets va30 subs va30 1 va66
+						dbg: outs "Random contact chosen: "
+						dbg: outs va30
 *					if null then there is no one on-line
 						sets va31 va30
 						doif va30 eq ""
@@ -729,8 +735,8 @@ dbg: outs "trying to figure out what to do what a creature"
 
 *!* AW replacement for net: expo
 *!* remove: setv va88 net: expo "warp" va30
-dbg: outs "sending creature to:"
-dbg: outs va30
+				dbg: outs "sending creature to:"
+				dbg: outs va30
 **
 				seta va79 targ
 				rtar 1 1 35700
