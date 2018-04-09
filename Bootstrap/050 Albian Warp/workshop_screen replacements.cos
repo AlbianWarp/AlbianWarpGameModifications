@@ -501,7 +501,7 @@ endm
 **It needs an AW-specific net:ruso eventually but this is fine for now
 scrp 1 2 208 1066
 	inst
-
+	dbg: outs "trying to figure out what to do what a creature"
 *	dbg: outs "SENDING"
 *	dbg: outv _p1_
 
@@ -587,39 +587,7 @@ scrp 1 2 208 1066
 *			if the user ID is random user, work out the random user					
 					doif va30 eq "!net: ruso"
 *!*					REPLACE THIS WITH AW NET:RUSO EQUIVLENT!
-*					right now this is going to just 
-*					pick a random user in your contacts
-
-*					so first... how many contacts do you have?
-						setv va48 game "contact_count"
-						subv va48 2
-
-						setv va49 rand 1 va48
-						sets va40 ""
-						sets va47 ""
-						sets va41 "_contact"
-						setv va45 0
-						loop
-							sets va42 gamn va40
-*						see if string contains search
-*						and also is an actual contact
-							doif va42 ne ""
-								doif subs va42 1 1 ne "!"
-									setv va43 sins va42 1 va41
-*							if it does
-									doif va43 ne -1
-										addv va45 1
-										doif va45 eq va49
-											sets va30 va42
-										endi
-									endi
-								endi
-							endi
-*						set 'previous entry' to current entry
-							sets va40 va42
-						untl va42 eq ""
-
-*					va30 now holds your random contact
+					sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 *					if null then there is no one on-line
 						sets va31 va30
 						doif va30 eq ""
@@ -632,7 +600,6 @@ scrp 1 2 208 1066
 							part 5
 							sets va81 read "programming" 13
 							ptxt va81
-
 							targ ownr
 						endi
 
@@ -715,6 +682,8 @@ scrp 1 2 208 1066
 
 *!* AW replacement for net: expo
 *!* remove: setv va88 net: expo "warp" va30
+				dbg: outs "sending creature to:"
+				dbg: outs va30
 **
 				seta va79 targ
 				rtar 1 1 35700
@@ -892,3 +861,4 @@ scrp 1 2 208 1066
 	retn
 
 endm
+

@@ -1,0 +1,579 @@
+*Albian Warp Portal Scripts
+*mostly just to rewrite net: line checks 
+*but there's some ulins that needfixing too once that is working
+
+
+scrp 3 9 1 0
+	lock
+	attr 197
+	anim [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19]
+	sndc "por1"
+	over
+	inst
+*		flag to say you are open	
+	setv ov03 1
+*	if you are online ...	
+	doif game "aw_status" eq "online"
+*		store your ID in temp variable
+		setv va00 ov00
+*		search to see if who you send to or receive from are online	
+
+*		set flag to say user is off/online
+		setv va90 0
+*		set first game variable to check
+		sets va99 ""
+*		set search string chunk
+		sets va01 "_portal"
+*		create full search string
+		adds va01 vtos va00
+
+		loop
+			sets va10 gamn va99
+*			see if string contains search
+			setv va20 sins va10 1 va01
+*			it does
+			doif va20 ne -1
+*				chop it up to get user ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+				doif va30 eq "!net: ruso"
+					setv va90 1
+				elif va30 eq "!friend"
+					gsub friend
+				else
+*					have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*doif net: ulin va30 eq 1
+*					they are, set flag
+					setv va90 1
+*endi
+				endi
+			endi
+*			set 'previous entry' to current entry
+			sets va99 va10
+		untl va10 eq ""
+
+*		if you found a user who's on then animate	
+		doif va90 eq 1
+
+			call 1000 0 0
+
+		endi
+	endi
+
+**	start timer that looks for immigrants
+**	ticks every 1 minutes
+*	tick 1200
+	bhvr 1
+	clac 1
+
+
+*	works out if your any of your friends are on
+	subr friend
+*		set first game variable to check
+		sets va98 ""
+*		set search string chunk
+		sets va11 "_group"
+
+		loop
+			sets va12 gamn va98
+*see if string contains search
+			setv va20 sins va12 1 va11
+*	it does
+			doif va20 ne -1
+*			see if this person is a friend
+				doif game va12 eq 2
+*			chop it up to get user ID
+					subv va20 1
+					sets va30 subs va12 1 va20
+
+*	have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*doif net: ulin va30 eq 1
+*	they are, set flag
+					setv va90 1
+*endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va98 va12
+		untl va12 eq ""
+	retn
+
+endm
+
+***activate 1 (only comes from a creature)
+scrp 3 9 1 1
+*	inst
+	lock
+	doif game "aw_status" eq "offline"
+		stop
+	endi
+	targ from
+	doif fmly ne 4
+*	if this wasn't from a creature then stop
+		stop
+	endi
+*see if this creature is allowed to travel
+*	get the moniker
+	sets va00 gtos 0
+*	store it again because this was added later :-(
+	sets va66 gtos 0
+*	add the _travel tag	
+	sets va01 "_travel"
+	adds va00 va01
+*	see if this game variable exists
+	doif game va00 gt 0
+*		it exists, cant let creature travel yet
+		stop
+	else
+*		it probably only exists because of checking for 
+*		its existence (Shroedingers game variable)		
+*		kill it!
+		delg va00
+	endi
+
+
+	targ ownr
+
+
+	sndc "wr_e"
+
+
+
+*store portal ID on temp variable
+	setv va00 ov00
+
+*set flag to say user is off/online
+	setv va90 0
+*set count to count how many of your send to list are on
+	setv va91 0
+*set first game variable to check
+	sets va99 ""
+*set search string chunk
+	sets va01 "_portal"
+	sets va02 "send"
+*create full search string
+	adds va01 vtos va00
+	adds va01 va02
+
+	loop
+		sets va10 gamn va99
+*		see if string contains search
+		setv va20 sins va10 1 va01
+*		it does
+		doif va20 ne -1
+*			chop it up to get user ID
+			subv va20 1
+			sets va30 subs va10 1 va20
+
+*			see if this is the random user contact	
+			doif va30 eq "!net: ruso"
+				addv va91 1
+			elif va30 eq "!friend"
+				gsub friendcount
+			else
+*			have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*				doif net: ulin va30 eq 1
+*				they are, add to counter
+				addv va91 1
+*				endi
+			endi
+		endi
+*		set 'previous entry' to current entry
+		sets va99 va10
+	untl va10 eq ""
+
+*check counter variable isn't zero
+	doif va91 ne 0
+*randomly choose one
+		setv va92 rand 1 va91
+*gonna have to loop through them all again
+*and stop when reach this random user
+
+*set new counter
+		setv va91 0
+*set first game variable to check
+		sets va99 ""
+
+		loop
+			sets va10 gamn va99
+*			see if string contains search
+			setv va20 sins va10 1 va01
+*			it does
+			doif va20 ne -1
+
+*				chop up string to get user ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+
+				doif va30 eq "!net: ruso"
+					addv va91 1
+				elif va30 eq "!friend"
+					gsub friendcheck
+				else
+
+*				have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*					doif net: ulin va30 eq 1
+*					increment counter counter
+					addv va91 1
+*					endi
+				endi
+*					is this search result the right random one?
+				doif va91 eq va92
+					inst
+					targ from
+					stim writ from 27 1
+					stim writ from 75 1
+
+*					if it's not net: ruso then do normal send
+					doif va30 ne "!net: ruso"
+*						check it's not dead now
+						doif dead eq 1
+							stop
+						endi
+
+*!* AW replacement for net: expo
+*!* remove: 
+**
+						seta va79 targ
+						rtar 1 1 35700
+						mesg wrt+ targ 1000 va79 va30 0
+**
+*setv va88 net: expo "warp" va30
+
+*						trigger warning
+						rtar 1 1 300
+						doif targ ne null
+							mesg wrt+ targ 1000 va66 va30 0
+						endi
+						targ ownr
+*						otherwise, need to compute
+					else
+*							get random user
+						lock
+						sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
+
+						inst
+						doif va30 eq ""
+							stop
+						endi
+*						check it's not dead now
+						doif dead eq 1
+							stop
+						endi
+
+
+*!* AW replacement for net: expo
+*!* remove: setv va88 net: expo "warp" va30
+**
+						seta va79 targ
+						rtar 1 1 35700
+						mesg wrt+ targ 1000 va79 va30 0
+**
+*							trigger contact
+*						but only if you've never come across them before
+						doif game va30 eq 0
+
+							rtar 1 1 157
+							doif targ ne null
+								mesg wrt+ targ 1000 va30 0 0
+							else
+								stop
+							endi
+						endi
+
+*							trigger warning
+						rtar 1 1 300
+						doif targ ne null
+							mesg wrt+ targ 1000 va66 va30 0
+						endi
+						targ ownr
+					endi
+
+					sets va10 ""
+
+				endi
+
+			endi
+
+*	set 'previous entry' to current entry
+			sets va99 va10
+		untl va10 eq ""
+	endi
+
+
+****	counts your online friends
+	subr friendcount
+*		set first game variable to check
+		sets va98 ""
+*		set search string chunk
+		sets va11 "_group"
+
+		loop
+			sets va12 gamn va98
+*see if string contains search
+			setv va20 sins va12 1 va11
+*	it does
+			doif va20 ne -1
+*			see if this person is a friend
+				doif game va12 eq 2
+*			chop it up to get user ID
+					subv va20 1
+					sets va30 subs va12 1 va20
+
+*	have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*doif net: ulin va30 eq 1
+*	they are, set flag
+					addv va91 1
+*endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va98 va12
+		untl va12 eq ""
+	retn
+
+
+****	
+	subr friendcheck
+*		set first game variable to check
+		sets va98 ""
+*		set search string chunk
+		sets va11 "_group"
+
+		loop
+			sets va12 gamn va98
+*see if string contains search
+			setv va20 sins va12 1 va11
+*	it does
+			doif va20 ne -1
+*			see if this person is a friend
+				doif game va12 eq 2
+*			chop it up to get user ID
+					subv va20 1
+					sets va30 subs va12 1 va20
+
+*	have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+
+*doif net: ulin va30 eq 1
+					doif 0 = 0
+*	they are, increment
+						addv va91 1
+
+*					is this search result the right random one?
+						doif va91 eq va92
+
+							targ from
+							stim writ from 27 1
+							stim writ from 75 1
+
+*					if it's not net: ruso then do normal send
+							doif va30 ne "!net: ruso"
+
+*!* AW replacement for net: expo
+*!* remove: setv va88 net: expo "warp" va30
+**
+								seta va79 targ
+								rtar 1 1 35700
+								mesg wrt+ targ 1000 va79 va10 0
+**
+
+*							trigger warning
+								rtar 1 1 300
+								doif targ ne null
+									mesg wrt+ targ 1000 va66 va30 0
+								endi
+								targ ownr
+*						otherwise, need to compute
+							else
+*							get random user
+								lock
+								sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
+								inst
+								doif va30 eq ""
+									stop
+								endi
+*							trigger contact
+								rtar 1 1 157
+								doif targ ne null
+									mesg wrt+ targ 1000 va30 0 0
+								else
+									stop
+								endi
+*!* AW replacement for net: expo
+*!* remove: setv va88 net: expo "warp" va30
+**
+								seta va79 targ
+								rtar 1 1 35700
+								mesg wrt+ targ 1000 va79 va10 0
+**
+
+
+
+*							trigger warning
+								rtar 1 1 300
+								doif targ ne null
+									mesg wrt+ targ 1000 va66 va30 0
+								endi
+								targ ownr
+							endi
+
+							stop
+
+						endi
+
+					endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va98 va12
+		untl va12 eq ""
+	retn
+
+endm
+
+***add to who's wanted register
+*we don't have an AW version of this yet 
+*_p1_ is user ID
+scrp 3 9 1 1005
+*	lock
+*	net: whon _p1_
+*	inst
+endm
+
+***trash who's wanted register
+scrp 3 9 1 1006
+*	inst
+*	net: whoz
+endm
+
+***WWR user online event
+scrp 3 9 1 137
+	inst
+
+*	dbg: outs "portal - user online"
+
+
+
+*	only do this if you are not closed
+	doif ov03 ne 0
+
+*	store your ID in temp variable
+		setv va00 ov00
+
+*	search to see if who you send to or receive from are online	
+
+*set flag to say user is off/online
+		setv va90 0
+*set first game variable to check
+		sets va99 ""
+*set search string chunk
+		sets va01 "_portal"
+*create full search string
+		adds va01 vtos va00
+
+		loop
+			sets va10 gamn va99
+*see if string contains search
+			setv va20 sins va10 1 va01
+*	it does
+			doif va20 ne -1
+*	chop it up to get user ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+
+				doif va30 eq "!net: ruso"
+					setv va90 1
+				elif va30 eq "!friend"
+					gsub friendcheck
+				else
+*	have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*doif net: ulin va30 eq 1
+
+*	they are, set flag
+					setv va90 1
+*endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va99 va10
+		untl va10 eq ""
+
+
+*	if you are not online
+		doif game "aw_status" = "offline"
+			setv va90 0
+
+*			dbg: outs "user not online"
+
+		endi
+
+
+*if you found a user who's on	
+		doif va90 eq 1
+*	and you are not operational
+			doif ov03 eq 1
+*		open up
+				call 1000 0 0
+			endi
+*otherwise if you found no users on			
+		elif va90 eq 0
+*	and you are operational
+			doif ov03 eq 2
+*		shut down
+				call 1001 0 0
+			endi
+		endi
+
+		bhvr 1
+		clac 1
+	endi
+
+
+*	works out if your any of your friends are on
+	subr friendcheck
+*		set first game variable to check
+		sets va98 ""
+*		set search string chunk
+		sets va11 "_group"
+
+		loop
+			sets va12 gamn va98
+*see if string contains search
+			setv va20 sins va12 1 va11
+*	it does
+			doif va20 ne -1
+*			see if this person is a friend
+				doif game va12 eq 2
+*			chop it up to get user ID
+					subv va20 1
+					sets va30 subs va12 1 va20
+
+*	have a look and see if this user is on
+*					Disabled/treated as online until AW equivlent
+*					is implemented
+*doif net: ulin va30 eq 1
+*	they are, set flag
+					setv va90 1
+*endi
+				endi
+			endi
+*	set 'previous entry' to current entry
+			sets va98 va12
+		untl va12 eq ""
+	retn
+
+endm
