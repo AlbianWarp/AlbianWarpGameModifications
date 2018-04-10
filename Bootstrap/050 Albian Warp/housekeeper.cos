@@ -5,7 +5,17 @@
 *use with sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 sets game "f_aw_ruso" sorc 1 1 35700 9000
 setv game "f_aw_ruso:v" 1
+scrx 1 1 35700 9000
 
+*Returns if a user is online:
+*0 if offline
+*1 if online
+*2 if there is no such contact
+*_p1_ must be set to the username you are checking
+*use with sets vaXX stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99
+sets game "f_aw_ulin" sorc 1 1 35700 9001
+setv game "f_aw_ulin:v" 1
+scrx 1 1 35700 9001
 
 *inject actual agent
 new: simp 1 1 35700 "blnk" 1 0 0
@@ -114,14 +124,14 @@ inst
 	targ ownr
 
 	setv va48 game "contact_count"
-	dbg: outs "there are this many contacts"
-	dbg: outv va48
+*	dbg: outs "there are this many contacts"
+*	dbg: outv va48
 
 
 	setv va49 rand 1 va48
 
-	dbg: outs "random number is:"
-	dbg: outv va48
+*	dbg: outs "random number is:"
+*	dbg: outv va48
 
 	sets va30 ""
 	sets va40 ""
@@ -157,9 +167,34 @@ inst
 	setv va66 strl va30
 	subv va66 8
 	sets va30 subs va30 1 va66
-	dbg: outs "Random contact chosen: "
-	dbg: outs va30
+*	dbg: outs "Random contact chosen: "
+*	dbg: outs va30
 	outs va30
+endm
+
+*holder script for CAOS function: 
+*returns 0 - "offline", 1 - "online", or 2 (contact does not exist)
+*_p1_ is the contact's name
+scrp 1 1 35700 9001
+
+	inst
+	sets va00 _p1_
+	adds va00 "_status"
+	doif type game va00 ne 2
+		outs "2"
+		stop
+	endi
+	doif game va00 eq "online"
+		outs "1"
+		stop
+	elif game va00 eq "offline"
+		outs "0"
+		stop
+	endi
+*if you're still here, the var eq something else for some reason
+*that should never happen but outs it anyway so we at least
+*know what it is!
+	outs game va00
 endm
 
 rscr
