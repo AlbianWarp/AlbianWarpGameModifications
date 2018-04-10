@@ -14,3 +14,10 @@ rgam
 ** Move to Docking Station Hub
 rtar 3 3 103
 cmrt 0
+
+*temporarily forcing online status (this is only here until the
+*server/client side starts updating it for iteslf)
+sets game "bob_status" "online"
+sets game "alice_status" "online"
+sets game "ham5ter_status" "online"
+sets game "potato_status" "online"
