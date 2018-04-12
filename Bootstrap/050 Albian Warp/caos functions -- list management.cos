@@ -11,6 +11,8 @@ sets game "f_LengthofVList" sorc 1 202 2 1004
 *ex: outv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
 sets game "f_GetSafeReturnVar" sorc 1 202 2 1005
 sets game "f_GetVarInVList" sorc 1 202 2 1006
+sets game "f_ExAddtoVList" sorc 1 202 2 1007
+
 
 scrx 1 202 2 1000
 scrx 1 202 2 1001
@@ -18,6 +20,8 @@ scrx 1 202 2 1002
 scrx 1 202 2 1003
 scrx 1 202 2 1004
 scrx 1 202 2 1005
+scrx 1 202 2 1006
+scrx 1 202 2 1007
 
 **var-based list functions must be run Dependently-- they rely on name vars on the owner
 ** later we should change this to check gamevars if they run independantly
@@ -78,7 +82,7 @@ endm
 *P1 (string) id the name of the list. 
 *P2 (anything) is item you want to add to the list.
 *This will add the item to the end of the list
-*Returns the new length of the list
+*Returns the namevar name containing the newly added item.
 scrp 1 202 2 1001
 	inst
 	seta va00 from
@@ -111,7 +115,7 @@ scrp 1 202 2 1001
 	elif type _p2_ gt 2 and type _p2_ le 7
 		seta name va01 _p2_
 	endi
-	outs vtos name va03
+	outs va01
 endm
 
 *"f_RemoveFromVList"
@@ -316,5 +320,81 @@ scrp 1 202 2 1006
 	adds va01 "_"
 	adds va01 vtos _p2_
 	targ va00
+	outs va01
+endm
+
+*"f_ExAddtoVList"
+*FROM is the agent
+*P1 (string) id the name of the list. 
+*P2 (anything) is item you want to add to the list.
+*This will first search the list for _p2_-- if it cannot be found
+*it will add the item to the end of the list
+*Returns the namevar name containing _p2_, whether that was a previously
+*existing match or the newly added version
+scrp 1 202 2 1007
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+	targ va00
+	sets va01 _p1_
+*	get the current list length
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+
+	*if the length is 0, skip the search bit:
+	doif va02 gt 0
+*		okay, we're going to search to see if _p2_ is 
+*		already in the list
+*		get the type of the search agent
+		setv va03 type _p2_
+
+		*start looping:
+		setv va10 0
+		sets va12 "#N#"
+		loop
+			addv va10 1
+			*make the varname:
+			sets va11 _p1_
+			adds va11 "_"
+			adds va11 vtos va10
+		*see if it matches
+			doif type _p2_ eq type name va11
+		*if it does, see if the content matches 
+				doif _p2_ eq  name va11
+		*if if does, you have a match, so save your index
+					sets va12 va11
+				endi
+			endi
+		untl va10 eq va02 or va12 ne "#N#"
+		*if you found something, outs it:
+		doif va12 ne "#N#"
+			outs vtos va12
+			stop
+		endi
+	endi
+*
+*	you didn't find anything, or the list is empty,
+*	so add it to the list!
+	addv va02 1
+	adds va01 "_"
+	adds va01 vtos va02
+*	dbg: outs va01
+*	update the length var	
+	sets va03 _p1_
+	adds va03 "_length"
+	setv name va03 va02
+*	dbg: outv name va03
+*	now figure out what type you are!
+	doif type _p2_ eq 0 or type _p2_ eq 1
+		setv name va01 _p2_
+	elif type _p2_ eq 2
+		sets name va01 _p2_
+	elif type _p2_ gt 2 and type _p2_ le 7
+		seta name va01 _p2_
+	endi
 	outs va01
 endm
