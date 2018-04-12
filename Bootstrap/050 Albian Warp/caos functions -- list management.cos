@@ -1,4 +1,5 @@
 **This is a huge, HUGE WIP, most of these are super-untested
+*And still need to be documented 
 
 sets game "f_ReadFromVList" sorc 1 202 2 1000
 *ex: outs caos 0 1 "listname" 99 game "f_ReadFromVList" 0 0 va99
@@ -7,9 +8,9 @@ sets game "f_AddtoVList" sorc 1 202 2 1001
 sets game "f_RemoveFromVList" sorc 1 202 2 1002
 sets game "f_SearchVList" sorc 1 202 2 1003
 sets game "f_LengthofVList" sorc 1 202 2 1004
-sets game "f_SetLengthofVList" sorc 1 202 2 1005
-sets game "f_GetSafeReturnVar" sorc 1 202 2 1006
-
+*ex: outv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+sets game "f_GetSafeReturnVar" sorc 1 202 2 1005
+sets game "f_GetVarInVList" sorc 1 202 2 1006
 
 scrx 1 202 2 1000
 scrx 1 202 2 1001
@@ -17,8 +18,6 @@ scrx 1 202 2 1002
 scrx 1 202 2 1003
 scrx 1 202 2 1004
 scrx 1 202 2 1005
-scrx 1 202 2 1006
-
 
 **var-based list functions must be run Dependently-- they rely on name vars on the owner
 ** later we should change this to check gamevars if they run independantly
@@ -52,7 +51,7 @@ scrp 1 202 2 1000
 	endi
 *	check to make sure it's in range!
 	setv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
-	dbg: outv va03
+*	dbg: outv va03
 	doif _p2_ gt va03
 		outs "#R#"
 		stop
@@ -92,18 +91,18 @@ scrp 1 202 2 1001
 	targ va00
 	sets va01 _p1_
 *	get the current list length
-	dbg: outs _p1_
+*	dbg: outs _p1_
 	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
-	dbg: outv va02
+*	dbg: outv va02
 	addv va02 1
 	adds va01 "_"
 	adds va01 vtos va02
-	dbg: outs va01
+*	dbg: outs va01
 *	update the length var	
 	sets va03 _p1_
 	adds va03 "_length"
 	setv name va03 va02
-	dbg: outv name va03
+*	dbg: outv name va03
 *	now figure out what type you are!
 	doif type _p2_ eq 0 or type _p2_ eq 1
 		setv name va01 _p2_
@@ -186,8 +185,9 @@ endm
 *"f_SearchVList"
 *FROM is the agent
 *P1 (string) is the name of the list. 
-*P2 (str, int, float) is the actual content of the item you are looking for
-*This will return the first index number that matches the content specified
+*P2 (anything) is the actual content of the item you are looking for
+*This will return the name variable holding the match of the content specified
+* or "#N#" if no match
 scrp 1 202 2 1003
 	inst
 	seta va00 from
@@ -197,7 +197,37 @@ scrp 1 202 2 1003
 			stop
 		endi
 	endi
-	sets va01 _p1_
+	targ va00
+	*get the length
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+	*get the type of the search agent
+	*if the length is 0, stop:
+	doif va02 eq 0
+		outs "0"
+		stop
+	endi
+	setv va03 type _p2_
+
+	*start looping:
+	setv va10 0
+	sets va12 "#N#"
+	loop
+		addv va10 1
+		*make the varname:
+		sets va11 _p1_
+		adds va11 "_"
+		adds va11 vtos va10
+	*see if it matches
+		doif type _p2_ eq type name va11
+	*if it does, see if the content matches 
+			doif _p2_ eq  name va11
+	*if if does, you have a match, so save your index
+				sets va12 va11
+			endi
+		endi
+	untl va10 eq va02 or va12 ne "#N#"
+	*return your index number (this will be 0 if nothing was found)
+	outs vtos va12
 endm
 
 *"f_LengthofVList"
@@ -208,12 +238,12 @@ endm
 scrp 1 202 2 1004
 	inst
 	seta va00 from
-	dbg: outs "setting from"
+*	dbg: outs "setting from"
 	doif va00 eq null
 		seta va00 targ
-		dbg: outs "no, setting targ"
+*		dbg: outs "no, setting targ"
 		doif va00 eq null and type _p2_ gt 2
-			dbg: outs "no, setting _p2_"
+*			dbg: outs "no, setting _p2_"
 			seta va00 _p2_
 			doif va00 eq null
 				stop
@@ -221,29 +251,11 @@ scrp 1 202 2 1004
 		endi	
 	endi
 	targ va00
-	dbg: outv unid	
+*	dbg: outv unid	
 	sets va01 _p1_
 	adds va01 "_length"
-	dbg: outs va01
+*	dbg: outs va01
 	outs vtos name va01 
-endm
-
-*"f_SetLengthofVList"
-*P1 (string) is the name of the list. 
-*P2 (integer) is the new length of the list
-scrp 1 202 2 1005
-	inst
-	setv va00 from
-	doif targ eq null
-		seta va00 targ
-		doif va00 eq null
-			stop
-		endi
-	endi
-	targ va00
-	sets va01 _p1_
-	adds va01 "_length"
-	setv name va01 _p2_
 endm
 
 *"f_GetSafeReturnVar"
@@ -251,7 +263,7 @@ endm
 *P2 (agent) is the agent to search for safe varnames
 *returns a name of a namevar that is not currently in use
 *that one could safely return an agent var in
-scrp 1 202 2 1006
+scrp 1 202 2 1005
 inst
 	sets va00 _p1_
 	setv va01 0
@@ -274,4 +286,35 @@ inst
 	untl va03 eq 0
 *	VA00 is now a safe var
 	outs va00
+endm
+
+*"f_GetVarInVList"
+*FROM is the agent, TARG also works if run with targ-dependence
+*P1 (string) id the name of the list. 
+*P2 (integer) is the index of the item you want to retrive
+*this will return the NAME of the Namevar of the item in the list
+*or "#R#" if index is out of range
+*This is probably better than *"f_ReadFromVList"
+scrp 1 202 2 1006
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+*	check to make sure it's in range!
+	setv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+*	dbg: outv va03
+	doif _p2_ gt va03
+		outs "#R#"
+		stop
+	endi
+
+	sets va01 _p1_
+	adds va01 "_"
+	adds va01 vtos _p2_
+	targ va00
+	outs va01
 endm
