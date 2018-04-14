@@ -134,13 +134,17 @@ scrp 1 202 2 1002
 		endi
 	endi
 	targ va00
-	*get the length of the list
-	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+	dbg: outs "got targ"
+*	get the length of the list
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 1 1 va99
+*	dbg: outs va99
+	dbg: outv va02
 *	make sure its not out of range
 	doif _p2_ gt va02
 		outs "#R#"
 		stop
 	endi 
+	dbg: outs "got length"
 *	get that var and delete it
 	sets va01 _p1_
 	adds va01 "_"
@@ -150,33 +154,64 @@ scrp 1 202 2 1002
 * of writing this entire structure...
 	setv va03 _p2_
 	loop
-	*get the destination varname
+*	get the destination varname
 	sets va04 _p1_
 	adds va04 "_"
 	adds va04 vtos va03
 
 	addv va03 1
 
-	*get the source varname
+*	get the source varname
 	sets va05 _p1_
 	adds va05 "_"
 	adds va05 vtos va03
 
-	*	now figure out what type you are and set it:
-	doif type name va05 eq 0 or type name va05 eq 1
-		setv name va04 name va05
-	elif type name va05 eq 2
-		sets name va04 name va05
-	elif type name va05 gt 2 and type name va05 le 7
-		seta name va04 name va05
-	endi
+*	check for anything else that might contain the source varname...
+*	aka sublist support!!
+	setv va09 strl va05
+	sets va06 ""
+	sets va07 ""
+		loop
+			sets va06 va07
+			namn va07
+			doif va06 ne ""
+				setv va08 sins va06 1 va05
+				doif va08 ne -1
+					doif subs va06 1 va09 eq va05 and strl va06 ge va09
+						sets va10 va04
+						setv va11 va09
+						addv va11 1
+						adds va10 subs va06 va11 -1
+******Debugggggg chunkccc
+						sets va77 "moving: "
+						adds va77 va06
+						adds va77 " to "
+						adds va77 va10
+						dbg: outs va77
+******End Debugggggg chunkccc
+*						va10 is the new name now
+*						va06 is the old name..
+*						now figure out what type you are and set it:
+						doif type name va06 eq 0 or type name va06 eq 1
+							setv name va10 name va06
+							dbg: outv name va10
+						elif type name va06 eq 2
+							sets name va10 name va06
+							dbg: outs name va10
+						elif type name va06 gt 2 and type name va06 le 7
+							seta name va10 name va06
+							dbg: outs "AGENT"
+						endi
+						dbg: outs "deleting!"
+						dbg: outs va06
+						deln va06
+					endi
+				endi
+			endi
+		untl va07 eq ""
 
 	untl va03 eq va02
-*delete the trailing var
-	sets va01 _p1_
-	adds va01 "_"
-	adds va01 vtos va02
-	deln va01
+
 *	update the length var	
 	subv va02 1
 	sets va03 _p1_
