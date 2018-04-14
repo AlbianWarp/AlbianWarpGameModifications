@@ -121,7 +121,7 @@ endm
 *"f_RemoveFromVList"
 *FROM is the agent
 *P1 (string) is the name of the list. 
-*P2 (integer) is the index of the item you want to remove
+*P2 (integer or string) is either the index or the varname of the item you want to remove) 
 *This will remove the item from the list and shuffle all the index numbers
 *Returns the new length of the list, or "#R#" if index is out of range
 scrp 1 202 2 1002
@@ -139,6 +139,14 @@ scrp 1 202 2 1002
 	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 1 1 va99
 *	dbg: outs va99
 	dbg: outv va02
+* 	convert _p2_ if it's a string
+	doif type _p2_ eq 2
+		setv va20 strl _p1_
+		addv va20 1
+		setv va22 stoi subs _p2_ va20 -1
+	else
+		setv va22 _p2_
+	endi
 *	make sure its not out of range
 	doif _p2_ gt va02
 		outs "#R#"
@@ -148,11 +156,11 @@ scrp 1 202 2 1002
 *	get that var and delete it
 	sets va01 _p1_
 	adds va01 "_"
-	adds va01 vtos _p2_
+	adds va01 vtos va22
 	deln va01
 * now you have to shuffle all the other vars up, which is the least fun part
 * of writing this entire structure...
-	setv va03 _p2_
+	setv va03 va22
 	loop
 *	get the destination varname
 	sets va04 _p1_
