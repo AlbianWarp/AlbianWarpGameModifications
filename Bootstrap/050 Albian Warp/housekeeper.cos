@@ -22,7 +22,7 @@ sets game "f_aw_ulin" sorc 1 1 35700 9001
 setv game "f_aw_ulin:v" 1
 scrx 1 1 35700 9001
 
-*add user to WWR
+*add user to WWR (net: whon)
 *returns nothing!
 *_p1_ is the username, _p2_ is the agent to get WW messages
 *use with sets vaXX caos 0 0 _p1_ _p2_ game "f_aw_whon" 0 0 va99
@@ -30,13 +30,29 @@ sets game "f_aw_whon" sorc 1 1 35700 9002
 setv game "f_aw_whon:v" 1
 scrx 1 1 35700 9002
 
-*remove user from WWR
+*remove user from WWR (net: whof)
 *returns nothing!
 *_p1_ is the username, _p2_ is the agent to get WW messages
 *use with sets vaXX caos 0 0 _p1_ _p2_ game "f_aw_whof" 0 0 va99
 sets game "f_aw_whof" sorc 1 1 35700 9003
 setv game "f_aw_whof:v" 1
 scrx 1 1 35700 9003
+
+*clear the WWR for an agent (net: whoz)
+*returns nothing!
+*_p1_ is the agent
+*use with sets vaXX caos 0 0 _p1_ 0 game "f_aw_whoz" 0 0 va99
+sets game "f_aw_whoz" sorc 1 1 35700 9004
+setv game "f_aw_whoz:v" 1
+scrx 1 1 35700 9004
+
+*dump debug info about the WWR in string format (net: whod)
+*no params
+*use with outs caos 0 0 0 0 game "f_aw_whod" 0 0 va99
+sets game "f_aw_whod" sorc 1 1 35700 9005
+setv game "f_aw_whod:v" 1
+scrx 1 1 35700 9005
+
 
 *inject actual agent
 new: simp 1 1 35700 "blnk" 1 0 0
@@ -229,12 +245,75 @@ scrp 1 1 35700 1003
 *	find the username in the list:
 	sets va02 caos 0 1 "wwr" _p1_ game "f_SearchVList" 0 0 va99
 *	remove agent from the sublist:
-	sets va03 caos 0 1 va02 _p2_ game "f_RemoveFromVList" 0 0 va99
-*	see if your list is empty!
-	doif stoi caos 0 0 _p1_ targ game "f_LengthofVList" 0 0 va99 eq 0
-*	remove your own entry:
-		sets va05 caos 0 1 "wwr" _p1_ game "f_RemoveFromVList" 0 0 va99
+	sets va04 caos 0 1 va02 _p2_ game "f_SearchVList" 0 0 va99
+	doif strl va04 gt strl va02
+		sets va03 caos 0 1 va02 va04 game "f_RemoveFromVList" 0 0 va99
 	endi
+*	see if your list is empty!
+	doif stoi caos 0 0 va02 targ game "f_LengthofVList" 0 0 va99 eq 0
+*	remove your own entry:
+		sets va05 caos 0 1 "wwr" va02 game "f_RemoveFromVList" 0 0 va99
+	endi
+endm
+
+*net: whoz
+scrp 1 1 35700 1004
+	inst
+*	p1 is the agent
+*	for each in "wwr"
+	setv va00 stoi caos 0 0 "wwr" ownr game "f_LengthofVList" 0 0 va99
+	doif va00 eq 0
+		stop
+	endi
+	setv va02 0
+	reps va00
+		addv va02 1
+*		see if agent is in sublist
+		sets va04 caos 0 1 va00 _p1_ game "f_SearchVList" 0 0 va99
+*		remove it
+		doif strl va04 gt strl va00
+			sets va03 caos 0 1 va00 va04 game "f_RemoveFromVList" 0 0 va99
+		endi
+*		see if your list is empty!
+		doif stoi caos 0 0 va00 targ game "f_LengthofVList" 0 0 va99 eq 0
+*		remove your own entry:
+			sets va05 caos 0 1 "wwr" va02 game "f_RemoveFromVList" 0 0 va99
+		endi
+	repe
+
+endm
+
+*	net: whod
+scrp 1 1 35700 1005
+	inst
+	sets va00 "Who's Wanted Registers:/r"
+	*	for each in "wwr"
+	setv va00 stoi caos 0 0 "wwr" ownr game "f_LengthofVList" 0 0 va99
+	doif va00 eq 0
+		outs "WWR is empty!"
+		stop
+	endi
+	sets va01 1
+	reps va00
+		adds va01 1
+		sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 0 0 va99
+		adds va00 name va03
+		adds va00 ":"
+		setv va06 stoi caos 0 0 va02 ownr game "f_LengthofVList" 0 0 va99
+		setv va05 0
+		reps va06
+			addv va05 1
+			sets va07 caos 0 1 va03 va05 game "f_GetVarInVList" 0 0 va99
+			targ name va07
+			adds va00 vtos spcs
+			adds va00 " ("
+			adds va00 vtos unid
+			adds va00 ") "
+			targ ownr
+		repe
+		adds va00 "\r"
+	repe
+	outs va00
 endm
 
 *holder script for CAOS functions: 
@@ -337,6 +416,24 @@ scrp 1 1 35700 9003
 inst
 rtar 1 1 35700
 mesg wrt+ targ 1003 _p1_ _p2_ 0 
+endm
+
+*NET: WHOZ Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9004
+inst
+rtar 1 1 35700
+mesg wrt+ targ 1004 _p1_ _p2_ 0 
+endm
+
+*NET: WHOD Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9005
+inst
+rtar 1 1 35700
+mesg wrt+ targ 1005 _p1_ _p2_ 0 
 endm
 
 rscr
