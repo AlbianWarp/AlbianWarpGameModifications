@@ -333,6 +333,7 @@ endm
 *existing match or the newly added version
 scrp 1 202 2 1007
 	inst
+*	dbg: outs "STARTING f_ExAddtoVList"
 	seta va00 from
 	doif va00 eq null
 		seta va00 targ
@@ -341,53 +342,61 @@ scrp 1 202 2 1007
 		endi
 	endi
 	targ va00
+*	dbg: outs "FOUND TARG f_ExAddtoVList"
 	sets va01 _p1_
 *	get the current list length
 	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
-
-	*if the length is 0, skip the search bit:
+	dbg: outs "length is"
+	dbg: outv va02
+*	if the length is 0, skip the search bit:
 	doif va02 gt 0
 *		okay, we're going to search to see if _p2_ is 
 *		already in the list
 *		get the type of the search agent
 		setv va03 type _p2_
-
-		*start looping:
+		dbg: outs "getting type"
+*start looping:
 		setv va10 0
 		sets va12 "#N#"
 		loop
 			addv va10 1
-			*make the varname:
+*make the varname:
 			sets va11 _p1_
 			adds va11 "_"
 			adds va11 vtos va10
-		*see if it matches
+			dbg: outs va11
+*see if it matches
 			doif type _p2_ eq type name va11
-		*if it does, see if the content matches 
-				doif _p2_ eq  name va11
-		*if if does, you have a match, so save your index
+*	if it does, see if the content matches 
+				doif _p2_ eq name va11
+*	if if does, you have a match, so save your index
 					sets va12 va11
 				endi
 			endi
 		untl va10 eq va02 or va12 ne "#N#"
-		*if you found something, outs it:
+		dbg: outs va12
+*	if you found something, outs it:
 		doif va12 ne "#N#"
-			outs vtos va12
+			outs va12
 			stop
 		endi
+	else
+		dbg: outs "list is empty"
 	endi
-*
+
+	dbg: outs "not in list"
 *	you didn't find anything, or the list is empty,
 *	so add it to the list!
 	addv va02 1
 	adds va01 "_"
 	adds va01 vtos va02
-*	dbg: outs va01
+	dbg: outs va01
 *	update the length var	
 	sets va03 _p1_
 	adds va03 "_length"
 	setv name va03 va02
-*	dbg: outv name va03
+	dbg: outs va03
+	dbg: outv name va03
 *	now figure out what type you are!
 	doif type _p2_ eq 0 or type _p2_ eq 1
 		setv name va01 _p2_
@@ -398,3 +407,7 @@ scrp 1 202 2 1007
 	endi
 	outs va01
 endm
+
+***Functions to add:
+*Wipe an entire list
+*Rename/Move a list 
