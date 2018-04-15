@@ -150,27 +150,27 @@ scrp 1 1 184 9
 			setv va78 strl va01
 			subv va78 5
 			sets va80 subs va01 1 va78
-		dbg: outs va80
+*			dbg: outs va80
 			enum 4 0 0
 				doif gtos 0 eq va80
 					setv va77 0
-					dbg: outs va01
-					dbg: outs "creature exists already"
+*					dbg: outs va01
+*					dbg: outs "creature exists already"
 				endi
 			next
 *		if the recipent is not you, skip it
 			sets va11 pray agts va01 "Pray Extra recipient_userID" "Unknown"
 			doif game "user_of_this_world" ne va11
-				dbg: outs va01
+*				dbg: outs va01
 				setv va77 0
-				dbg: outs "creature is not for you!"
+*				dbg: outs "creature is not for you!"
 			endi
 		endi
 *		barring those two situations... you should be good.
 		sets va76 va01
 	untl va76 eq "" or va77 eq 1
 	doif va76 eq ""
-		dbg: outs "no more creatures"
+		dbg: outs "no creatures available to warp in"
 		pray refr
 		gsub guioff
 		stop

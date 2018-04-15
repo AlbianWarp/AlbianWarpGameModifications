@@ -172,7 +172,10 @@ scrp 1 202 2 1002
 	dbg: outs "About to go in remove loop"
 	loop
 	dbg: outs "IN THE remove loop"
+*	va95 is infinite loop protection
+	setv va95 0
 *	get the destination varname
+		addv va95 1
 		sets va04 _p1_
 		adds va04 "_"
 		adds va04 vtos va03
@@ -189,8 +192,10 @@ scrp 1 202 2 1002
 		setv va09 strl va05
 		sets va06 ""
 		sets va07 ""
+		
 
 		loop
+			addv va95 1
 			dbg: outs "in the sublist remove loop!"
 			sets va06 va07
 			namn va07
@@ -229,10 +234,13 @@ scrp 1 202 2 1002
 					endi
 				endi
 			endi
-		untl va07 eq ""
-dbg: outs "out of the sublist remove loop"
-	untl va03 ge va02
-dbg: outs " out of the remove loop"
+		untl va07 eq "" or va95 gt 1000
+	dbg: outs "out of the sublist remove loop"
+	untl va03 ge va02 or va95 gt 1000
+	dbg: outs " out of the remove loop"
+	doif va95 gt 1000
+	dbg: outs "stopped due to being too long in looping"
+	endi
 *	update the length var	
 	subv va02 1
 	sets va03 _p1_
@@ -466,6 +474,6 @@ scrp 1 202 2 1007
 	outs va01
 endm
 
-***Functions to add:
+***Functions to add maybe:
 *Wipe an entire list
 *Rename/Move a list 
