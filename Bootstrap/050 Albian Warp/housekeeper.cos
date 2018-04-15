@@ -405,7 +405,7 @@ scrp 1 1 35700 1005
 endm
 
 scrp 1 1 35700 1006
-*sets number of real, actual online contacts into game "online_contact_count"
+*sets number of real, actual online contacts into game "online_user_count"
 *also updates game "!net ruso_status"
 	inst
 *update the number of contacts you currently have
@@ -432,7 +432,7 @@ scrp 1 1 35700 1006
 *	set 'previous entry' to current entry
 		sets va40 va42
 	untl va42 eq ""
-	setv game "online_contact_count" va45
+	setv game "online_user_count" va45
 	doif va45 gt 0
 		sets game "!net ruso_status" "online"
 	else
@@ -489,7 +489,7 @@ scrp 1 1 35700 9000
 	mesg writ targ 1006
 	targ ownr
 
-	setv va48 game "online_contact_count"
+	setv va48 game "online_user_count"
 *	dbg: outs "there are this many contacts"
 *	dbg: outv va48
 
