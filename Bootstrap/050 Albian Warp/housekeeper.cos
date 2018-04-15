@@ -315,12 +315,20 @@ scrp 1 1 35700 1005
 			reps va06
 				addv va05 1
 				sets va07 caos 0 1 va03 va05 game "f_GetVarInVList" 1 0 va99
-				targ name va07
-				adds va00 vtos spcs
-				adds va00 " ("
-				adds va00 vtos unid
-				adds va00 ") "
-				targ ownr
+				doif type name va07 gt 2
+					targ name va07
+					adds va00 vtos fmly
+					adds va00 " "
+					adds va00 vtos gnus
+					adds va00 " "
+					adds va00 vtos spcs
+					adds va00 " ("
+					adds va00 vtos unid
+					adds va00 ") "
+					targ ownr
+				else
+					adds va00 "this isn't an agent for some reason"
+				endi
 			repe
 		endi
 		adds va00 "\n"
