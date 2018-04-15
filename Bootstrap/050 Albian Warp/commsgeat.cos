@@ -58,8 +58,7 @@ endm
 
 
 ****event to fill in the spaces - shows contacts
-**This is a long one. Right now until we can write an AW equivlent
-**of NET: ULIN and the WWR, it just treats everyone as being online.
+**This is a long one.
 
 scrp 1 2 210 1010
 	inst

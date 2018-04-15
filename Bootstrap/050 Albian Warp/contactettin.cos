@@ -65,8 +65,7 @@ scrp 1 1 157 1000
 
 
 
-*The rest is this is somehow related to portals and hasn't been 
-*tested or modified for AW at all
+*The rest is this is somehow related to portals
 
 *	check whether type of _p2_ is not integer
 	doif type _p2_ ne 0
@@ -191,7 +190,7 @@ scrp 1 1 157 137
 *	check time online
 *	doif va90 gt 5000
 
-	dbg: outs "contact book WWR online event"
+*	dbg: outs "contact book WWR online event"
 
 *	build search string
 	sets va00 _p1_
@@ -219,7 +218,7 @@ scrp 1 1 157 138
 *	net: stat va90 va91 va92 va93
 *	check time online
 *	doif va90 gt 5000
-	dbg: outs "contact book WWR offline event"
+*	dbg: outs "contact book WWR offline event"
 
 
 

@@ -74,6 +74,11 @@ scrp 1 1 35700 9
 	endi
 	dbg: outs "housekeeper running"
 
+*	not sure if this is a good idea >> but refreshing the contacts list 
+*	should update the online status of the special vars
+*rtar 1 2 210
+*mesg writ targ 1010
+*targ ownr
 	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
 		sets game "aw_status" "offline"
 		sets game "status" "offline"
@@ -138,13 +143,16 @@ scrp 1 1 35700 9
 	endi
 
 *	Time to check the WWRs:
+*	refresh the special contacts
+	mesg writ ownr 1006
+	mesg writ ownr 1007
 
 *	subtract from the newly-online indicator
 	doif mv02 gt 0
 		subv mv02 1
 	endi
-	dbg: outs "newly online status is"
-	dbg: outv mv02
+	*dbg: outs "newly online status is"
+	*dbg: outv mv02
 
 	targ ownr
 	setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
@@ -396,6 +404,81 @@ scrp 1 1 35700 1005
 	outs va00
 endm
 
+scrp 1 1 35700 1006
+*sets number of real, actual online contacts into game "online_contact_count"
+*also updates game "!net ruso_status"
+	inst
+*update the number of contacts you currently have
+	sets va40 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*			see if string contains search
+		setv va43 sins va42 1 va41
+*			if it does, and is not an automation:
+		doif va43 ne -1
+			doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*get the actual username from the string
+				setv va46 strl va42
+				subv va46 strl va41
+				sets va47 subs va42 1 va46
+				doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+					addv va45 1
+*dbg: outs va47
+				endi
+			endi
+		endi
+*	set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+	setv game "online_contact_count" va45
+	doif va45 gt 0
+		sets game "!net ruso_status" "online"
+	else
+		sets game "!net ruso_status" "offline"
+	endi
+endm
+
+scrp 1 1 35700 1007
+*sets number of online friends into game "online_friend_count"
+*also updates game "!friend_status"
+	inst
+*update the number of contacts you currently have
+	sets va40 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*			see if string contains search
+		setv va43 sins va42 1 va41
+*			if it does, and is not an automation:
+		doif va43 ne -1
+			doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*get the actual username from the string
+				setv va46 strl va42
+				subv va46 strl va41
+				sets va47 subs va42 1 va46
+				doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+					adds va47 "_group"
+					doif game va47 eq 2
+						addv va45 1
+					endi
+*dbg: outs va47
+				endi
+			endi
+		endi
+*	set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+	setv game "online_friend_count" va45
+	doif va45 gt 0
+		sets game "!friend_status" "online"
+	else
+		sets game "!friend_status" "offline"
+	endi
+endm
+
 *holder script for CAOS functions: 
 *no parameters-- just returns a random user
 scrp 1 1 35700 9000
@@ -403,10 +486,10 @@ scrp 1 1 35700 9000
 *	trigger the update contacts script
 *	I don't even think this DOES good in an inst but whatever
 	rtar 1 1 35700
-	mesg writ targ 1001
+	mesg writ targ 1006
 	targ ownr
 
-	setv va48 game "contact_count"
+	setv va48 game "online_contact_count"
 *	dbg: outs "there are this many contacts"
 *	dbg: outv va48
 
@@ -431,11 +514,17 @@ scrp 1 1 35700 9000
 *							if it does
 			doif va43 ne -1
 				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
-					dbg: outs va42
-					addv va45 1
-					dbg: outv va45
-					doif va45 eq va49
-						sets va30 va42
+*					get the actual username from the string
+					setv va46 strl va42
+					subv va46 strl va41
+					sets va47 subs va42 1 va46
+					doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+						dbg: outs va42
+						addv va45 1
+						dbg: outv va45
+						doif va45 eq va49
+							sets va30 va42
+						endi
 					endi
 				endi
 			endi
