@@ -26,7 +26,7 @@ scrp 1 1 157 1000
 * make sure we are in WWR, so net: ulin is fast
 * and for warning icon script 1 1 157 137 below
 *	lock
-*	net: whon _p1_
+	sets va99 caos 0 0 _p1_ targ game "f_aw_whon" 0 0 va99
 	inst
 	sets va79 _p1_
 	adds va79 "_contact"
@@ -180,8 +180,7 @@ scrp 1 1 157 135
 endm
 
 ***WWR user online event - do warning icons etc.
-**IN PROGRESS right now since we don't currently get indicators
-**when someone comes online/goes offline
+
 scrp 1 1 157 137
 	inst
 
@@ -196,7 +195,7 @@ scrp 1 1 157 137
 
 *	build search string
 	sets va00 _p1_
-	adds va00 "_contact"
+*	adds va00 "_contact"
 	adds va00 "_group"
 	doif game va00 eq 2
 *	if this person is classed as a friend ...
@@ -227,7 +226,7 @@ scrp 1 1 157 138
 		doif game va00 eq 2
 *	if this person is classed as a friend ...
 *		only do this though if you are online
-			doif net: line eq 1
+			doif game "aw_status" eq "online"
 				rtar 1 1 164
 *		tell the warning icon controller about it	
 				doif targ ne null

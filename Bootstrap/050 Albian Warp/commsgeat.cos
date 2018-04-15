@@ -104,8 +104,7 @@ scrp 1 2 210 1010
 
 *	wipe whose on register for us -
 *	then we add in every on this page with net: whon below
-*!* to be replaced with AW equivelent
-*	net: whoz
+	sets va99 caos 0 0 targ 0 game "f_aw_whoz" 0 0 va99
 
 *	va90 is X offset of any new parts created
 *	va91 is Y offset of any new parts created
@@ -141,7 +140,7 @@ scrp 1 2 210 1010
 				doif va30 <> "!friend" and va30 <> "!net: ruso"
 *!* Replace with AW Equivlent of 'add this user to
 *!* who's wanted 
-*net: whon va30
+	sets va99 caos 0 0 va30 targ game "f_aw_whon" 0 0 va99
 					inst
 				endi
 *		get nickname for this user
@@ -389,4 +388,91 @@ scrp 1 2 219 1000
 		webb va00
 	endi
 
+endm
+
+***WWR user online event
+scrp 1 2 210 137
+	inst
+
+	dbg: outs "WWR - user online"
+	dbg: outs _p1_
+
+*	if you are in 'view contacts' mode
+	doif ov00 eq 1
+*	only do this if on screen
+*		doif visi 0 eq 1
+
+*		build search string
+		sets va00 _p1_
+		adds va00 "_nick"
+*		get nickname of this user
+		sets va01 game va00
+*		now look for va01 being in a text box
+		setv va02 11
+		setv va99 0
+*		start looking in part 11, finish with part 68
+		loop
+			part va02
+*			make sure part exists
+			doif base eq -1
+				setv va02 71
+			else
+				doif ptxt eq va01
+					setv va03 va02
+					addv va03 2
+					part va03
+					pose 1
+					setv va02 71
+				endi
+				addv va02 3
+			endi
+		untl va02 ge 71
+*		endi
+	endi
+endm
+
+
+
+***WWR user offline event
+scrp 1 2 210 138
+	inst
+
+*	only do this if on screen
+	doif visi 0 eq 1
+
+
+
+		dbg: outs "WWR - user offline"
+		dbg: outs _p1_
+
+*	if you are in 'view contacts' mode	
+		doif ov00 eq 1
+*		build search string
+			sets va00 _p1_
+			adds va00 "_nick"
+*		get nickname of this user
+			sets va01 game va00
+*		now look for va01 being in a text box
+			setv va02 11
+			setv va99 0
+*		start looking in part 11, finish with part 68
+			loop
+				part va02
+*			make sure part actually exists
+				doif base eq -1
+					setv va02 71
+				else
+
+					doif ptxt eq va01
+						setv va03 va02
+						addv va03 2
+						part va03
+						pose 0
+						setv va02 71
+					endi
+					addv va02 3
+				endi
+			untl va02 ge 71
+		endi
+	endi
 endm
