@@ -239,7 +239,6 @@ scrp 1 1 35700 1000
 		sets va01 gtos 0
 		sets name "aw_creature_monicer" va01
 		sets va02 hist name va01
-		sets va03 va02
 		sets name "aw_creature_name" va02
 		sets name "aw_sender" game "user_of_this_world"
 * Set the recipient user id on the Creature that will be warped
@@ -249,29 +248,34 @@ scrp 1 1 35700 1000
 		sets name "Last Network User" game "user_of_this_world"
 * export the Creature with the custom Chunk Type `WARP` (warp out)
 		setv va99 pray expo "warp"
-
 *		check to make sure it worked...
 		doif va99 eq 1
 			targ pntr
 			sndc "buzz"
 			dbg: outs "Could not warp creature because it is already on disk!"
 		else
-*		Create a aw_message_object that tells the client the moniker of the exported creature
-			doif va02 ne ""
-				adds va02 "_"
-				adds va02 va01
-				sets va01 va02
-			endi
-
-			new: simp 1 1 35760 "blnk" 1 0 0
-			sets name "aw_recipient" _p2_
-			sets name "moniker" va01
-			sets name "creature_name" va03
-
+* Create a aw_message_object that tells the client the moniker of the exported creature
+		  new: simp 1 1 35760 "blnk" 1 0 0
+		  sets name "aw_recipient" _p2_
+		  sets name "moniker" va01
+		  sets name "creature_name" va02
 		endi
-
 	endi
 	unlk
+endm
+
+***
+* Delete Creature File from Export folder, containing the given moniker
+* _p1_ = moniker (str)
+***
+scrp 1 1 35700 1337
+	sets va01 _p1_
+	adds va01 ".warp"
+	dbg: outs "try to delete creature with moniker: "
+	dbg: outs va01
+	setv va00 pray kill va01
+	dbg: outv va00
+	outv va00
 endm
 
 scrp 1 1 35700 1001
