@@ -1,3 +1,8 @@
+enum 1 1 35700
+	kill targ
+next
+
+
 *setup CAOS functions
 
 *Returns name of random online user
@@ -5,6 +10,48 @@
 *use with sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 sets game "f_aw_ruso" sorc 1 1 35700 9000
 setv game "f_aw_ruso:v" 1
+scrx 1 1 35700 9000
+
+*Returns if a user is online (net: ulin):
+*0 if offline
+*1 if online
+*2 if there is no such contact
+*_p1_ must be set to the username you are checking
+*use with setv vaXX stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99
+sets game "f_aw_ulin" sorc 1 1 35700 9001
+setv game "f_aw_ulin:v" 1
+scrx 1 1 35700 9001
+
+*add user to WWR (net: whon)
+*returns nothing!
+*_p1_ is the username, _p2_ is the agent to get WW messages
+*use with sets va99 caos 0 0 va30 targ game "f_aw_whon" 0 0 va99
+sets game "f_aw_whon" sorc 1 1 35700 9002
+setv game "f_aw_whon:v" 1
+scrx 1 1 35700 9002
+
+*remove user from WWR (net: whof)
+*returns nothing!
+*_p1_ is the username, _p2_ is the agent to get WW messages
+*use with sets vaXX caos 0 0 _p1_ _p2_ game "f_aw_whof" 0 0 va99
+sets game "f_aw_whof" sorc 1 1 35700 9003
+setv game "f_aw_whof:v" 1
+scrx 1 1 35700 9003
+
+*clear the WWR for an agent (net: whoz)
+*returns nothing!
+*_p1_ is the agent
+*use with sets vaXX caos 0 0 targ 0 game "f_aw_whoz" 0 0 va99
+sets game "f_aw_whoz" sorc 1 1 35700 9004
+setv game "f_aw_whoz:v" 1
+scrx 1 1 35700 9004
+
+*dump debug info to dbg: outs ( like net: whod but not really)
+*no params
+*use with outs caos 0 0 0 0 game "f_aw_whod" 0 0 va99
+sets game "f_aw_whod" sorc 1 1 35700 9005
+setv game "f_aw_whod:v" 1
+scrx 1 1 35700 9005
 
 
 *inject actual agent
@@ -15,7 +62,8 @@ setv ov00 0
 
 
 scrp 1 1 35700 9
-inst
+	inst
+
 *if race is less than 50, we're in fast ticks, so don't go on until you
 *total is at least 50 (should be about the equivlent of not being in fast ticks).
 	addv ov00 race
@@ -24,22 +72,157 @@ inst
 	else
 		setv ov00 0
 	endi
+	dbg: outs "the housekeeper is running about"
 
+*	not sure if this is a good idea >> but refreshing the contacts list 
+*	should update the online status of the special vars
+*rtar 1 2 210
+*mesg writ targ 1010
+*targ ownr
 	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
 		sets game "aw_status" "offline"
 		sets game "status" "offline"
+		dbg: outs "client closed/offline, going offline"
 
+* 		set newly online flag (this is just so the WWR doesn't
+*		spam you with who's online after you just connected) 
+		setv mv02 2
+
+*		tell all agents you are offline
+		enum 0 0 0
+			mesg writ targ 136
+		next
+
+*make everyone's status offline!
+		sets va99 ""
+		sets va00 "_status"
+		loop
+			sets va10 gamn va99
+*			see if string contains string
+			setv va20 sins va10 1 va00
+			doif va20 ne -1
+				doif type game va10 eq 2
+					doif game va10 eq "online"
+						sets game va10 "offline"
+					endi
+				endi
+			endi
+			sets va99 va10
+		untl va10 eq ""
+
+*	tell the online indicator you are offline
 		enum 1 2 14
 			mesg writ targ 501
 		next
+
 	elif game "aw_online_indicator" eq 1 and game "aw_status" eq "offline"
 		sets game "aw_status" "online"
 		sets game "status" "online"
+		dbg: outs "client open/online, going online"
+
+*		tell all agents you are online
+		enum 0 0 0
+			mesg writ targ 135
+		next
+
+*		tell the online indicator you are online		
 		enum 1 2 14
 			mesg writ targ 500
 		next
+	else
+*		dbg: outs "no status changes"
+*		dbg: outs game "aw_status"
+*		dbg: outv game "aw_online_indicator"
 	endi
+
+
 	setv game "aw_online_indicator" 0
+
+	doif game "aw_status" = "offline"
+		stop
+	endi
+
+*	Time to check the WWRs:
+*	refresh the special contacts
+	mesg writ ownr 1006
+	mesg writ ownr 1007
+
+*	subtract from the newly-online indicator
+	doif mv02 gt 0
+		subv mv02 1
+	endi
+	*dbg: outs "newly online status is"
+	*dbg: outv mv02
+
+	targ ownr
+	setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
+*	dbg: outs "wwrs found"
+*	dbg: outv va02
+	doif va02 gt 0
+		setv va01 0
+		reps va02
+			addv va01 1
+*			get the user namevar:
+			sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 0 0 va99
+*			get the username itself 
+			sets va04 name va03
+*			see if your online status has changed!
+			sets va05 va03
+			adds va05 "_status"
+			setv va06 name va05
+*			va06 is now the old status!
+*			see if this has changed! Set the new status
+			setv name va05 stoi caos 0 0 va04 0 game "f_aw_ulin" 0 1 va99
+*				this incorporates the newly online indicator (mv02)
+*				so it doesn't notify you everyone is online when you
+*				just logged in!
+			doif name va05 ne va06 and mv02 le 0
+*				something is different, gasp
+*				you have to tell your agents!
+*				first make sure you have agents...
+				setv va07 stoi caos 0 0 va03 ownr game "f_LengthofVList" 0 0 va99
+				doif va07 gt 0
+					setv va08 0
+					reps va07
+						addv va08 1
+*						get the agent name:
+						sets va09 caos 0 1 va03 va08 game "f_GetVarInVList" 0 0 va99
+*						sets the agent name
+						seta va10 name va09
+*						now you gotta tell the agent what's up!
+*						if status is 0, set the "went offline" message
+						doif name va05 eq 0
+							dbg: outs "sending an offline message about"
+							dbg: outs va04
+							mesg wrt+ va10 138 va04 0 0
+						elif name va05 eq 1
+*							if status is 1, set the "went online" message!
+							dbg: outs "sending an online message about"
+							dbg: outs va04
+							mesg wrt+ va10 137 va04 0 0
+						endi
+					repe
+				endi
+			endi
+		repe
+	endi
+endm
+
+*WWR test entries:
+scrp 1 1 35700 137
+	inst
+	sets va00 "According to the WWR, "
+	adds va00 _p1_
+	adds va00 " has just come online."
+	dbg: outs va00
+endm
+
+scrp 1 1 35700 138
+	inst
+	sets va00 "According to the WWR, "
+	adds va00 _p1_
+	adds va00 " has just gone offline."
+	dbg: outs va00
 endm
 
 ***
@@ -65,11 +248,18 @@ scrp 1 1 35700 1000
 		sets name "Last Network User" game "user_of_this_world"
 * export the Creature with the custom Chunk Type `WARP` (warp out)
 		setv va99 pray expo "warp"
+*		check to make sure it worked...
+		doif va99 eq 1
+			targ pntr
+			sndc "buzz"
+			dbg: outs "Could not warp creature because it is already on disk!"
+		else
 * Create a aw_message_object that tells the client the moniker of the exported creature
-		new: simp 1 1 35760 "blnk" 1 0 0
-		sets name "aw_recipient" _p2_
-		sets name "moniker" va01
-		sets name "creature_name" va02
+		  new: simp 1 1 35760 "blnk" 1 0 0
+		  sets name "aw_recipient" _p2_
+		  sets name "moniker" va01
+		  sets name "creature_name" va02
+		endi
 	endi
 	unlk
 endm
@@ -90,46 +280,239 @@ endm
 
 scrp 1 1 35700 1001
 *sets number of real, actual contacts into game "contact_count"
-inst
+	inst
 *update the number of contacts you currently have
-		sets va40 ""
-		sets va41 "_contact"
-		setv va45 0
-		loop
-			sets va42 gamn va40
+	sets va40 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
 *			see if string contains search
-			setv va43 sins va42 1 va41
+		setv va43 sins va42 1 va41
 *			if it does, and is not an automation:
-			doif va43 ne -1
-				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
-					addv va45 1
-				endi
+		doif va43 ne -1
+			doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+				addv va45 1
 			endi
+		endi
 *	set 'previous entry' to current entry
-			sets va40 va42
-		untl va42 eq ""
-		setv game "contact_count" va45
+		sets va40 va42
+	untl va42 eq ""
+	setv game "contact_count" va45
 endm
 
-*holder script for CAOS function: 
+*add someone to the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 1002
+	inst
+*	dbg: outs "HEY WE ARE ADDING SOMEONE HERE"
+*	exclusive add the username to the list:
+	sets va02 caos 0 1 "wwr" _p1_ game "f_ExAddtoVList" 0 0 va99
+*	and then set its status so we know if it changes
+	sets va03 va02
+	adds va03 "_status"
+	setv name va03 stoi caos 0 0 _p1_ 0 game "f_aw_ulin" 0 1 va99
+*	exclusive add the agent to the usernames's sublist
+	sets va04 caos 0 1 va02 _p2_ game "f_ExAddtoVList" 0 0 va99
+
+*	dbg: outs va03
+*	dbg: outs _p1_
+*	dbg: outs "was added to the wwr for agent:"
+*	targ _p2_
+*	dbg: outv unid
+*	dbg: outs "new length:"
+*	dbg: outs caos 0 0 "wwr" ownr game "f_LengthofVList" 1 1 va99
+endm
+
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 1003
+	inst
+*	find the username in the list:
+	sets va02 caos 0 1 "wwr" _p1_ game "f_SearchVList" 0 0 va99
+*	remove agent from the sublist:
+	sets va04 caos 0 1 va02 _p2_ game "f_SearchVList" 0 0 va99
+	doif strl va04 gt strl va02
+		sets va03 caos 0 1 va02 va04 game "f_RemoveFromVList" 0 0 va99
+	endi
+*	see if your list is empty!
+	doif stoi caos 0 0 va02 targ game "f_LengthofVList" 0 0 va99 eq 0
+*	remove your own entry:
+		sets va05 caos 0 1 "wwr" va02 game "f_RemoveFromVList" 0 0 va99
+	endi
+endm
+
+*net: whoz
+scrp 1 1 35700 1004
+	inst
+*	p1 is the agent
+*	for each in "wwr"
+	setv va00 stoi caos 0 0 "wwr" ownr game "f_LengthofVList" 0 0 va99
+	doif va00 eq 0
+		stop
+	endi
+	setv va02 0
+	reps va00
+		addv va02 1
+		sets va06 "wwr_"
+		adds va06 vtos va02
+*		see if agent is in sublist
+		sets va04 caos 0 1 va06 _p1_ game "f_SearchVList" 1 0 va99
+*		remove it
+		doif strl va04 gt strl va06
+			sets va03 caos 0 1 va06 va04 game "f_RemoveFromVList" 1 0 va99
+		endi
+*		see if your list is empty!
+		doif stoi caos 0 0 va06 targ game "f_LengthofVList" 1 0 va99 eq 0
+*		remove your own entry:
+			sets va05 caos 0 1 "wwr" va02 game "f_RemoveFromVList" 1 0 va99
+		endi
+	repe
+
+endm
+
+*	net: whod
+scrp 1 1 35700 1005
+	inst
+
+	sets va00 "Who's Wanted Registers:\n"
+*	for each in "wwr"
+	setv va10 stoi caos 0 0 "wwr" ownr game "f_LengthofVList" 1 0 va99
+	doif va10 eq 0
+		outs "WWR is empty!"
+		stop
+	endi
+	setv va01 0
+
+	reps va10
+		addv va01 1
+		sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 1 0 va99
+		adds va00 name va03
+		adds va00 ":"
+*		dbg: outs "hello"
+		setv va06 stoi caos 0 0 va03 ownr game "f_LengthofVList" 1 0 va99
+*		dbg: outs "hellooo"
+		setv va05 0
+		doif va06 gt 0
+			reps va06
+				addv va05 1
+				sets va07 caos 0 1 va03 va05 game "f_GetVarInVList" 1 0 va99
+				doif type name va07 gt 2
+					targ name va07
+					adds va00 vtos fmly
+					adds va00 " "
+					adds va00 vtos gnus
+					adds va00 " "
+					adds va00 vtos spcs
+					adds va00 " ("
+					adds va00 vtos unid
+					adds va00 ") "
+					targ ownr
+				else
+					adds va00 "this isn't an agent for some reason"
+				endi
+			repe
+		endi
+		adds va00 "\n"
+	repe
+	dbg: outs va00
+	outs va00
+endm
+
+scrp 1 1 35700 1006
+*sets number of real, actual online contacts into game "online_user_count"
+*also updates game "!net ruso_status"
+	inst
+*update the number of contacts you currently have
+	sets va40 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*			see if string contains search
+		setv va43 sins va42 1 va41
+*			if it does, and is not an automation:
+		doif va43 ne -1
+			doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*get the actual username from the string
+				setv va46 strl va42
+				subv va46 strl va41
+				sets va47 subs va42 1 va46
+				doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+					addv va45 1
+*dbg: outs va47
+				endi
+			endi
+		endi
+*	set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+	setv game "online_user_count" va45
+	doif va45 gt 0
+		sets game "!net ruso_status" "online"
+	else
+		sets game "!net ruso_status" "offline"
+	endi
+endm
+
+scrp 1 1 35700 1007
+*sets number of online friends into game "online_friend_count"
+*also updates game "!friend_status"
+	inst
+*update the number of contacts you currently have
+	sets va40 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*			see if string contains search
+		setv va43 sins va42 1 va41
+*			if it does, and is not an automation:
+		doif va43 ne -1
+			doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*get the actual username from the string
+				setv va46 strl va42
+				subv va46 strl va41
+				sets va47 subs va42 1 va46
+				doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+					adds va47 "_group"
+					doif game va47 eq 2
+						addv va45 1
+					endi
+*dbg: outs va47
+				endi
+			endi
+		endi
+*	set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+	setv game "online_friend_count" va45
+	doif va45 gt 0
+		sets game "!friend_status" "online"
+	else
+		sets game "!friend_status" "offline"
+	endi
+endm
+
+*holder script for CAOS functions: 
 *no parameters-- just returns a random user
 scrp 1 1 35700 9000
-inst
-*trigger the update contacts script
-*I don't even think this DOES good in an inst but whatever
+	inst
+*	trigger the update contacts script
+*	I don't even think this DOES good in an inst but whatever
 	rtar 1 1 35700
-	mesg writ targ 1001
+	mesg writ targ 1006
 	targ ownr
 
-	setv va48 game "contact_count"
-	dbg: outs "there are this many contacts"
-	dbg: outv va48
+	setv va48 game "online_user_count"
+*	dbg: outs "there are this many contacts"
+*	dbg: outv va48
 
 
 	setv va49 rand 1 va48
 
-	dbg: outs "random number is:"
-	dbg: outv va48
+*	dbg: outs "random number is:"
+*	dbg: outv va48
 
 	sets va30 ""
 	sets va40 ""
@@ -146,11 +529,17 @@ inst
 *							if it does
 			doif va43 ne -1
 				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
-					dbg: outs va42
-					addv va45 1
-					dbg: outv va45
-					doif va45 eq va49
-						sets va30 va42
+*					get the actual username from the string
+					setv va46 strl va42
+					subv va46 strl va41
+					sets va47 subs va42 1 va46
+					doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+						dbg: outs va42
+						addv va45 1
+						dbg: outv va45
+						doif va45 eq va49
+							sets va30 va42
+						endi
 					endi
 				endi
 			endi
@@ -165,12 +554,73 @@ inst
 	setv va66 strl va30
 	subv va66 8
 	sets va30 subs va30 1 va66
-	dbg: outs "Random contact chosen: "
-	dbg: outs va30
+*	dbg: outs "Random contact chosen: "
+*	dbg: outs va30
 	outs va30
+endm
+
+*holder script for CAOS function: 
+*returns 0 - "offline", 1 - "online", or 2 (contact does not exist)
+*_p1_ is the contact's name
+scrp 1 1 35700 9001
+
+	inst
+	sets va00 _p1_
+	adds va00 "_status"
+	doif type game va00 ne 2
+		outs "2"
+		stop
+	endi
+	doif game va00 eq "online"
+		outs "1"
+		stop
+	elif game va00 eq "offline"
+		outs "0"
+		stop
+	endi
+*if you're still here, the var eq something else for some reason
+*that should never happen but outs it anyway so we at least
+*know what it is!
+	outs game va00
+endm
+
+*NET: WHON Replacement
+*add someone to the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9002
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1002 _p1_ _p2_ 0
+endm
+
+*NET: WHOF Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9003
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1003 _p1_ _p2_ 0
+endm
+
+*NET: WHOZ Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9004
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1004 _p1_ _p2_ 0
+endm
+
+*NET: WHOD Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9005
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1005 _p1_ _p2_ 0
 endm
 
 rscr
 enum 1 1 35700
-kill targ
+	kill targ
 next

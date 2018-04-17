@@ -4,9 +4,9 @@ This repository contains the Creatures 3/Docking Station Game modifications need
 
 ## Installation
 
-The Bootstrap directory must be copied into the Docking Station installation directory, if you downloaded Creatures Exodus from gog.com, the standard installation directory should be `C:\GOG Games\Creatures Exodus\Docking Station` The Bootstrap directory will then integrate into the original Bootstrap directory without overwriting any of the original files.
+The Bootstrap directory must be copied into the Docking Station installation directory, if you downloaded Creatures Exodus from gog.com, the standard installation directory should be `C:\GOG Games\Creatures Exodus\Docking Station` The Bootstrap directory will then integrate into the original Bootstrap directory. 
 
-Note that if you have a folder called 'dsbuild 195' in your bootstrap folder containing a file called 'reinject_updated_agents.cos' you will need to move, delete, or rename the extention of that file to stop it from re-overwriting the Albian Warp scripts. 
+The bootstrap should only overwrite one file at most-- the file called 'reinject_updated_agents.cos' in the 'dsbuild 195' directory. A backup of this file is provided in the same directory should you wish to restore it later. Note that restoring the file will disable the functionality of Albian Warp.
 
 ## Usage
 
