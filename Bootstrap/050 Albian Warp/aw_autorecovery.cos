@@ -28,8 +28,8 @@ scrp 1 202 3 1000
 	sets va03 va02
 	adds va02 "% 6"
 	adds va03 "% 7"
-	dbg: outs va02
-	dbg: outs va03
+*	dbg: outs va02
+*	dbg: outs va03
 
 *	va04 is going to be the line you add *it's gonna be ject 7
 	sets va04 "ject %"
@@ -49,9 +49,9 @@ scrp 1 202 3 1000
 	gsub quotify
 	sets va04 va77
 
-	dbg: outs va02
-	dbg: outs va03
-	dbg: outs va04
+*	dbg: outs va02
+*	dbg: outs va03
+*	dbg: outs va04
 
 *	okay now search for your anchor(s) and add your file after it
 
@@ -62,7 +62,7 @@ scrp 1 202 3 1000
 	sets va87 va03
 	gsub amend
 
-	dbg: outs va00
+*	dbg: outs va00
 
 *	injects the new script
 	sets va99 caos 0 0 0 0 va00 0 0 va99
