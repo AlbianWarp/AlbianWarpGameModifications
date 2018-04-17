@@ -79,7 +79,7 @@ endm
 * _p1_ = moniker (str)
 ***
 scrp 1 1 35700 1337
-	setv va01 _p1_
+	sets va01 _p1_
 	adds va01 ".warp"
 	dbg: outs "try to delete creature with moniker: "
 	dbg: outs va01
