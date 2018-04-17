@@ -72,7 +72,7 @@ scrp 1 1 35700 9
 	else
 		setv ov00 0
 	endi
-	dbg: outs "housekeeper running"
+	dbg: outs "the housekeeper is running about"
 
 *	not sure if this is a good idea >> but refreshing the contacts list 
 *	should update the online status of the special vars
@@ -249,16 +249,27 @@ scrp 1 1 35700 1000
 		sets name "Last Network User" game "user_of_this_world"
 * export the Creature with the custom Chunk Type `WARP` (warp out)
 		setv va99 pray expo "warp"
-* Create a aw_message_object that tells the client the moniker of the exported creature
-		doif va02 ne ""
-			adds va02 "_"
-			adds va02 va01
-			sets va01 va02
+
+*		check to make sure it worked...
+		doif va99 eq 1
+			targ pntr
+			sndc "buzz"
+			dbg: outs "Could not warp creature because it is already on disk!"
+		else
+*		Create a aw_message_object that tells the client the moniker of the exported creature
+			doif va02 ne ""
+				adds va02 "_"
+				adds va02 va01
+				sets va01 va02
+			endi
+
+			new: simp 1 1 35760 "blnk" 1 0 0
+			sets name "aw_recipient" _p2_
+			sets name "moniker" va01
+			sets name "creature_name" va03
+
 		endi
-		new: simp 1 1 35760 "blnk" 1 0 0
-		sets name "aw_recipient" _p2_
-		sets name "moniker" va01
-		sets name "creature_name" va03
+
 	endi
 	unlk
 endm

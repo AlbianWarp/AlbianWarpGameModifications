@@ -63,7 +63,7 @@ endm
 scrp 1 2 210 1010
 	inst
 	lock
-	dbg: outs "displaying parts"
+*	dbg: outs "displaying parts"
 ****	create the list of known contacts	
 *	ov01	is the part# to use - incremented with each new part
 	setv ov01 11
@@ -83,7 +83,7 @@ scrp 1 2 210 1010
 	adds va81 ")"
 	ptxt va81
 
-	dbg: outs "displaying parts 2"
+*	dbg: outs "displaying parts 2"
 *	va02 this is how many valid entries searched so far
 	setv va02 0
 *	va03 is when to start (based on page required
@@ -102,11 +102,11 @@ scrp 1 2 210 1010
 		pose 0
 	endi
 
-	dbg: outs "displaying parts 3"
+*	dbg: outs "displaying parts 3"
 *	wipe whose on register for us -
 *	then we add in every on this page with net: whon below
 	sets va99 caos 0 0 targ 0 game "f_aw_whoz" 1 0 va99
-	dbg: outs "wiped WWR"
+*	dbg: outs "wiped WWR"
 
 *	va90 is X offset of any new parts created
 *	va91 is Y offset of any new parts created
@@ -119,7 +119,7 @@ scrp 1 2 210 1010
 *	search string
 	sets va00 "_contact"
 *	loop through all game variables
-	dbg: outs "start contact search loop"
+*	dbg: outs "start contact search loop"
 	loop
 
 *	set va10 to the string of the current game variable
@@ -140,9 +140,9 @@ scrp 1 2 210 1010
 				sets va30 subs va10 1 va20
 * make sure we are in the whose wanted register
 * (the icon lights are updated by this in the wwr script 137)
-				dbg: outs "presenting:"
-				dbg: outs va30
-				dbg: outs "the wild contact"
+*				dbg: outs "presenting:"
+*				dbg: outs va30
+*				dbg: outs "the wild contact"
 				doif va30 <> "!friend" and va30 <> "!net: ruso"
 					sets va99 caos 0 0 va30 targ game "f_aw_whon" 1 0 va99
 					inst
@@ -181,7 +181,7 @@ scrp 1 2 210 1010
 *				display nickname
 				ptxt va42
 
-				dbg: outs "displayed nickname"
+*				dbg: outs "displayed nickname"
 
 *				increment part #
 				addv ov01 1
@@ -216,7 +216,7 @@ scrp 1 2 210 1010
 *				change X  offsets for part position
 				addv va90 25
 
-				dbg: outs "set friend/foe status"
+*				dbg: outs "set friend/foe status"
 
 *	find out whether they are online or not
 *		if random user ...
@@ -268,7 +268,7 @@ scrp 1 2 210 1010
 				part ov01
 				pose va45
 
-				dbg: outs "set online/offline status"
+*				dbg: outs "set online/offline status"
 
 *			increment part#
 				addv ov01 1
@@ -303,7 +303,7 @@ scrp 1 2 210 1010
 *	keep going until you've looked at all game variables
 	untl va10 eq ""
 
-	dbg: outs "end contact search loop"
+*	dbg: outs "end contact search loop"
 
 *	'export contacts' buttons	
 *	pat: butt ov01 "comms" 34 2 480 -38 1 [] 1013 0
