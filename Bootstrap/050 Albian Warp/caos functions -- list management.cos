@@ -134,33 +134,33 @@ scrp 1 202 2 1002
 		endi
 	endi
 	targ va00
-	dbg: outs _p1_
-	dbg: outs "got targ"
+*	dbg: outs _p1_
+*	dbg: outs "got targ"
 *	get the length of the list
 
 	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 1 0 va99
-	dbg: outs "got length"
-	dbg: outv va02
+*	dbg: outs "got length"
+*	dbg: outv va02
 * 	convert _p2_ if it's a string
 	doif type _p2_ eq 2
-	dbg: outs "it's a string"
-	dbg: outs _p1_
-	dbg: outs _p2_
+*	dbg: outs "it's a string"
+*	dbg: outs _p1_
+*	dbg: outs _p2_
 		setv va20 strl _p1_
 		addv va20 2
 		setv va22 stoi subs _p2_ va20 -1
 	else
 		setv va22 _p2_
 	endi
-	dbg: outs "index to remove set to:"
-	dbg: outv va22
+*	dbg: outs "index to remove set to:"
+*	dbg: outv va22
 
 *	make sure its not out of range
 	doif va22 gt va02
 		outs "#R#"
 		stop
 	endi
-	dbg: outs "got length"
+*	dbg: outs "got length"
 *	get that var and delete it
 	sets va01 _p1_
 	adds va01 "_"
@@ -169,9 +169,9 @@ scrp 1 202 2 1002
 * now you have to shuffle all the other vars up, which is the least fun part
 * of writing this entire structure...
 	setv va03 va22
-	dbg: outs "About to go in remove loop"
+*	dbg: outs "About to go in remove loop"
 	loop
-	dbg: outs "IN THE remove loop"
+*	dbg: outs "IN THE remove loop"
 *	va95 is infinite loop protection
 	setv va95 0
 *	get the destination varname
@@ -196,11 +196,11 @@ scrp 1 202 2 1002
 
 		loop
 			addv va95 1
-			dbg: outs "in the sublist remove loop!"
+*			dbg: outs "in the sublist remove loop!"
 			sets va06 va07
 			namn va07
 			doif va06 ne ""
-				dbg: outs va06
+*				dbg: outs va06
 				setv va08 sins va06 1 va05
 				doif va08 ne -1
 					doif subs va06 1 va09 eq va05 and strl va06 ge va09
@@ -209,35 +209,35 @@ scrp 1 202 2 1002
 						addv va11 1
 						adds va10 subs va06 va11 -1
 ******Debugggggg chunkccc
-						sets va77 "moving: "
-						adds va77 va06
-						adds va77 " to "
-						adds va77 va10
-						dbg: outs va77
+*						sets va77 "moving: "
+*						adds va77 va06
+*						adds va77 " to "
+*						adds va77 va10
+*						dbg: outs va77
 ******End Debugggggg chunkccc
 *						va10 is the new name now
 *						va06 is the old name..
 *						now figure out what type you are and set it:
 						doif type name va06 eq 0 or type name va06 eq 1
 							setv name va10 name va06
-							dbg: outv name va10
+*							dbg: outv name va10
 						elif type name va06 eq 2
 							sets name va10 name va06
-							dbg: outs name va10
+*							dbg: outs name va10
 						elif type name va06 gt 2 and type name va06 le 7
 							seta name va10 name va06
-							dbg: outs "AGENT"
+*							dbg: outs "AGENT"
 						endi
-						dbg: outs "deleting!"
-						dbg: outs va06
+*						dbg: outs "deleting!"
+*						dbg: outs va06
 						deln va06
 					endi
 				endi
 			endi
 		untl va07 eq "" or va95 gt 1000
-	dbg: outs "out of the sublist remove loop"
+*	dbg: outs "out of the sublist remove loop"
 	untl va03 ge va02 or va95 gt 1000
-	dbg: outs " out of the remove loop"
+*	dbg: outs " out of the remove loop"
 	doif va95 gt 1000
 	dbg: outs "stopped due to being too long in looping"
 	endi
@@ -245,7 +245,7 @@ scrp 1 202 2 1002
 	subv va02 1
 	sets va03 _p1_
 	adds va03 "_length"
-	dbg: outs va03
+*	dbg: outs va03
 	setv name va03 va02
 	outs vtos va02
 * aashjdfgashjagrjhkawg that HURT to write. But now I never have to write it again.
@@ -450,19 +450,19 @@ scrp 1 202 2 1007
 *		dbg: outs "list is empty"
 	endi
 
-	dbg: outs "not in list"
+*	dbg: outs "not in list"
 *	you didn't find anything, or the list is empty,
 *	so add it to the list!
 	addv va02 1
 	adds va01 "_"
 	adds va01 vtos va02
-	dbg: outs va01
+*	dbg: outs va01
 *	update the length var	
 	sets va03 _p1_
 	adds va03 "_length"
 	setv name va03 va02
-	dbg: outs va03
-	dbg: outv name va03
+*	dbg: outs va03
+*	dbg: outv name va03
 *	now figure out what type you are!
 	doif type _p2_ eq 0 or type _p2_ eq 1
 		setv name va01 _p2_

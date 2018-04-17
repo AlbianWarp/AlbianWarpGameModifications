@@ -12,7 +12,7 @@ sets game "f_aw_ruso" sorc 1 1 35700 9000
 setv game "f_aw_ruso:v" 1
 scrx 1 1 35700 9000
 
-*Returns if a user is online:
+*Returns if a user is online (net: ulin):
 *0 if offline
 *1 if online
 *2 if there is no such contact

@@ -1,6 +1,6 @@
 *New Albian Warp comms functions, aka Commsgeat
 *replaces and removes scripts in comms screen.cos
-
+dbg: outs "injecting commsgeat"
 *Just Went Online: 
 *Checks who is online and offline 
 *Doesn't work right now til AW implements it 
