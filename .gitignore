@@ -9,6 +9,7 @@
 # And the Bootstrap modifications
 !Bootstrap/
 Bootstrap/*
+!Bootstrap/dsbuild 195/
 !Bootstrap/050 Albian warp/
 Bootstrap/000 Switcher/*
 !Bootstrap/000 Switcher/AW eame vars.cos

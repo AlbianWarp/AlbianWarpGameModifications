@@ -1,0 +1,479 @@
+**This is a huge, HUGE WIP, most of these are super-untested
+*And still need to be documented 
+
+sets game "f_ReadFromVList" sorc 1 202 2 1000
+*ex: outs caos 0 1 "listname" 99 game "f_ReadFromVList" 0 0 va99
+sets game "f_AddtoVList" sorc 1 202 2 1001
+*ex: outs caos 0 1 "listname" "cats" game "f_AddtoVList" 0 0 va99
+sets game "f_RemoveFromVList" sorc 1 202 2 1002
+sets game "f_SearchVList" sorc 1 202 2 1003
+sets game "f_LengthofVList" sorc 1 202 2 1004
+*ex: outv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+sets game "f_GetSafeReturnVar" sorc 1 202 2 1005
+sets game "f_GetVarInVList" sorc 1 202 2 1006
+sets game "f_ExAddtoVList" sorc 1 202 2 1007
+
+
+scrx 1 202 2 1000
+scrx 1 202 2 1001
+scrx 1 202 2 1002
+scrx 1 202 2 1003
+scrx 1 202 2 1004
+scrx 1 202 2 1005
+scrx 1 202 2 1006
+scrx 1 202 2 1007
+
+**var-based list functions must be run Dependently-- they rely on name vars on the owner
+** later we should change this to check gamevars if they run independantly
+**_p1_ is always the name of the list, _p2_ is the modifying factor
+**(this could be an index number or the thing you want to add/remove)
+
+*List items are stored in NAME "p1_#" 
+*so like "mylist_1, mylist_2" etc
+*indices begin at 1. 
+*the length is stored in NAME "p1_length" 
+
+*"f_ReadFromVList"
+*FROM is the agent
+*P1 (string) id the name of the list. 
+*P2 (integer) is the index of the item you want to retrive
+*this will return the item in the list in string form,
+*or "#R#" if index is out of range
+*if the returned item is an Agent it will return the name of
+*the name var that the agent was set to (something like f_agent_0)
+*if you're going to use this function to retrieve agents you better
+*DELN those name vars after you use them or it's gonna add up!
+
+scrp 1 202 2 1000
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+*	check to make sure it's in range!
+	setv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+*	dbg: outv va03
+	doif _p2_ gt va03
+		outs "#R#"
+		stop
+	endi
+
+	sets va01 _p1_
+	adds va01 "_"
+	adds va01 vtos _p2_
+	targ va00
+	doif type name va01 eq 0 or type name va01 eq 1
+		outs vtos name va01
+	elif type name va01 eq 2
+		outs name va01
+	elif type name va01 ge 3 and type name va01 le 7
+*		if this is an agent you need to get a safe var to return it in
+		sets va02 caos 0 0 "ReadFromVList" targ game "f_GetSafeReturnVar" 0 0 va99
+		outs name va02
+		sets name va02 name va01
+	endi
+endm
+
+*"f_AddtoVList"
+*FROM is the agent
+*P1 (string) id the name of the list. 
+*P2 (anything) is item you want to add to the list.
+*This will add the item to the end of the list
+*Returns the namevar name containing the newly added item.
+scrp 1 202 2 1001
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+	targ va00
+	sets va01 _p1_
+*	get the current list length
+*	dbg: outs _p1_
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+*	dbg: outv va02
+	addv va02 1
+	adds va01 "_"
+	adds va01 vtos va02
+*	dbg: outs va01
+*	update the length var	
+	sets va03 _p1_
+	adds va03 "_length"
+	setv name va03 va02
+*	dbg: outv name va03
+*	now figure out what type you are!
+	doif type _p2_ eq 0 or type _p2_ eq 1
+		setv name va01 _p2_
+	elif type _p2_ eq 2
+		sets name va01 _p2_
+	elif type _p2_ gt 2 and type _p2_ le 7
+		seta name va01 _p2_
+	endi
+	outs va01
+endm
+
+*"f_RemoveFromVList"
+*FROM is the agent
+*P1 (string) is the name of the list. 
+*P2 (integer or string) is either the index or the varname of the item you want to remove) 
+*This will remove the item from the list and shuffle all the index numbers
+*Returns the new length of the list, or "#R#" if index is out of range
+scrp 1 202 2 1002
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+	targ va00
+*	dbg: outs _p1_
+*	dbg: outs "got targ"
+*	get the length of the list
+
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 1 0 va99
+*	dbg: outs "got length"
+*	dbg: outv va02
+* 	convert _p2_ if it's a string
+	doif type _p2_ eq 2
+*	dbg: outs "it's a string"
+*	dbg: outs _p1_
+*	dbg: outs _p2_
+		setv va20 strl _p1_
+		addv va20 2
+		setv va22 stoi subs _p2_ va20 -1
+	else
+		setv va22 _p2_
+	endi
+*	dbg: outs "index to remove set to:"
+*	dbg: outv va22
+
+*	make sure its not out of range
+	doif va22 gt va02
+		outs "#R#"
+		stop
+	endi
+*	dbg: outs "got length"
+*	get that var and delete it
+	sets va01 _p1_
+	adds va01 "_"
+	adds va01 vtos va22
+	deln va01
+* now you have to shuffle all the other vars up, which is the least fun part
+* of writing this entire structure...
+	setv va03 va22
+*	dbg: outs "About to go in remove loop"
+	loop
+*	dbg: outs "IN THE remove loop"
+*	va95 is infinite loop protection
+	setv va95 0
+*	get the destination varname
+		addv va95 1
+		sets va04 _p1_
+		adds va04 "_"
+		adds va04 vtos va03
+
+		addv va03 1
+
+*	get the source varname
+		sets va05 _p1_
+		adds va05 "_"
+		adds va05 vtos va03
+
+*	check for anything else that might contain the source varname...
+*	aka sublist support!!
+		setv va09 strl va05
+		sets va06 ""
+		sets va07 ""
+		
+
+		loop
+			addv va95 1
+*			dbg: outs "in the sublist remove loop!"
+			sets va06 va07
+			namn va07
+			doif va06 ne ""
+*				dbg: outs va06
+				setv va08 sins va06 1 va05
+				doif va08 ne -1
+					doif subs va06 1 va09 eq va05 and strl va06 ge va09
+						sets va10 va04
+						setv va11 va09
+						addv va11 1
+						adds va10 subs va06 va11 -1
+******Debugggggg chunkccc
+*						sets va77 "moving: "
+*						adds va77 va06
+*						adds va77 " to "
+*						adds va77 va10
+*						dbg: outs va77
+******End Debugggggg chunkccc
+*						va10 is the new name now
+*						va06 is the old name..
+*						now figure out what type you are and set it:
+						doif type name va06 eq 0 or type name va06 eq 1
+							setv name va10 name va06
+*							dbg: outv name va10
+						elif type name va06 eq 2
+							sets name va10 name va06
+*							dbg: outs name va10
+						elif type name va06 gt 2 and type name va06 le 7
+							seta name va10 name va06
+*							dbg: outs "AGENT"
+						endi
+*						dbg: outs "deleting!"
+*						dbg: outs va06
+						deln va06
+					endi
+				endi
+			endi
+		untl va07 eq "" or va95 gt 1000
+*	dbg: outs "out of the sublist remove loop"
+	untl va03 ge va02 or va95 gt 1000
+*	dbg: outs " out of the remove loop"
+	doif va95 gt 1000
+	dbg: outs "stopped due to being too long in looping"
+	endi
+*	update the length var	
+	subv va02 1
+	sets va03 _p1_
+	adds va03 "_length"
+*	dbg: outs va03
+	setv name va03 va02
+	outs vtos va02
+* aashjdfgashjagrjhkawg that HURT to write. But now I never have to write it again.
+endm
+
+*"f_SearchVList"
+*FROM is the agent
+*P1 (string) is the name of the list. 
+*P2 (anything) is the actual content of the item you are looking for
+*This will return the name variable holding the match of the content specified
+* or "#N#" if no match
+scrp 1 202 2 1003
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+	targ va00
+*get the length
+*	dbg: outs "getting length"
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 1 0 va99
+*get the type of the search agent
+*if the length is 0, stop:
+	doif va02 eq 0
+		outs "0"
+		stop
+	endi
+	setv va03 type _p2_
+*	dbg: outs "got length"
+*start looping:
+	setv va10 0
+	sets va12 "#N#"
+	loop
+		addv va10 1
+*make the varname:
+		sets va11 _p1_
+		adds va11 "_"
+		adds va11 vtos va10
+*see if it matches
+		doif type _p2_ eq type name va11
+*if it does, see if the content matches 
+			doif _p2_ eq name va11
+*if if does, you have a match, so save your index
+				sets va12 va11
+			endi
+		endi
+	untl va10 eq va02 or va12 ne "#N#"
+*return your index number (this will be 0 if nothing was found)
+	outs va12
+endm
+
+*"f_LengthofVList"
+*this one is a little special-- it can be run independently. 
+*If so, it will look for the agent to target in _p2_. 
+*P1 (string) is the name of the list. 
+*P2 (agent) is the agent to target if FROM is null.
+scrp 1 202 2 1004
+	inst
+	seta va00 from
+*	dbg: outs "setting from"
+	doif va00 eq null
+		seta va00 targ
+*		dbg: outs "no, setting targ"
+		doif va00 eq null and type _p2_ gt 2
+*			dbg: outs "no, setting _p2_"
+			seta va00 _p2_
+			doif va00 eq null
+				stop
+			endi
+		endi
+	endi
+	targ va00
+*	dbg: outv unid	
+	sets va01 _p1_
+	adds va01 "_length"
+*	dbg: outs va01
+	outs vtos name va01
+endm
+
+*"f_GetSafeReturnVar"
+*P1 (string) is the var prefix
+*P2 (agent) is the agent to search for safe varnames
+*returns a name of a namevar that is not currently in use
+*that one could safely return an agent var in
+scrp 1 202 2 1005
+	inst
+	sets va00 _p1_
+	setv va01 0
+	sets va02 ""
+*	outer loop keeps incrementing the var number until 
+*	one doesn't exist
+	loop
+		sets va00 "fr_"
+		adds va00 _p1_
+		adds va00 "#"
+		adds va00 vtos va01
+		addv va01 1
+		setv va03 0
+		loop
+			namn va02
+			doif va02 eq va00
+				setv va03 1
+			endi
+		untl va02 eq ""
+	untl va03 eq 0
+*	VA00 is now a safe var
+	outs va00
+endm
+
+*"f_GetVarInVList"
+*FROM is the agent, TARG also works if run with targ-dependence
+*P1 (string) id the name of the list. 
+*P2 (integer) is the index of the item you want to retrive
+*this will return the NAME of the Namevar of the item in the list
+*or "#R#" if index is out of range
+*This is probably better than *"f_ReadFromVList"
+scrp 1 202 2 1006
+	inst
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+*	check to make sure it's in range!
+	setv va03 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+*	dbg: outv va03
+	doif _p2_ gt va03
+		outs "#R#"
+		stop
+	endi
+
+	sets va01 _p1_
+	adds va01 "_"
+	adds va01 vtos _p2_
+	targ va00
+	outs va01
+endm
+
+*"f_ExAddtoVList"
+*FROM is the agent
+*P1 (string) id the name of the list. 
+*P2 (anything) is item you want to add to the list.
+*This will first search the list for _p2_-- if it cannot be found
+*it will add the item to the end of the list
+*Returns the namevar name containing _p2_, whether that was a previously
+*existing match or the newly added version
+scrp 1 202 2 1007
+	inst
+*	dbg: outs "STARTING f_ExAddtoVList"
+	seta va00 from
+	doif va00 eq null
+		seta va00 targ
+		doif va00 eq null
+			stop
+		endi
+	endi
+	targ va00
+*	dbg: outs "FOUND TARG f_ExAddtoVList"
+	sets va01 _p1_
+*	get the current list length
+	setv va02 stoi caos 0 0 _p1_ va00 game "f_LengthofVList" 0 0 va99
+*	dbg: outs "length is"
+*	dbg: outv va02
+*	if the length is 0, skip the search bit:
+	doif va02 gt 0
+*		okay, we're going to search to see if _p2_ is 
+*		already in the list
+*		get the type of the search agent
+		setv va03 type _p2_
+*		dbg: outs "getting type"
+*start looping:
+		setv va10 0
+		sets va12 "#N#"
+		loop
+			addv va10 1
+*make the varname:
+			sets va11 _p1_
+			adds va11 "_"
+			adds va11 vtos va10
+*			dbg: outs va11
+*see if it matches
+			doif type _p2_ eq type name va11
+*	if it does, see if the content matches 
+				doif _p2_ eq name va11
+*	if if does, you have a match, so save your index
+					sets va12 va11
+				endi
+			endi
+		untl va10 eq va02 or va12 ne "#N#"
+*		dbg: outs va12
+*	if you found something, outs it:
+		doif va12 ne "#N#"
+			outs va12
+			stop
+		endi
+	else
+*		dbg: outs "list is empty"
+	endi
+
+*	dbg: outs "not in list"
+*	you didn't find anything, or the list is empty,
+*	so add it to the list!
+	addv va02 1
+	adds va01 "_"
+	adds va01 vtos va02
+*	dbg: outs va01
+*	update the length var	
+	sets va03 _p1_
+	adds va03 "_length"
+	setv name va03 va02
+*	dbg: outs va03
+*	dbg: outv name va03
+*	now figure out what type you are!
+	doif type _p2_ eq 0 or type _p2_ eq 1
+		setv name va01 _p2_
+	elif type _p2_ eq 2
+		sets name va01 _p2_
+	elif type _p2_ gt 2 and type _p2_ le 7
+		seta name va01 _p2_
+	endi
+	outs va01
+endm
+
+***Functions to add maybe:
+*Wipe an entire list
+*Rename/Move a list 

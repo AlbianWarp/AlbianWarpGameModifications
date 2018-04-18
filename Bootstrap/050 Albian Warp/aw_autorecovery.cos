@@ -1,0 +1,110 @@
+*alright this is kinda audacious but HERE WE GO
+*while we're doing this we may as well write a univeral "add to autorecovery script"
+
+*_p1_ (string) is the name of the 'anchor' or old script that you want to inject your newer script after.
+*_p2_ (string) is the name of the newer script.
+sets game "f_AmendAutorecovery" sorc 1 202 3 1000
+scrx 1 202 3 1000
+
+*HERE WE GO!
+sets va98 caos 0 0 "workshop screen.cos" "workshop_screen replacements.cos" game "f_AmendAutorecovery" 1 1 va99
+sets va98 caos 0 0 "comms screen.cos" "commsgeat.cos" game "f_AmendAutorecovery" 1 1 va99
+sets va98 caos 0 0 "immigrant checker.cos" "warpnorn.cos" game "f_AmendAutorecovery" 1 1 va99
+sets va98 caos 0 0 "message centre.cos" "mailgrendel.cos" game "f_AmendAutorecovery" 1 1 va99
+sets va98 caos 0 0 "ds gui - topleft.cos" "ds gui - topleft replacements.cos" game "f_AmendAutorecovery" 1 1 va99
+
+
+scrp 1 202 3 1000
+	inst
+*	get the current script
+	sets va00 "scrp 1 1 226 9 "
+	adds va00 sorc 1 1 226 9
+	adds va00 " endm"
+
+*	ject lines can be either 6 or 7 soooo
+*	va02 holds a 6 line and va03 holds a 7 line
+	sets va02 "ject %"
+	adds va02 _p1_
+	sets va03 va02
+	adds va02 "% 6"
+	adds va03 "% 7"
+*	dbg: outs va02
+*	dbg: outs va03
+
+*	va04 is going to be the line you add *it's gonna be ject 7
+	sets va04 "ject %"
+	adds va04 _p2_
+	adds va04 "% 7 "
+
+*convert those lines to have quotes in them
+	sets va77 va02
+	gsub quotify
+	sets va02 va77
+
+	sets va77 va03
+	gsub quotify
+	sets va03 va77
+
+	sets va77 va04
+	gsub quotify
+	sets va04 va77
+
+*	dbg: outs va02
+*	dbg: outs va03
+*	dbg: outs va04
+
+*	okay now search for your anchor(s) and add your file after it
+
+	sets va87 va02
+	sets va88 va04
+	gsub amend
+
+	sets va87 va03
+	gsub amend
+
+*	dbg: outs va00
+
+*	injects the new script
+	sets va99 caos 0 0 0 0 va00 0 0 va99
+
+	subr quotify
+		setv va70 1
+		loop
+			setv va71 sins va77 va70 "%"
+			doif va71 gt 0
+				char va77 va71 34
+			endi
+		untl va71 eq -1
+	retn
+
+*	va87 is the anchor, va88 is the one to add
+	subr amend
+*	search source for things
+*		the new string
+		sets va10 ""
+*		index to search from
+		setv va11 1
+*		length of search string (since we'll have to add it)
+		setv va12 strl va87
+		loop
+*			position of anchor
+			setv va13 sins va00 va11 va87
+*			check if the anchor is there!
+			doif va13 ne -1
+*				length of string
+				addv va13 va12
+*		 		add the string so far to the new string
+				adds va10 subs va00 va11 va13
+*				increment the index to search from 
+				setv va11 va13
+*				add the one to add!
+				adds va10 va88
+			else
+*			if there's no anchor, you're at the end
+				adds va10 subs va00 va11 -1
+			endi
+		untl va13 eq -1
+		sets va00 va10
+	retn
+
+endm

@@ -139,38 +139,50 @@ scrp 1 1 184 9
 	setv eame "engine_clone_upon_import" 0
 *!* Here is where we get the current creature:
 	sets va76 ""
+	sets va68 ""
 	loop
-	setv va77 1
+		setv va77 1
 *		get the current chunk
 		sets va01 pray fore "warp" va76
-
 *		if a creature of that moniker already exists in your world, skip it.
 *		get the moniker
+*		dbg: outs "now checking:"
+*		dbg: outs va01
 		doif va01 ne ""
+*!* Va68 is just debug!
+*			dbg: outs "this is a creature!"
+			sets va68 "Trying to warp in "
+			adds va68 va01
 			setv va78 strl va01
 			subv va78 5
 			sets va80 subs va01 1 va78
-		dbg: outs va80
+*			dbg: outs va80
 			enum 4 0 0
 				doif gtos 0 eq va80
 					setv va77 0
-					dbg: outs va01
-					dbg: outs "creature exists already"
+*					dbg: outs va01
+					adds va68 " but the creature exists in your world already."
+					dbg: outs va68
 				endi
 			next
 *		if the recipent is not you, skip it
 			sets va11 pray agts va01 "Pray Extra recipient_userID" "Unknown"
 			doif game "user_of_this_world" ne va11
-				dbg: outs va01
 				setv va77 0
-				dbg: outs "creature is not for you!"
+				adds va68 " but it is an outgoing creature"
+				dbg: outs va68
 			endi
+		else
+*			dbg: outs "this is just a blank"
+			setv va77 0
 		endi
 *		barring those two situations... you should be good.
 		sets va76 va01
 	untl va76 eq "" or va77 eq 1
+
 	doif va76 eq ""
-		dbg: outs "no more creatures"
+		sets va68 "(that was the last creature)"
+		dbg: outs va68
 		pray refr
 		gsub guioff
 		stop
@@ -254,6 +266,8 @@ scrp 1 1 184 9
 			mesg wrt+ targ 1000 va79 va10 0
 **
 		endi
+		adds va68 " but a foe sent it to you (auto-rejected)"
+		dbg: outs va68
 *		clear 'last creature' flag
 		targ ownr
 		sets ov99 ""
@@ -609,7 +623,8 @@ scrp 1 1 184 9
 		setv name "Pray Extra reject" 4
 *!*		newww AW replacement for net: expo
 *!* 		remove: setv va88 net: expo "warp" va10
-**
+		adds va68 " but you have not opted to recieve creatures from this person (auto-reject)"
+		dbg: outs va68
 		seta va79 targ
 		rtar 1 1 35700
 		mesg wrt+ targ 1000 va79 va10 0
@@ -735,6 +750,8 @@ scrp 1 1 184 9
 *		clear 'last creature flag'		
 		targ ownr
 		sets ov99 ""
+		adds va68 "Success! It was sent to the containment chamber"
+		dbg: outs va68
 *		trigger change on topleft gui
 		gsub guioff
 *	stop now
@@ -795,6 +812,9 @@ scrp 1 1 184 9
 *		clear 'last creature flag'		
 			targ ownr
 			sets ov99 ""
+
+			adds va68 "Success! It was sent to a portal."
+			dbg: outs va68
 
 *		send portal the immigrant ahoy message
 			targ va90

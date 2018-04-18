@@ -42,12 +42,10 @@ scrp 3 9 1 0
 					gsub friend
 				else
 *					have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*doif net: ulin va30 eq 1
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *					they are, set flag
-					setv va90 1
-*endi
+						setv va90 1
+					endi
 				endi
 			endi
 *			set 'previous entry' to current entry
@@ -89,12 +87,10 @@ scrp 3 9 1 0
 					sets va30 subs va12 1 va20
 
 *	have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*doif net: ulin va30 eq 1
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, set flag
-					setv va90 1
-*endi
+						setv va90 1
+					endi
 				endi
 			endi
 *	set 'previous entry' to current entry
@@ -176,12 +172,10 @@ scrp 3 9 1 1
 				gsub friendcount
 			else
 *			have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*				doif net: ulin va30 eq 1
+				doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *				they are, add to counter
-				addv va91 1
-*				endi
+					addv va91 1
+				endi
 			endi
 		endi
 *		set 'previous entry' to current entry
@@ -218,12 +212,10 @@ scrp 3 9 1 1
 				else
 
 *				have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*					doif net: ulin va30 eq 1
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *					increment counter counter
-					addv va91 1
-*					endi
+						addv va91 1
+					endi
 				endi
 *					is this search result the right random one?
 				doif va91 eq va92
@@ -329,12 +321,10 @@ scrp 3 9 1 1
 					sets va30 subs va12 1 va20
 
 *	have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*doif net: ulin va30 eq 1
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, set flag
-					addv va91 1
-*endi
+						addv va91 1
+					endi
 				endi
 			endi
 *	set 'previous entry' to current entry
@@ -366,8 +356,7 @@ scrp 3 9 1 1
 *					Disabled/treated as online until AW equivlent
 *					is implemented
 
-*doif net: ulin va30 eq 1
-					doif 0 = 0
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, increment
 						addv va91 1
 
@@ -444,25 +433,23 @@ scrp 3 9 1 1
 endm
 
 ***add to who's wanted register
-*we don't have an AW version of this yet 
 *_p1_ is user ID
 scrp 3 9 1 1005
-*	lock
-*	net: whon _p1_
-*	inst
+	inst
+	sets va99 caos 0 0 _p1_ targ game "f_aw_whon" 0 0 va99
 endm
 
 ***trash who's wanted register
 scrp 3 9 1 1006
-*	inst
-*	net: whoz
+	inst
+	sets va99 caos 0 0 targ 0 game "f_aw_whoz" 1 1 va99
 endm
 
 ***WWR user online event
 scrp 3 9 1 137
 	inst
 
-*	dbg: outs "portal - user online"
+	dbg: outs "portal - user online"
 
 
 
@@ -501,11 +488,10 @@ scrp 3 9 1 137
 *	have a look and see if this user is on
 *					Disabled/treated as online until AW equivlent
 *					is implemented
-*doif net: ulin va30 eq 1
-
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, set flag
-					setv va90 1
-*endi
+						setv va90 1
+						endi
 				endi
 			endi
 *	set 'previous entry' to current entry
@@ -563,12 +549,10 @@ scrp 3 9 1 137
 					sets va30 subs va12 1 va20
 
 *	have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-*doif net: ulin va30 eq 1
+					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, set flag
-					setv va90 1
-*endi
+						setv va90 1
+					endi
 				endi
 			endi
 *	set 'previous entry' to current entry
