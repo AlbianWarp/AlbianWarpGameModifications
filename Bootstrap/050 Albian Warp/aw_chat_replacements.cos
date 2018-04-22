@@ -1,1 +1,281 @@
 *this replaces scripts in both 'chat - the interpreters.cos' and 'chat - in chat invitation manager.cos'
+
+*chat - in chat invitation manager scrps first:
+
+*  Update Recipient Display
+* _p1_ shows you which page to display
+* 0, 1, 2.. etc
+scrp 1 1 215 10000
+	inst
+	lock
+** Add up all the Chatter UserIDs into a String
+** This is so the string can be searched to find whether
+** someone is already in the Chat or not.
+	targ name "Chat"
+** Loop through all chatters
+	sets va10 "chatter"
+	sets va01 "_UserID"
+	setv va02 1
+	sets va77 "("
+	loop
+*		"chatter"
+		sets va03 va10
+*		"chatterX"
+		adds va03 vtos va02
+*		"chatterX_UserID"						
+		adds va03 va01
+		doif name va03 <> ""
+** Add to va77
+			adds va77 "["
+			adds va77 name va03
+			adds va77 "]"
+			doif va02 < 30
+** Add a divider
+				adds va77 ","
+			endi
+		endi
+** Increment counter
+		addv va02 1
+	untl va02 = 31
+	adds va77 ")"
+	targ ownr
+
+*	va15 is when to start displaying entries
+*	based on page number needed	
+	setv va15 _p1_
+	mulv va15 11
+*	doif _p1_ <> 0
+*		addv va15 2
+*	endi
+*	set page number variable
+	setv name "page" _p1_
+*	va16 is how many legit entries had so far	
+	setv va16 0
+
+*	show back arrow if this isn't page 1
+	doif _p1_ <> 0
+		part 5
+		pose 1
+	else
+		part 5
+		pose 0
+	endi
+
+*	Clear all info on NicknameDisplays
+	setv va00 120
+	loop
+		part va00
+		ptxt ""
+		addv va00 1
+	untl va00 = 132
+*	Clear all info on Recipient Choosing Buttons
+	setv va00 150
+	loop
+		part va00
+		pose 0
+		addv va00 1
+	untl va00 = 162
+
+*	UPDATE RECIPIENT LIST
+*     =====================
+
+	setv va33 0
+*	va00 is which part # to use, incremented with each entry
+	setv va00 120
+*	va01 is how many entries added
+	setv va01 0
+*	va99 is which game variable to search, start at ""
+	sets va99 ""
+*	search string
+	sets va02 "_contact"
+*	loop through all game variables
+	slow
+	wait 1
+	inst
+	loop
+		doif va01 > 11
+			sets va99 ""
+		endi
+*	set va10 to the string of the current game variable
+		sets va10 gamn va99
+*	set va20 to the value where search string is contained
+*	in current game variable
+		setv va20 sins va10 1 va02
+*	if va20 ne -1 then the current string is what we are looking for
+		doif va20 ne -1
+
+**only do this if this is the page you need
+*			addv va16 1
+			doif va16 ge va15
+*		chop up string so only head remains
+*		this makes va30 the USER ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+*			ignore random user contact
+*			only do this if it isn't 'random online user'
+				doif va30 <> "!net: ruso" and va30 <> "!friend"
+*			And if they aren't in the chat already!
+					sets va76 "["
+					adds va76 va30
+					adds va76 "]"
+					doif sins va77 1 va76 = -1
+** Only shows if the user is online
+						doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 = 1
+*			get Nicknamename for this user
+							sets va40 "_nick"
+*      		Store the UserID into a NAME variable, to use for the Recipient.
+							setv va88 va00
+							addv va88 30
+							sets name va88 va30
+*			copy user ID to another variable
+							sets va41 va30
+*			create Nickname string
+							adds va41 va40
+*			get value from Nickname string
+							sets va42 "<tint 120 220 250>"
+							adds va42 game va41
+*  			put Nickname in correct text box
+							part va00
+							ptxt va42
+*		increment part# to place text in
+							addv va00 1
+* save a record that a contact was actually found
+							setv va33 1
+*		increment counter
+							addv va01 1
+** increment entry counter
+							addv va16 1
+						endi
+					endi
+				endi
+
+** Bail if text parts get too high
+				doif va00 = 132
+					sets va10 ""
+				endi
+
+*	if this is enough entries to fill column
+				doif va01 = 11
+*		display forward arrow
+					part 6
+					pose 1
+*		and set condition to exit loop
+					sets va10 ""
+				else
+*		don't show forward arrow
+					part 6
+					pose 0
+				endi
+			endi
+
+		endi
+*	carry on loop, increment current game variable
+		sets va99 va10
+*	keep going until you've scanned them all
+	untl va10 eq ""
+** button
+	part 2
+	frat 4
+	anim [0 1 255]
+	part 1
+	frat 4
+	anim [1 0 255]
+	part 3
+	frat 4
+	anim [0 1 255]
+	slow
+	part 4
+	ptxt read "In Chat Invitation Manager Text" 1
+endm
+
+** Sending the Invitation
+scrp 1 1 215 5000
+	inst
+	targ name "Chat"
+	sets mame "ChatID" name "ChatID"
+	targ ownr
+** Send the invitation
+*	There is a Invitee... :)  Let's ask the Chat Host to invite the Invitee... :)
+
+*	Make an RTDMA!
+	new: simp 1 1 35755 "blnk" 1 0 0
+	sets name "aw_recipient" 
+	sets name "type" "Join Existing Chat"
+	sets name "chat_id" mame "ChatID"
+	sets name "chat" mame "Chat"
+	sets name "Invitee" mame "Invitee_UserID"
+
+*!**The rest of this is old.... what do? Come back to this later when we see
+* how the othe end handles these!
+
+	file oope 0 "chat_invitation.txt" 0
+	outx "en-gb"
+	outs "\n"
+	outs "group REQU "
+*	Put your UserID at the start...
+	sets va01 net: user
+	sets va70 va01
+*	Add time & date info...
+	sets va77 rtif rtim "%Y%m%d%H%M%S"
+	adds va01 va77
+*	Add the _chatmessage TAG
+	adds va01 "_invitation"
+	outx va01
+	outs "\n"
+** Add the Type
+	outs "\"Request Type\" "
+	outx "Join Existing Chat"
+	outs "\n"
+** Add the Sender
+	outs "\"Sender UserID\" "
+	outx va70
+	outs "\n"
+** Add the ChatID
+	outs "\"ChatID\" "
+	outx name "ChatID"
+	outs "\n"
+** Add the Sender's Nickname
+	outs "\"Sender Nickname\" "
+	outx game "user_of_this_world"
+	outs "\n"
+*** Add the Chat HOst
+*	outs ""Chat Host" "
+*	outx name "Chat_Host"
+*	outs ""
+** Add all the current chatters
+	targ name "Chat"
+	sets va31 "chatter"
+	sets va32 "_Nickname"
+	sets va33 "_UserID"
+	setv va30 1
+	loop
+		sets va40 va31
+		adds va40 vtos va30
+		sets va41 va40
+		adds va40 va32
+		adds va41 va33
+		outx va40
+		outs " "
+		outx name va40
+		outs "\n"
+		outx va41
+		outs " "
+		outx name va41
+		outs "\n"
+		addv va30 1
+	untl va30 = 31
+	targ ownr
+	file oclo
+* Make the pray file..
+	setv va80 net: make 0 "chat_invitation.txt" name "Invitee_UserID" va81
+*	Pray garbage collection!
+	pray garb 1
+* 	Has it been successful?
+	sets name "Result" ""
+	doif va80 = 0
+		sets name "Result" "Success"
+	else
+* Sending the Chat Message failed! va81 has more info on this error!
+		sets name "Result" "Failure"
+	endi
+endm
