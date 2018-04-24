@@ -199,7 +199,7 @@ scrp 1 1 215 5000
 
 *	Make an RTDMA!
 	new: simp 1 1 35755 "blnk" 1 0 0
-	sets name "aw_recipient" 
+	sets name "aw_recipient" "??"
 	sets name "type" "Join Existing Chat"
 	sets name "chat_id" mame "ChatID"
 	sets name "chat" mame "Chat"
@@ -286,13 +286,13 @@ endm
 scrp 1 1 213 9
 	inst
 *wait til you're online
-	doif  game "aw_status" = "online"
+	doif game "aw_status" = "online"
 * Check for "REQU" RTDMAs!
 		enum 1 1 35756
 			doif type name "REQU" eq 2
-				*We're in. Save who you are because we need it.
+*We're in. Save who you are because we need it.
 				seta va66 targ
-**				What ChatID are you waiting on? Why does this matter? A Mystery 
+**				What ChatID are you waiting on? Why does this matter? A Mystery. 
 *				I think this might be an invite that you sent
 *				and are waiting for a reply on?
 				rtar 1 1 211
@@ -312,11 +312,12 @@ scrp 1 1 213 9
 				sets va01 name "aw_sender"
 *				now we have to figure out who this user is
 *				Is it a stranger? Make a contact:
-				sets va02 va01 
+				sets va02 va01
 				adds va02 "_contact"
 				doif game va02 eq 0
 					rtar 1 1 157
 					mesg wrt+ targ 1000 va01 0 0
+					targ va66
 				else
 *				you know this person-- are they a foe?
 					sets va02 "_group"
@@ -330,6 +331,513 @@ scrp 1 1 213 9
 						stop
 					endi
 				endi
+*				By now you know who they are and that they are not a foe:
+*				va02 should be the name too for reasons:
+				sets va02 va01
+*				Now we get to see what kind of message it actually is:
+				sets va01 name "REQU"
+*				Here we go the big doif that does it all:
+				doif va01 = "Invite Accept"
+** A user you have invited to an existing chat has accepted your invitation.
+** You need to:  Add this user to your chatter list, add them to your who's wanted list, and then tell everyone else in the chat to do the same!
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+					sets va04 name "aw_sender"
+					sets va48 va03
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** 					Add the new chatter to the list, somewhere! :o)
+								setv va99 0
+								setv va40 1
+								sets va41 "chatter"
+								sets va42 "_Nickname"
+								sets va43 "_UserID"
+								loop
+* 						"chatter"
+									sets va50 va41
+* 						"chatterX"  (X = va40)
+									adds va50 vtos va40
+* 						same again for the UserID...
+									sets va51 va50
+* 						"chatterX_Nickname"
+									adds va50 va42
+* 						"chatterX_UserID"
+									adds va51 va43
+** 						Find a spare one...
+									doif name va50 = "" and va99 = 0
+										sets name va50 va03
+										sets name va51 va04
+** 							add them to your who's wanted register too
+										lock
+										sets va99 caos 0 0 va04 targ game "f_aw_whon" 0 0 va99
+										inst
+										setv va99 1
+									endi
+									addv va40 1
+								untl va40 = 31 or va99 = 1
+** 					If you haven't been added, then something has gone wrong!! eek!
+								doif va99 = 0
+									dbg: asrt "invitee accepted" = "couldn't be added"
+								endi
+** OK, so they are on your Chatter list now...  next is to tell everyone in the chat!
+**								Time to make a new RTDMA!!
+**								left off 4/24
+*	Open Pray source file for output...
+								file oope 0 "chat_update.txt" 0
+								outx "en-gb"
+								outs "\n"
+								outs "group CHAT "
+*					Put your UserID at the start...
+								sets va01 net: user
+								sets va70 va01
+*					Add time & date info...
+								sets va77 rtif rtim "%Y%m%d%H%M%S"
+								adds va01 va77
+*					Add the _chatupdate TAG
+								adds va01 "_chatupdate"
+								outx va01
+								outs "\n"
+** 					Add the ChatID
+								outs "\"ChatID\" "
+								outx name "ChatID"
+								outs "\n"
+** 					Add the Sender's Nickname
+								outs "\"Sender Nickname\" "
+								outx game "user_of_this_world"
+								outs "\n"
+** 					Add the Sender's UserID
+								outs "\"Sender UserID\" "
+								outx va70
+								outs "\n"
+** 					Add the Chat Message Type
+								outs "\"Chat Message Type\" "
+								outx "Update"
+								outs "\n"
+** 					Add the new chatter Nickname
+								outs "\"New Chatter Nickname\" "
+								outx va03
+								outs "\n"
+** 					Add the new chatter UserID
+								outs "\"New Chatter UserID\" "
+								outx va04
+								outs "\n"
+								file oclo
+** Send it to all chatters!
+								sets va10 "chatter"
+								sets va01 "_UserID"
+								setv va22 1
+								sets va88 net: user
+								loop
+*						"chatter"
+									sets va03 va10
+*						"chatterX"
+									adds va03 vtos va22
+*						"chatterX_UserID"						
+									adds va03 va01
+*						Send to all Chatters, except to yourself and the new chatter! :o)
+									doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
+										setv va80 net: make 0 "chat_update.txt" name va03 va81
+									endi
+									addv va22 1
+								untl va22 = 31
+*	Pray garbage collection!
+								pray garb 1
+* 	Has it been successful?
+								doif va80 = 0
+									inst
+									sets va10 "<tint 120 220 250>"
+									adds va10 va48
+									adds va10 read "The Interpreters Text" 0
+** Update the ChatText... :O)
+									adds name "ChatText" va10
+									part 2
+									ptxt name "ChatText"
+									setv va77 npgs
+									subv va77 1
+									page va77
+** Update the Contact List
+									setv ov70 0
+									tick 1
+								else
+* Sending the Chat Message failed! va81 has more info on this error!
+									dbg: asrt 423 = 120
+								endi
+* Update the ChatText... :O)
+							endi
+						endi
+					next
+					gsub delete
+					stop
+				elif va01 = "Invite Decline"
+** A user you have invited to an existing chat has declined your invitation.
+** You need to: Be notified they have declined.
+					sets va02 pray agts va00 "ChatID" "Unknown"
+					sets va03 pray agts va00 "Sender Nickname" "Unknown"
+**
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 1
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va50 npgs
+								subv va50 1
+								page va50
+** Update the Contact List
+								setv ov70 0
+								tick 1
+							endi
+						endi
+					next
+					doif va99 = 0
+** The chat was not found, so kill the pray file.
+						gsub delete
+					else
+** The chat text has been updated, so let's kill the pray file anyhow! :o)
+						gsub delete
+					endi
+					stop
+				elif va01 = "Invite Timeout"
+** A user you have invited to an existing chat has not responded to your invitation.
+** You need to: Be notified they have declined.
+					sets va02 pray agts va00 "ChatID" "Unknown"
+					sets va03 pray agts va00 "Sender Nickname" "Unknown"
+**
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 2
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va50 npgs
+								subv va50 1
+								page va50
+** Update the Contact List
+								setv ov70 0
+								tick 1
+							endi
+						endi
+					next
+					doif va99 = 0
+** The chat was not found, so kill the pray file.
+						gsub delete
+					else
+** The chat text has been updated, so let's kill the pray file anyhow! :o)
+						gsub delete
+					endi
+					stop
+				elif va01 = "Join Existing Chat"
+					sets va02 pray agts va00 "ChatID" "Unknown"
+					sets va03 pray agts va00 "Sender Nickname" "Unknown"
+					sets va04 pray agts va00 "Sender UserID" "Unknown"
+					sets va05 pray agts va00 "Chat Host" "Unknown"
+					enum 1 1 214
+						doif targ <> null
+** Check to see if an invitation from a user in that chat is already being displayed
+							doif name "ChatID" = va02
+* if so, kill the chat request pray file and stop
+								setv va99 pray kill va00
+								stop
+							endi
+						endi
+					next
+** check to see if a chat is already open for that ChatID
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+* if so, kill the chat request pray file and stop
+								setv va99 pray kill va00
+								stop
+							endi
+						endi
+					next
+					targ ownr
+					setv va69 9075
+					setv va68 totl 1 1 214
+					doif va68 > 0
+						enum 1 1 214
+							doif targ <> null
+								setv va68 plne
+								doif va68 < va69
+									setv va69 va68
+								endi
+							endi
+						next
+						subv va69 5
+					else
+						setv va69 9075
+					endi
+					targ ownr
+*	Create a chat request Agent
+*	===========================
+*	Pop it up on the Screen
+					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					attr 304
+** Decline Request button
+					pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
+					part 1
+					anim [0]
+** Accept Request button
+					pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
+					part 2
+					anim [0]
+** chat request Details
+					pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 3
+					part 3
+					frmt 5 0 5 0 3 0 2
+					ptxt va10
+** What type is this? 1 = join existing, 0 = normal chat request...
+					setv ov81 1
+** Save chatID
+					sets name "ChatID" va02
+** Save the text
+					sets name "text" va10
+** Store who the host is
+					sets name "Chat_Host" va05
+** store the sender's Nickname and UserID
+					sets name "Sender_Nickname" va03
+					sets name "Sender_UserID" va04
+*** Add all the chatters straight from the pray file
+					setv va40 1
+					sets va41 "chatter"
+					sets va42 "_Nickname"
+					sets va43 "_UserID"
+					loop
+						sets va50 va41
+						adds va50 vtos va40
+						sets va51 va50
+						adds va50 va42
+						adds va51 va43
+** save to "chatterX_Nickname" name variable
+						sets name va50 pray agts va00 va50 ""
+** save to "chatterX_UserID" name variable 
+						sets name va51 pray agts va00 va51 ""
+** Increment X		
+						addv va40 1
+					untl va40 = 31
+** Positioning!
+					setv va90 wndw
+					divv va90 2
+					setv va91 wndh
+					divv va91 2
+					setv va92 wdth
+					divv va92 2
+					setv va93 hght
+					divv va93 2
+					subv va90 va92
+					subv va91 va93
+** Float to...
+					flto va90 va91
+** timer
+					setv ov01 15
+					tick 20
+*** Kill the Pray File
+					setv va99 pray kill va00
+					stop
+				elif va01 = "Request"
+*	Convert the Message to a chat request Agent... :o)
+*     =============================================
+*	Store who it is from... :o) 
+					sets va02 pray agts va00 "Sender UserID" "UserID"
+*	Get the Date Sent..
+					sets va03 pray agts va00 "Date Sent" "No Date"
+*	Get the Sender's Nickname
+					sets va05 pray agts va00 "Sender Nickname" "Unknown"
+*	Get the ChatID
+					sets va06 pray agts va00 "ChatID" "Unknown"
+*	Create a chat request Agent
+*	===========================
+
+					inst
+					new: simp 1 1 212 "blnk" 0 0 0
+					attr 16
+*> Save the Sender's UserID
+					sets name "Sender UserID" va02
+*> Save the Date Sent
+					sets name "Date Sent" va03
+*> Save the Sender Nicknamename
+					sets name "Sender Nickname" va05
+** Save a target to this agent!
+					seta va88 targ
+** unique plane
+					targ ownr
+					setv va69 9075
+					setv va68 totl 1 1 214
+					doif va68 > 0
+						enum 1 1 214
+							doif targ <> null
+								setv va68 plne
+								doif va68 < va69
+									setv va69 va68
+								endi
+							endi
+						next
+						subv va69 5
+					else
+						setv va69 9075
+					endi
+					targ ownr
+*	Pop it up on the Screen
+					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					attr 304
+** Decline Request button
+					pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
+					part 1
+					anim [0]
+** Accept Request button
+					pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
+					part 2
+					anim [0]
+** chat request Details
+					pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
+					sets va10 "<tint 120 220 250>"
+					adds va10 va05
+					adds va10 read "The Interpreters Text" 4
+					part 3
+					frmt 5 0 5 0 3 0 2
+					ptxt va10
+** Save chatID
+					sets name "ChatID" va06
+** Save the text
+					sets name "text" va10
+** Save the target to the message!
+					seta name "request" va88
+** Positioning!
+					setv va90 wndw
+					divv va90 2
+					setv va91 wndh
+					divv va91 2
+					setv va92 wdth
+					divv va92 2
+					setv va93 hght
+					divv va93 2
+					subv va90 va92
+					subv va91 va93
+** Float to...
+					flto va90 va91
+** timer
+					setv ov01 15
+					tick 20
+					gsub delete
+				elif va01 = "Accept"
+					sets va02 pray agts va00 "Sender UserID" "UserID"
+** What ChatID is this for?
+					sets va06 pray agts va00 "ChatID" "Unknown"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+					doif va06 = name "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "accepted"
+*	Delete the pray file!
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				elif va01 = "Decline"
+					sets va02 pray agts va00 "Sender UserID" "UserID"
+** What ChatID is this for?
+					sets va06 pray agts va00 "ChatID" "Unknown"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+					doif va06 = name "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "declined"
+*	Delete the pray file!
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				elif va01 = "Timeout"
+					sets va02 pray agts va00 "Sender UserID" "UserID"
+** What ChatID is this for?
+					sets va06 pray agts va00 "ChatID" "Unknown"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+					doif va06 = name "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "timeout"
+*	Delete the pray file!
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				else
+					gsub delete
+
+				endi
+** For some reason, the CR is no longer relevant
+				subr delete
+					targ ownr
+*	Delete the pray file!
+					setv va99 pray kill va00
+				retn
+
 
 
 			endi
@@ -344,530 +852,4 @@ scrp 1 1 213 9
 
 	endi
 
-
-** Old stuff starts here:
-	endi
-*	Find the Nickname of this user...
-	sets va02 va01
-	adds va02 "_nick"
-
-*	If you have no entry for this contact yet, wait until contact book has sorted itself out!
-	lock
-*	Make sure contact details have been obtained... :-)
-	setv va84 0
-	loop
-		doif type game va02 = 0
-			delg va02
-			wait 1
-		elif type game va02 = 2
-			setv va84 1
-		else
-			wait 1
-		endi
-	untl va84 = 1
-	inst
-** IS THIS A REQUEST - or is it actually a Decline or Acceptance message?
-*	Store a reference to the Message...
-	sets va00 ""
-	sets va00 pray fore "REQU" ""
-	sets va01 pray agts va00 "Request Type" "Unknown"
-** WHAT KIND OF A CR IS IT???
-	doif va01 = "Invite Accept"
-** A user you have invited to an existing chat has accepted your invitation.
-** You need to:  Add this user to your chatter list, add them to your who's wanted list, and then tell everyone else in the chat to do the same!
-		sets va02 pray agts va00 "ChatID" "Unknown"
-		sets va03 pray agts va00 "Sender Nickname" "Unknown"
-		sets va04 pray agts va00 "Sender UserID" "Unknown"
-		sets va48 va03
-** Find the chat
-		setv va99 0
-		enum 1 1 210
-			doif targ <> null
-				doif name "ChatID" = va02
-					setv va99 1
-** 					Add the new chatter to the list, somewhere! :o)
-					setv va99 0
-					setv va40 1
-					sets va41 "chatter"
-					sets va42 "_Nickname"
-					sets va43 "_UserID"
-					loop
-* 						"chatter"
-						sets va50 va41
-* 						"chatterX"  (X = va40)
-						adds va50 vtos va40
-* 						same again for the UserID...
-						sets va51 va50
-* 						"chatterX_Nickname"
-						adds va50 va42
-* 						"chatterX_UserID"
-						adds va51 va43
-** 						Find a spare one...
-						doif name va50 = "" and va99 = 0
-							sets name va50 va03
-							sets name va51 va04
-** 							add them to your who's wanted register too
-							lock
-							net: whon va04
-							inst
-							setv va99 1
-						endi
-						addv va40 1
-					untl va40 = 31 or va99 = 1
-** 					If you haven't been added, then something has gone wrong!! eek!
-					doif va99 = 0
-						dbg: asrt "invitee accepted" = "couldn't be added"
-					endi
-** OK, so they are on your Chatter list now...  next is to tell everyone in the chat!
-*	Open Pray source file for output...
-					file oope 0 "chat_update.txt" 0
-					outx "en-gb"
-					outs "\n"
-					outs "group CHAT "
-*					Put your UserID at the start...
-					sets va01 net: user
-					sets va70 va01
-*					Add time & date info...
-					sets va77 rtif rtim "%Y%m%d%H%M%S"
-					adds va01 va77
-*					Add the _chatupdate TAG
-					adds va01 "_chatupdate"
-					outx va01
-					outs "\n"
-** 					Add the ChatID
-					outs "\"ChatID\" "
-					outx name "ChatID"
-					outs "\n"
-** 					Add the Sender's Nickname
-					outs "\"Sender Nickname\" "
-					outx game "user_of_this_world"
-					outs "\n"
-** 					Add the Sender's UserID
-					outs "\"Sender UserID\" "
-					outx va70
-					outs "\n"
-** 					Add the Chat Message Type
-					outs "\"Chat Message Type\" "
-					outx "Update"
-					outs "\n"
-** 					Add the new chatter Nickname
-					outs "\"New Chatter Nickname\" "
-					outx va03
-					outs "\n"
-** 					Add the new chatter UserID
-					outs "\"New Chatter UserID\" "
-					outx va04
-					outs "\n"
-					file oclo
-** Send it to all chatters!
-					sets va10 "chatter"
-					sets va01 "_UserID"
-					setv va22 1
-					sets va88 net: user
-					loop
-*						"chatter"
-						sets va03 va10
-*						"chatterX"
-						adds va03 vtos va22
-*						"chatterX_UserID"						
-						adds va03 va01
-*						Send to all Chatters, except to yourself and the new chatter! :o)
-						doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
-							setv va80 net: make 0 "chat_update.txt" name va03 va81
-						endi
-						addv va22 1
-					untl va22 = 31
-*	Pray garbage collection!
-					pray garb 1
-* 	Has it been successful?
-					doif va80 = 0
-						inst
-						sets va10 "<tint 120 220 250>"
-						adds va10 va48
-						adds va10 read "The Interpreters Text" 0
-** Update the ChatText... :O)
-						adds name "ChatText" va10
-						part 2
-						ptxt name "ChatText"
-						setv va77 npgs
-						subv va77 1
-						page va77
-** Update the Contact List
-						setv ov70 0
-						tick 1
-					else
-* Sending the Chat Message failed! va81 has more info on this error!
-						dbg: asrt 423 = 120
-					endi
-* Update the ChatText... :O)
-				endi
-			endi
-		next
-		gsub delete
-		stop
-	elif va01 = "Invite Decline"
-** A user you have invited to an existing chat has declined your invitation.
-** You need to: Be notified they have declined.
-		sets va02 pray agts va00 "ChatID" "Unknown"
-		sets va03 pray agts va00 "Sender Nickname" "Unknown"
-**
-		sets va10 "<tint 120 220 250>"
-		adds va10 va03
-		adds va10 read "The Interpreters Text" 1
-** Find the chat
-		setv va99 0
-		enum 1 1 210
-			doif targ <> null
-				doif name "ChatID" = va02
-					setv va99 1
-** Update the ChatText... :O)
-					adds name "ChatText" va10
-					part 2
-					ptxt name "ChatText"
-					setv va50 npgs
-					subv va50 1
-					page va50
-** Update the Contact List
-					setv ov70 0
-					tick 1
-				endi
-			endi
-		next
-		doif va99 = 0
-** The chat was not found, so kill the pray file.
-			gsub delete
-		else
-** The chat text has been updated, so let's kill the pray file anyhow! :o)
-			gsub delete
-		endi
-		stop
-	elif va01 = "Invite Timeout"
-** A user you have invited to an existing chat has not responded to your invitation.
-** You need to: Be notified they have declined.
-		sets va02 pray agts va00 "ChatID" "Unknown"
-		sets va03 pray agts va00 "Sender Nickname" "Unknown"
-**
-		sets va10 "<tint 120 220 250>"
-		adds va10 va03
-		adds va10 read "The Interpreters Text" 2
-** Find the chat
-		setv va99 0
-		enum 1 1 210
-			doif targ <> null
-				doif name "ChatID" = va02
-					setv va99 1
-** Update the ChatText... :O)
-					adds name "ChatText" va10
-					part 2
-					ptxt name "ChatText"
-					setv va50 npgs
-					subv va50 1
-					page va50
-** Update the Contact List
-					setv ov70 0
-					tick 1
-				endi
-			endi
-		next
-		doif va99 = 0
-** The chat was not found, so kill the pray file.
-			gsub delete
-		else
-** The chat text has been updated, so let's kill the pray file anyhow! :o)
-			gsub delete
-		endi
-		stop
-	elif va01 = "Join Existing Chat"
-		sets va02 pray agts va00 "ChatID" "Unknown"
-		sets va03 pray agts va00 "Sender Nickname" "Unknown"
-		sets va04 pray agts va00 "Sender UserID" "Unknown"
-		sets va05 pray agts va00 "Chat Host" "Unknown"
-		enum 1 1 214
-			doif targ <> null
-** Check to see if an invitation from a user in that chat is already being displayed
-				doif name "ChatID" = va02
-* if so, kill the chat request pray file and stop
-					setv va99 pray kill va00
-					stop
-				endi
-			endi
-		next
-** check to see if a chat is already open for that ChatID
-		enum 1 1 210
-			doif targ <> null
-				doif name "ChatID" = va02
-* if so, kill the chat request pray file and stop
-					setv va99 pray kill va00
-					stop
-				endi
-			endi
-		next
-		targ ownr
-		setv va69 9075
-		setv va68 totl 1 1 214
-		doif va68 > 0
-			enum 1 1 214
-				doif targ <> null
-					setv va68 plne
-					doif va68 < va69
-						setv va69 va68
-					endi
-				endi
-			next
-			subv va69 5
-		else
-			setv va69 9075
-		endi
-		targ ownr
-*	Create a chat request Agent
-*	===========================
-*	Pop it up on the Screen
-		new: comp 1 1 214 "small_useful_screen" 1 0 va69
-		attr 304
-** Decline Request button
-		pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
-		part 1
-		anim [0]
-** Accept Request button
-		pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
-		part 2
-		anim [0]
-** chat request Details
-		pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
-		sets va10 "<tint 120 220 250>"
-		adds va10 va03
-		adds va10 read "The Interpreters Text" 3
-		part 3
-		frmt 5 0 5 0 3 0 2
-		ptxt va10
-** What type is this? 1 = join existing, 0 = normal chat request...
-		setv ov81 1
-** Save chatID
-		sets name "ChatID" va02
-** Save the text
-		sets name "text" va10
-** Store who the host is
-		sets name "Chat_Host" va05
-** store the sender's Nickname and UserID
-		sets name "Sender_Nickname" va03
-		sets name "Sender_UserID" va04
-*** Add all the chatters straight from the pray file
-		setv va40 1
-		sets va41 "chatter"
-		sets va42 "_Nickname"
-		sets va43 "_UserID"
-		loop
-			sets va50 va41
-			adds va50 vtos va40
-			sets va51 va50
-			adds va50 va42
-			adds va51 va43
-** save to "chatterX_Nickname" name variable
-			sets name va50 pray agts va00 va50 ""
-** save to "chatterX_UserID" name variable 
-			sets name va51 pray agts va00 va51 ""
-** Increment X		
-			addv va40 1
-		untl va40 = 31
-** Positioning!
-		setv va90 wndw
-		divv va90 2
-		setv va91 wndh
-		divv va91 2
-		setv va92 wdth
-		divv va92 2
-		setv va93 hght
-		divv va93 2
-		subv va90 va92
-		subv va91 va93
-** Float to...
-		flto va90 va91
-** timer
-		setv ov01 15
-		tick 20
-*** Kill the Pray File
-		setv va99 pray kill va00
-		stop
-	elif va01 = "Request"
-*	Convert the Message to a chat request Agent... :o)
-*     =============================================
-*	Store who it is from... :o) 
-		sets va02 pray agts va00 "Sender UserID" "UserID"
-*	Get the Date Sent..
-		sets va03 pray agts va00 "Date Sent" "No Date"
-*	Get the Sender's Nickname
-		sets va05 pray agts va00 "Sender Nickname" "Unknown"
-*	Get the ChatID
-		sets va06 pray agts va00 "ChatID" "Unknown"
-*	Create a chat request Agent
-*	===========================
-
-		inst
-		new: simp 1 1 212 "blnk" 0 0 0
-		attr 16
-*> Save the Sender's UserID
-		sets name "Sender UserID" va02
-*> Save the Date Sent
-		sets name "Date Sent" va03
-*> Save the Sender Nicknamename
-		sets name "Sender Nickname" va05
-** Save a target to this agent!
-		seta va88 targ
-** unique plane
-		targ ownr
-		setv va69 9075
-		setv va68 totl 1 1 214
-		doif va68 > 0
-			enum 1 1 214
-				doif targ <> null
-					setv va68 plne
-					doif va68 < va69
-						setv va69 va68
-					endi
-				endi
-			next
-			subv va69 5
-		else
-			setv va69 9075
-		endi
-		targ ownr
-*	Pop it up on the Screen
-		new: comp 1 1 214 "small_useful_screen" 1 0 va69
-		attr 304
-** Decline Request button
-		pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
-		part 1
-		anim [0]
-** Accept Request button
-		pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
-		part 2
-		anim [0]
-** chat request Details
-		pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
-		sets va10 "<tint 120 220 250>"
-		adds va10 va05
-		adds va10 read "The Interpreters Text" 4
-		part 3
-		frmt 5 0 5 0 3 0 2
-		ptxt va10
-** Save chatID
-		sets name "ChatID" va06
-** Save the text
-		sets name "text" va10
-** Save the target to the message!
-		seta name "request" va88
-** Positioning!
-		setv va90 wndw
-		divv va90 2
-		setv va91 wndh
-		divv va91 2
-		setv va92 wdth
-		divv va92 2
-		setv va93 hght
-		divv va93 2
-		subv va90 va92
-		subv va91 va93
-** Float to...
-		flto va90 va91
-** timer
-		setv ov01 15
-		tick 20
-		gsub delete
-	elif va01 = "Accept"
-		sets va02 pray agts va00 "Sender UserID" "UserID"
-** What ChatID is this for?
-		sets va06 pray agts va00 "ChatID" "Unknown"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-		doif va06 = name "ChatID"
-** Check Comms Screen
-			rtar 1 2 210
-			setv va10 ov00
-			targ ownr
-			doif va10 = 6
-				rtar 1 1 211
-				doif targ <> null and targ <> ownr
-					doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
-						sets name "CR_result" "accepted"
-*	Delete the pray file!
-						gsub delete
-					else
-						gsub delete
-					endi
-				else
-					gsub delete
-				endi
-			else
-				gsub delete
-			endi
-		else
-			gsub delete
-		endi
-	elif va01 = "Decline"
-		sets va02 pray agts va00 "Sender UserID" "UserID"
-** What ChatID is this for?
-		sets va06 pray agts va00 "ChatID" "Unknown"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-		doif va06 = name "ChatID"
-** Check Comms Screen
-			rtar 1 2 210
-			setv va10 ov00
-			targ ownr
-			doif va10 = 6
-				rtar 1 1 211
-				doif targ <> null and targ <> ownr
-					doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
-						sets name "CR_result" "declined"
-*	Delete the pray file!
-						gsub delete
-					else
-						gsub delete
-					endi
-				else
-					gsub delete
-				endi
-			else
-				gsub delete
-			endi
-		else
-			gsub delete
-		endi
-	elif va01 = "Timeout"
-		sets va02 pray agts va00 "Sender UserID" "UserID"
-** What ChatID is this for?
-		sets va06 pray agts va00 "ChatID" "Unknown"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-		doif va06 = name "ChatID"
-** Check Comms Screen
-			rtar 1 2 210
-			setv va10 ov00
-			targ ownr
-			doif va10 = 6
-				rtar 1 1 211
-				doif targ <> null and targ <> ownr
-					doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
-						sets name "CR_result" "timeout"
-*	Delete the pray file!
-						gsub delete
-					else
-						gsub delete
-					endi
-				else
-					gsub delete
-				endi
-			else
-				gsub delete
-			endi
-		else
-			gsub delete
-		endi
-	else
-		gsub delete
-
-	endi
-** For some reason, the CR is no longer relevant
-	subr delete
-		targ ownr
-*	Delete the pray file!
-		setv va99 pray kill va00
-	retn
 endm
