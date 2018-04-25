@@ -385,52 +385,9 @@ scrp 1 1 213 9
 								endi
 ** OK, so they are on your Chatter list now...  next is to tell everyone in the chat!
 **								Time to make a new RTDMA!!
-**								left off 4/24
-*	Open Pray source file for output...
-								file oope 0 "chat_update.txt" 0
-								outx "en-gb"
-								outs "\n"
-								outs "group CHAT "
-*					Put your UserID at the start...
-								sets va01 net: user
-								sets va70 va01
-*					Add time & date info...
-								sets va77 rtif rtim "%Y%m%d%H%M%S"
-								adds va01 va77
-*					Add the _chatupdate TAG
-								adds va01 "_chatupdate"
-								outx va01
-								outs "\n"
-** 					Add the ChatID
-								outs "\"ChatID\" "
-								outx name "ChatID"
-								outs "\n"
-** 					Add the Sender's Nickname
-								outs "\"Sender Nickname\" "
-								outx game "user_of_this_world"
-								outs "\n"
-** 					Add the Sender's UserID
-								outs "\"Sender UserID\" "
-								outx va70
-								outs "\n"
-** 					Add the Chat Message Type
-								outs "\"Chat Message Type\" "
-								outx "Update"
-								outs "\n"
-** 					Add the new chatter Nickname
-								outs "\"New Chatter Nickname\" "
-								outx va03
-								outs "\n"
-** 					Add the new chatter UserID
-								outs "\"New Chatter UserID\" "
-								outx va04
-								outs "\n"
-								file oclo
-** Send it to all chatters!
-								sets va10 "chatter"
-								sets va01 "_UserID"
+* You're going to have to make SEVERAL RTDMAs in the case of a group chat
+* Because you need to send one to each user!
 								setv va22 1
-								sets va88 net: user
 								loop
 *						"chatter"
 									sets va03 va10
@@ -440,12 +397,15 @@ scrp 1 1 213 9
 									adds va03 va01
 *						Send to all Chatters, except to yourself and the new chatter! :o)
 									doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
-										setv va80 net: make 0 "chat_update.txt" name va03 va81
+										new: simp 1 1 35755 "blnk" 1 0 0
+										sets name "aw_recipient" mame va03
+										sets name "CHAT" "Update"
+										sets name "New Chatter Nickname" va04
 									endi
 									addv va22 1
+*								31? might change this later.
 								untl va22 = 31
-*	Pray garbage collection!
-								pray garb 1
+**								left off 4/25
 * 	Has it been successful?
 								doif va80 = 0
 									inst
