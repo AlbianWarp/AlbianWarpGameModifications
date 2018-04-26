@@ -338,6 +338,7 @@ scrp 1 1 213 9
 				sets va01 name "REQU"
 *				Here we go the big doif that does it all:
 				doif va01 = "Invite Accept"
+					targ va66
 ** A user you have invited to an existing chat has accepted your invitation.
 ** You need to:  Add this user to your chatter list, add them to your who's wanted list, and then tell everyone else in the chat to do the same!
 					sets va02 name "ChatID"
@@ -405,10 +406,8 @@ scrp 1 1 213 9
 									addv va22 1
 *								31? might change this later.
 								untl va22 = 31
-**								left off 4/25
-* 	Has it been successful?
-								doif va80 = 0
-									inst
+** 								There's a check for success here but for AW let's just 
+**								Assume we're always sucessful
 									sets va10 "<tint 120 220 250>"
 									adds va10 va48
 									adds va10 read "The Interpreters Text" 0
@@ -422,10 +421,7 @@ scrp 1 1 213 9
 ** Update the Contact List
 									setv ov70 0
 									tick 1
-								else
-* Sending the Chat Message failed! va81 has more info on this error!
-									dbg: asrt 423 = 120
-								endi
+
 * Update the ChatText... :O)
 							endi
 						endi
@@ -435,8 +431,9 @@ scrp 1 1 213 9
 				elif va01 = "Invite Decline"
 ** A user you have invited to an existing chat has declined your invitation.
 ** You need to: Be notified they have declined.
-					sets va02 pray agts va00 "ChatID" "Unknown"
-					sets va03 pray agts va00 "Sender Nickname" "Unknown"
+					targ va66 
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
 **
 					sets va10 "<tint 120 220 250>"
 					adds va10 va03
@@ -460,19 +457,14 @@ scrp 1 1 213 9
 							endi
 						endi
 					next
-					doif va99 = 0
-** The chat was not found, so kill the pray file.
-						gsub delete
-					else
-** The chat text has been updated, so let's kill the pray file anyhow! :o)
-						gsub delete
-					endi
+					gsub delete
 					stop
 				elif va01 = "Invite Timeout"
 ** A user you have invited to an existing chat has not responded to your invitation.
 ** You need to: Be notified they have declined.
-					sets va02 pray agts va00 "ChatID" "Unknown"
-					sets va03 pray agts va00 "Sender Nickname" "Unknown"
+					targ va66 
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
 **
 					sets va10 "<tint 120 220 250>"
 					adds va10 va03
@@ -496,25 +488,20 @@ scrp 1 1 213 9
 							endi
 						endi
 					next
-					doif va99 = 0
-** The chat was not found, so kill the pray file.
-						gsub delete
-					else
-** The chat text has been updated, so let's kill the pray file anyhow! :o)
-						gsub delete
-					endi
+					gsub delete
 					stop
 				elif va01 = "Join Existing Chat"
-					sets va02 pray agts va00 "ChatID" "Unknown"
-					sets va03 pray agts va00 "Sender Nickname" "Unknown"
-					sets va04 pray agts va00 "Sender UserID" "Unknown"
-					sets va05 pray agts va00 "Chat Host" "Unknown"
+					targ va66 
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+					sets va04 name "aw_sender"
+					sets va05 name "Chat Host"
 					enum 1 1 214
 						doif targ <> null
 ** Check to see if an invitation from a user in that chat is already being displayed
 							doif name "ChatID" = va02
 * if so, kill the chat request pray file and stop
-								setv va99 pray kill va00
+								kill va66
 								stop
 							endi
 						endi
@@ -524,7 +511,7 @@ scrp 1 1 213 9
 						doif targ <> null
 							doif name "ChatID" = va02
 * if so, kill the chat request pray file and stop
-								setv va99 pray kill va00
+								kill va66
 								stop
 							endi
 						endi
@@ -613,19 +600,20 @@ scrp 1 1 213 9
 					setv ov01 15
 					tick 20
 *** Kill the Pray File
-					setv va99 pray kill va00
+					kill va66
 					stop
 				elif va01 = "Request"
 *	Convert the Message to a chat request Agent... :o)
 *     =============================================
+					targ va66
 *	Store who it is from... :o) 
-					sets va02 pray agts va00 "Sender UserID" "UserID"
+					sets va02 name "aw_sender"
 *	Get the Date Sent..
-					sets va03 pray agts va00 "Date Sent" "No Date"
+					sets va03 name "aw_date"
 *	Get the Sender's Nickname
-					sets va05 pray agts va00 "Sender Nickname" "Unknown"
+					sets va05 name "aw_sender"
 *	Get the ChatID
-					sets va06 pray agts va00 "ChatID" "Unknown"
+					sets va06 name "ChatID"
 *	Create a chat request Agent
 *	===========================
 
@@ -701,11 +689,12 @@ scrp 1 1 213 9
 					tick 20
 					gsub delete
 				elif va01 = "Accept"
-					sets va02 pray agts va00 "Sender UserID" "UserID"
+					targ va66
+					sets va02 name "aw_sender"
 ** What ChatID is this for?
-					sets va06 pray agts va00 "ChatID" "Unknown"
+					sets va06 name "ChatID"
 ** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-					doif va06 = name "ChatID"
+					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
 						setv va10 ov00
@@ -730,11 +719,12 @@ scrp 1 1 213 9
 						gsub delete
 					endi
 				elif va01 = "Decline"
-					sets va02 pray agts va00 "Sender UserID" "UserID"
+					targ va66
+					sets va02 name "aw_sender"
 ** What ChatID is this for?
-					sets va06 pray agts va00 "ChatID" "Unknown"
+					sets va06 name "ChatID"
 ** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-					doif va06 = name "ChatID"
+					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
 						setv va10 ov00
@@ -759,11 +749,12 @@ scrp 1 1 213 9
 						gsub delete
 					endi
 				elif va01 = "Timeout"
-					sets va02 pray agts va00 "Sender UserID" "UserID"
+					targ va66
+					sets va02 name "aw_sender"
 ** What ChatID is this for?
-					sets va06 pray agts va00 "ChatID" "Unknown"
+					sets va06 name "ChatID"
 ** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
-					doif va06 = name "ChatID"
+					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
 						setv va10 ov00
@@ -793,9 +784,7 @@ scrp 1 1 213 9
 				endi
 ** For some reason, the CR is no longer relevant
 				subr delete
-					targ ownr
-*	Delete the pray file!
-					setv va99 pray kill va00
+					kill va66
 				retn
 
 
@@ -812,4 +801,332 @@ scrp 1 1 213 9
 
 	endi
 
+endm
+
+************************************
+*** CHAT MESSAGE INTERPRETER SCRIPTS
+************************************ 
+* left off 4/26
+
+scrp 1 1 209 9
+	inst
+*	If Offline, kill all CHAT messages, then stop!
+	doif net: line = 0
+* slow down the check
+		tick 75
+		setv va00 pray coun "CHAT"
+* If none found, stop!
+		doif va00 = 0
+			stop
+		endi
+** otherwise, kill them all!
+		sets va00 pray fore "CHAT" ""
+		setv va99 pray kill va00
+		stop
+	endi
+** Otherwise, if you are online... :o)
+** are there any chats up?
+	doif totl 1 1 210 = 0
+		tick 40
+		stop
+	endi
+* 	Refresh Pray!
+	pray refr
+* Speed up the check!
+	tick 20
+*	How many Messages exist?
+	setv va00 pray coun "CHAT"
+*	If none found, stop.	
+	doif va00 = 0
+		stop
+	endi
+*	Find a pray file..
+	sets va00 pray fore "CHAT" ""
+*	Put the Message Sender's UserID into VA01
+	sets va01 net: from va00
+*	If that can't be found, kill the Pray file and stop further script processing.
+	doif va01 = ""
+*		Kill the Pray file!	
+		setv va99 pray kill va00
+		stop
+	else
+*		If the User is unknown - make a new contact! :-)
+		doif game va01 = 0
+			rtar 1 1 157
+			doif targ ne null
+				mesg wrt+ targ 1000 va01 0 0
+			else
+				stop
+			endi
+			targ ownr
+		else
+*		The User is already known to you, is it a foe? !O_O!
+			sets va02 "_group"
+			sets va03 va01
+			adds va03 va02
+*			Are you a foe, little User? ;O)		
+			doif game va03 = 3
+*				Trash the foe's message!
+				setv va99 pray kill va00
+*				And stop further processing! :0)
+				stop
+			endi
+		endi
+	endi
+*	Find the Nickname of this user...
+	sets va02 va01
+	adds va02 "_nick"
+
+*	If you have no entry for this contact yet, wait until contact book has sorted itself out!
+	lock
+*	Make sure contact details have been obtained... :-)
+	setv va84 0
+	loop
+		doif type game va02 = 0
+			delg va02
+			wait 1
+		elif type game va02 = 2
+			setv va84 1
+		else
+			wait 1
+		endi
+	untl va84 = 1
+	inst
+	sets va00 pray fore "CHAT" ""
+	sets va10 pray agts va00 "Chat Message Type" "Unknown"
+	doif va10 = "Chatter go Bye Bye"
+** You have been informed of an exiting chatter...
+** You need to: Remove the new chatter from your Chatter List, and also from your Who's Wanted Register!
+		sets va80 pray agts va00 "ChatID" "Unknown"
+		sets va81 pray agts va00 "Sender Nickname" "Unknown"
+		sets va82 pray agts va00 "Exiting Chatter Nickname" "Unknown"
+		sets va83 pray agts va00 "Exiting Chatter UserID" "Unknown"
+		setv va70 pray kill va00
+** Find the chat
+		setv va99 0
+		enum 1 1 210
+			setv va88 1
+			doif targ <> null
+				doif name "ChatID" = va80
+** Warn if Minimised!
+					seta va44 targ
+					doif name "Iconised" = 1
+						rtar 1 1 164
+						doif targ ne null
+							mesg wrt+ targ 1000 5 0 0
+						endi
+					endi
+					targ va44
+					setv ov70 0
+					tick 1
+					wait 2
+					inst
+** 					Add the new chatter to the list, somewhere! :o)
+					setv va99 0
+					setv va40 1
+					sets va41 "chatter"
+					sets va42 "_Nickname"
+					sets va43 "_UserID"
+					loop
+* 						"chatter"
+						sets va50 va41
+* 						"chatterX"  (X = va40)
+						adds va50 vtos va40
+* 						same again for the UserID...
+						sets va51 va50
+* 						"chatterX_Nickname"
+						adds va50 va42
+* 						"chatterX_UserID"
+						adds va51 va43
+** 						Find the one.. :)
+						doif name va51 = va83
+							sets name va50 ""
+							sets name va51 ""
+** 							Remove them from your who's wanted register too
+							net: whof va83
+							setv va99 1
+						endi
+						addv va40 1
+					untl va40 = 31 or va99 = 1
+* I have replaced my debug assert style error with a less intrusive one that will simply
+* tell the user that an error has occured and to report it to Creature Labs.
+*					doif va99 = 0
+*						dbg: asrt "leaving chatter" = "not removed"
+*					endi
+*** Instead I added this error text! A polite Grendel error!  
+					doif va99 <> 0
+						sets va10 "<tint 120 220 250>"
+						adds va10 va82
+						adds va10 read "The Interpreters Text" 5
+					else
+						sets va10 ""
+*					adds va10 "<tint 255 0 0>A polite Grendel error has occured. The secret code is: [<tint 255 255 255>Leaving_1<tint 255 0 0>] Please tell Creature Labs the code!"
+					endi
+*** Update the ChatText... :O)
+					adds name "ChatText" va10
+					part 2
+					ptxt name "ChatText"
+					setv va77 npgs
+					subv va77 1
+					page va77
+** Update the Contact List
+					setv ov70 0
+					tick 1
+** stopOK
+					stop
+				endi
+			endi
+		next
+		stop
+	elif va10 = "Update"
+** You have been informed of a new Chatter...
+** You need to: Add the new chatter to your Chatter list, and to your who's wanted register! :o)
+		sets va80 pray agts va00 "ChatID" "Unknown"
+		sets va81 pray agts va00 "Sender Nickname" "Unknown"
+		sets va82 pray agts va00 "New Chatter Nickname" "Unknown"
+		sets va83 pray agts va00 "New Chatter UserID" "Unknown"
+		setv va70 pray kill va00
+** Find the chat
+		setv va99 0
+		enum 1 1 210
+			setv va88 1
+			doif targ <> null
+				doif name "ChatID" = va80
+** Warn if Minimised!
+					seta va44 targ
+					doif name "Iconised" = 1
+						rtar 1 1 164
+						doif targ ne null
+							mesg wrt+ targ 1000 5 0 0
+						endi
+					endi
+					targ va44
+** 					Add the new chatter to the list, somewhere! :o)
+					setv va99 0
+					setv va40 1
+					sets va41 "chatter"
+					sets va42 "_Nickname"
+					sets va43 "_UserID"
+*					First check to see if they are already in there... :)
+					loop
+* 						"chatter"
+						sets va50 va41
+* 						"chatterX"  (X = va40)
+						adds va50 vtos va40
+* 						same again for the UserID...
+						sets va51 va50
+* 						"chatterX_Nickname"
+						adds va50 va42
+* 						"chatterX_UserID"
+						adds va51 va43
+** Kill and Stop if Chatter is already found!
+						doif name va51 = va83
+							setv va70 pray kill va00
+							stop
+						endi
+						addv va40 1
+					untl va40 = 31
+** If it has got this far, the chatter is not already in there.. :)
+** So we need to scan through again and find a spare slot! 
+					setv va99 0
+					setv va40 1
+					sets va41 "chatter"
+					sets va42 "_Nickname"
+					sets va43 "_UserID"
+					loop
+* 						"chatter"
+						sets va50 va41
+* 						"chatterX"  (X = va40)
+						adds va50 vtos va40
+* 						same again for the UserID...
+						sets va51 va50
+* 						"chatterX_Nickname"
+						adds va50 va42
+* 						"chatterX_UserID"
+						adds va51 va43
+** 						Find a spare one...
+						doif name va50 = ""
+							sets name va50 va82
+							sets name va51 va83
+** 							add them to your who's wanted register too
+							lock
+							net: whon va83
+							inst
+							setv va99 1
+						endi
+						addv va40 1
+					untl va40 = 31 or va99 = 1
+** 					If you haven't been added, then something has gone wrong!! eek!
+					doif va99 = 0
+						dbg: asrt "chatter" = "not added"
+					else
+						sets va10 "<tint 120 220 250>"
+						adds va10 va82
+						adds va10 read "The Interpreters Text" 6
+*** Update the ChatText... :O)
+						adds name "ChatText" va10
+						part 2
+						ptxt name "ChatText"
+						setv va77 npgs
+						subv va77 1
+						page va77
+** Update the Contact List
+						setv ov70 0
+						tick 1
+					endi
+				endi
+			endi
+		next
+		doif va88 <> 1
+			dbg: asrt 1 = 666
+		endi
+		stop
+	elif va10 = "Message"
+*	Grab all the Message Details.
+		sets va01 pray agts va00 "Sender UserID" "Unknown"
+		sets va02 pray agts va00 "ChatID" "Unknown"
+		sets va03 pray agts va00 "Sender Nickname" "Unknown"
+		sets va04 pray agts va00 "Chat Message" "Nothing"
+*	Search all Chats for the one with this ChatID
+		setv va99 0
+		enum 1 1 210
+			doif name "ChatID" = va02
+				inst
+** Warn if Minimised!
+				seta va44 targ
+				doif name "Iconised" = 1
+					rtar 1 1 164
+					doif targ ne null
+						mesg wrt+ targ 1000 5 0 0
+					endi
+				endi
+				targ va44
+				setv va99 1
+				adds name "ChatText" "<tint 120 220 250>"
+				adds name "ChatText" va03
+				adds name "ChatText" ": "
+				adds name "ChatText" va04
+				part 2
+				ptxt name "ChatText"
+				setv va10 npgs
+				subv va10 1
+				page va10
+** Update the Contact List
+				setv ov70 0
+				tick 1
+			endi
+		next
+	else
+		dbg: asrt "Unknown PRAY Type" = "Found"
+	endi
+	targ ownr
+	doif va99 = 0
+** The Chat is no longer active, so kill this Chat pray file! :)
+		setv va70 pray kill va00
+		stop
+	elif va99 = 1
+** The Chat is active, and has been updated... kill the chat pray file anyhow! :o)
+		setv va70 pray kill va00
+		stop
+	endi
 endm
