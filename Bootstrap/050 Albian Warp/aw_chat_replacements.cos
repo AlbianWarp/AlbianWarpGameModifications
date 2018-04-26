@@ -860,15 +860,17 @@ scrp 1 1 209 9
 *			By now you know who they are and that they are not a foe:
 *			va02 should be the name too for reasons:
 			sets va02 va01
+
+			targ va66
 *			alright, here's the big DOIF:
 			doif va10 = "Chatter go Bye Bye"
 ** You have been informed of an exiting chatter...
 ** You need to: Remove the new chatter from your Chatter List, and also from your Who's Wanted Register!
-				sets va80 pray agts va00 "ChatID" "Unknown"
-				sets va81 pray agts va00 "Sender Nickname" "Unknown"
-				sets va82 pray agts va00 "Exiting Chatter Nickname" "Unknown"
-				sets va83 pray agts va00 "Exiting Chatter UserID" "Unknown"
-				setv va70 pray kill va00
+				sets va80 name "ChatID"
+				sets va81 name "aw_sender"
+				sets va82 name "Exiting Chatter Nickname"
+				sets va83 name "Exiting Chatter Nickname"
+				kill va66
 ** Find the chat
 				setv va99 0
 				enum 1 1 210
@@ -910,7 +912,7 @@ scrp 1 1 209 9
 									sets name va50 ""
 									sets name va51 ""
 ** 							Remove them from your who's wanted register too
-									net: whof va83
+									sets va99 caos 0 0 va83 targ game "f_aw_whof" 0 0 va99
 									setv va99 1
 								endi
 								addv va40 1
@@ -948,11 +950,11 @@ scrp 1 1 209 9
 			elif va10 = "Update"
 ** You have been informed of a new Chatter...
 ** You need to: Add the new chatter to your Chatter list, and to your who's wanted register! :o)
-				sets va80 pray agts va00 "ChatID" "Unknown"
-				sets va81 pray agts va00 "Sender Nickname" "Unknown"
-				sets va82 pray agts va00 "New Chatter Nickname" "Unknown"
-				sets va83 pray agts va00 "New Chatter UserID" "Unknown"
-				setv va70 pray kill va00
+				sets va80 name "ChatID" 
+				sets va81 name "aw_sender"
+				sets va82 name "New Chatter Nickname"
+				sets va83 name "New Chatter Nickname"
+				kill va66
 ** Find the chat
 				setv va99 0
 				enum 1 1 210
@@ -986,9 +988,8 @@ scrp 1 1 209 9
 								adds va50 va42
 * 						"chatterX_UserID"
 								adds va51 va43
-** Kill and Stop if Chatter is already found!
+**						Stop if Chatter is already found!
 								doif name va51 = va83
-									setv va70 pray kill va00
 									stop
 								endi
 								addv va40 1
@@ -1017,7 +1018,7 @@ scrp 1 1 209 9
 									sets name va51 va83
 ** 							add them to your who's wanted register too
 									lock
-									net: whon va83
+									sets va99 caos 0 0 va83 targ game "f_aw_whon" 0 0 va99
 									inst
 									setv va99 1
 								endi
@@ -1050,10 +1051,11 @@ scrp 1 1 209 9
 				stop
 			elif va10 = "Message"
 *	Grab all the Message Details.
-				sets va01 pray agts va00 "Sender UserID" "Unknown"
-				sets va02 pray agts va00 "ChatID" "Unknown"
-				sets va03 pray agts va00 "Sender Nickname" "Unknown"
-				sets va04 pray agts va00 "Chat Message" "Nothing"
+				sets va01 name "aw_sender"
+				sets va02 name "ChatID"
+				sets va03 name "aw_sender"
+				sets va04 name "Chat Message"
+				kill va66
 *	Search all Chats for the one with this ChatID
 				setv va99 0
 				enum 1 1 210
