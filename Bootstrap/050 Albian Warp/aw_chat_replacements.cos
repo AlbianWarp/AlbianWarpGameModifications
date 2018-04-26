@@ -199,85 +199,43 @@ scrp 1 1 215 5000
 
 *	Make an RTDMA!
 	new: simp 1 1 35755 "blnk" 1 0 0
-	sets name "aw_recipient" "??"
-	sets name "type" "Join Existing Chat"
-	sets name "chat_id" mame "ChatID"
-	sets name "chat" mame "Chat"
-	sets name "Invitee" mame "Invitee_UserID"
+	seta va66 targ
+	sets name "aw_recipient" mame "Invitee_UserID"
+	sets name "REQU" "Join Existing Chat"
+	sets name "ChatID" mame "ChatID"
+	*I am not convinced this even does anything:
+	sets name "Chat Host" "A Cat"
 
-*!**The rest of this is old.... what do? Come back to this later when we see
-* how the othe end handles these!
-
-	file oope 0 "chat_invitation.txt" 0
-	outx "en-gb"
-	outs "\n"
-	outs "group REQU "
-*	Put your UserID at the start...
-	sets va01 net: user
-	sets va70 va01
-*	Add time & date info...
-	sets va77 rtif rtim "%Y%m%d%H%M%S"
-	adds va01 va77
-*	Add the _chatmessage TAG
-	adds va01 "_invitation"
-	outx va01
-	outs "\n"
-** Add the Type
-	outs "\"Request Type\" "
-	outx "Join Existing Chat"
-	outs "\n"
-** Add the Sender
-	outs "\"Sender UserID\" "
-	outx va70
-	outs "\n"
-** Add the ChatID
-	outs "\"ChatID\" "
-	outx name "ChatID"
-	outs "\n"
-** Add the Sender's Nickname
-	outs "\"Sender Nickname\" "
-	outx game "user_of_this_world"
-	outs "\n"
-*** Add the Chat HOst
-*	outs ""Chat Host" "
-*	outx name "Chat_Host"
-*	outs ""
-** Add all the current chatters
-	targ name "Chat"
+** Add all the current chatters to the thing!
 	sets va31 "chatter"
 	sets va32 "_Nickname"
 	sets va33 "_UserID"
 	setv va30 1
 	loop
+		targ mame "Chat"
 		sets va40 va31
 		adds va40 vtos va30
+
 		sets va41 va40
+
 		adds va40 va32
 		adds va41 va33
-		outx va40
-		outs " "
-		outx name va40
-		outs "\n"
-		outx va41
-		outs " "
-		outx name va41
-		outs "\n"
+
+		doif type name va40 eq 2
+			sets va43 name va40
+			sets va44 name va41
+		else
+			sets va43 ""
+			sets va44 ""
+		endi
+
 		addv va30 1
+
+		targ va66
+		sets name va40 va43
+		sets name va41 va44
+
 	untl va30 = 31
-	targ ownr
-	file oclo
-* Make the pray file..
-	setv va80 net: make 0 "chat_invitation.txt" name "Invitee_UserID" va81
-*	Pray garbage collection!
-	pray garb 1
-* 	Has it been successful?
-	sets name "Result" ""
-	doif va80 = 0
-		sets name "Result" "Success"
-	else
-* Sending the Chat Message failed! va81 has more info on this error!
-		sets name "Result" "Failure"
-	endi
 endm
 
 **This is where the real stuff happens: chat - the interpreters 
@@ -403,8 +361,7 @@ scrp 1 1 213 9
 										sets name "CHAT" "Update"
 										sets name "New Chatter Nickname" va04
 									endi
-									addv va22 1
-*								31? might change this later.
+									addv va22 1.
 								untl va22 = 31
 ** 								There's a check for success here but for AW let's just 
 **								Assume we're always sucessful
@@ -500,7 +457,7 @@ scrp 1 1 213 9
 						doif targ <> null
 ** Check to see if an invitation from a user in that chat is already being displayed
 							doif name "ChatID" = va02
-* if so, kill the chat request pray file and stop
+* if so, kill the chat request RTDMA and stop
 								kill va66
 								stop
 							endi
@@ -510,7 +467,7 @@ scrp 1 1 213 9
 					enum 1 1 210
 						doif targ <> null
 							doif name "ChatID" = va02
-* if so, kill the chat request pray file and stop
+* if so, kill the chat request RTDMA and stop
 								kill va66
 								stop
 							endi
@@ -537,6 +494,7 @@ scrp 1 1 213 9
 *	===========================
 *	Pop it up on the Screen
 					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					seta va56 targ
 					attr 304
 ** Decline Request button
 					pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
@@ -565,7 +523,7 @@ scrp 1 1 213 9
 ** store the sender's Nickname and UserID
 					sets name "Sender_Nickname" va03
 					sets name "Sender_UserID" va04
-*** Add all the chatters straight from the pray file
+*** Add all the chatters straight from the RTDMA
 					setv va40 1
 					sets va41 "chatter"
 					sets va42 "_Nickname"
@@ -576,10 +534,21 @@ scrp 1 1 213 9
 						sets va51 va50
 						adds va50 va42
 						adds va51 va43
+						targ va66
 ** save to "chatterX_Nickname" name variable
-						sets name va50 pray agts va00 va50 ""
-** save to "chatterX_UserID" name variable 
-						sets name va51 pray agts va00 va51 ""
+						doif type name va50 eq 2
+						sets va57 name va50
+						sets va58 name va51
+						targ va56
+** save to "chatterX_UserID" name variable
+						sets name va50 va57
+						sets name va51 va58
+						else
+						targ va56
+						sets name va50 ""
+						sets name va51 ""
+						endi
+
 ** Increment X		
 						addv va40 1
 					untl va40 = 31
@@ -599,7 +568,7 @@ scrp 1 1 213 9
 ** timer
 					setv ov01 15
 					tick 20
-*** Kill the Pray File
+*** Kill the RTDMA File
 					kill va66
 					stop
 				elif va01 = "Request"
@@ -693,7 +662,7 @@ scrp 1 1 213 9
 					sets va02 name "aw_sender"
 ** What ChatID is this for?
 					sets va06 name "ChatID"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA
 					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
@@ -704,7 +673,7 @@ scrp 1 1 213 9
 							doif targ <> null and targ <> ownr
 								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
 									sets name "CR_result" "accepted"
-*	Delete the pray file!
+*	Delete the RTDMA
 									gsub delete
 								else
 									gsub delete
@@ -723,7 +692,7 @@ scrp 1 1 213 9
 					sets va02 name "aw_sender"
 ** What ChatID is this for?
 					sets va06 name "ChatID"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA
 					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
@@ -734,7 +703,7 @@ scrp 1 1 213 9
 							doif targ <> null and targ <> ownr
 								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
 									sets name "CR_result" "declined"
-*	Delete the pray file!
+*	Delete the RTDMA
 									gsub delete
 								else
 									gsub delete
@@ -753,7 +722,7 @@ scrp 1 1 213 9
 					sets va02 name "aw_sender"
 ** What ChatID is this for?
 					sets va06 name "ChatID"
-** If it is the Chat I am waiting to create, continue... otherwise, trash this prayfile!
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA!
 					doif va06 = mame "ChatID"
 ** Check Comms Screen
 						rtar 1 2 210
@@ -764,7 +733,7 @@ scrp 1 1 213 9
 							doif targ <> null and targ <> ownr
 								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
 									sets name "CR_result" "timeout"
-*	Delete the pray file!
+*	Delete the RTDMA!
 									gsub delete
 								else
 									gsub delete
