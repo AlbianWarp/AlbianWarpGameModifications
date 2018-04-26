@@ -1,7 +1,5 @@
 *Albian Warp Portal Scripts
 *mostly just to rewrite net: line checks 
-*but there's some ulins that needfixing too once that is working
-
 
 scrp 3 9 1 0
 	lock
@@ -449,7 +447,7 @@ endm
 scrp 3 9 1 137
 	inst
 
-	dbg: outs "portal - user online"
+*	dbg: outs "portal - user online"
 
 
 
@@ -560,4 +558,10 @@ scrp 3 9 1 137
 		untl va12 eq ""
 	retn
 
+endm
+
+***user offline event
+scrp 3 9 1 136
+	inst
+	mesg writ ownr 137
 endm
