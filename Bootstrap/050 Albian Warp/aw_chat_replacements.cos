@@ -1625,3 +1625,401 @@ scrp 1 1 211 1009
 *		va81 has more info on this error!
 	endi
 endm
+
+* chat - chat request indicator.cos
+
+** Send Result
+scrp 1 1 214 1002
+	lock
+	inst
+** Get all the necessary details first..
+	doif ov81 = 0
+		targ name "request"
+
+		sets va02 name "Sender UserID"
+		sets va03 name "Sender Nickname"
+		targ ownr
+** Kill the Request
+
+		kill name "request"
+
+	else
+		sets va02 name "Sender_UserID"
+		sets va03 name "Sender_Nickname"
+	endi
+*	
+*	Create RTDMA:
+	new: simp 1 1 35755 "blnk" 1 0 0
+	sets name "aw_recipient" va02
+	sets name "ChatID" mame "ChatID"
+*	What are you actually doing here	
+	doif mame "result" = "decline"
+		sets name "REQU" "Decline"
+	elif mame "result" = "accept"
+		sets name "REQU" "Accept"
+	elif mame "result" = "timeout"
+		sets name "REQU" "Timeout"
+	elif mame "result" = "invite_accept"
+		sets name "REQU" "Invite Accept"
+	elif mame "result" = "invite_decline"
+		sets name "REQU" "Invite Decline"
+	elif mame "result" = "invite_timeout"
+		sets name "REQU" "Invite Timeout"
+	endi
+
+	targ ownr
+	doif name "result" = "decline" or name "result" = "invite_decline"
+		kill ownr
+	elif name "result" = "invite_accept"
+		inst
+** find a spare plane
+		doif game "chat_plane" < game "chat_plane_max"
+			setv va00 game "chat_plane"
+			setv va01 va00
+			addv va01 10
+			setv game "chat_plane" va01
+		else
+			setv game "chat_plane" 8500
+			setv va00 8500
+		endi
+** Create the chat!
+		new: comp 1 1 210 "chat" 2 0 va00
+		attr 290
+** Listen for raw mouse downs!
+		imsk 8
+** Save the Plane
+		setv name "Plane" va00
+** Grab all the Chat Details... :)
+		sets name "ChatID" mame "ChatID"
+** Sizing
+		sets name "Sizing" "Minimum"
+** Fill in all the chatters!
+		setv va40 1
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+* sets name "chatterX_Nickname" the same as the Chat Invitation said..
+			sets name va50 mame va50
+* sets name "chatterX_UserID" the same as the Chat Invitation said..
+			sets name va51 mame va51
+** Also add to the Who's Wanted register... :o)
+			doif name va51 <> ""
+				lock
+				sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
+				inst
+			endi
+* Increment the X (va40)
+			addv va40 1
+		untl va40 = 31
+** Add yourself to this list, somewhere! :o)
+		setv va99 0
+		setv va40 1
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+** Find a spare one...
+			doif name va50 = ""
+				sets name va50 game "user_of_this_world"
+				sets name va51 game "user_of_this_world"
+				setv va99 1
+			endi
+			addv va40 1
+		untl va40 = 31 or va99 = 1
+** If you haven't been added, then something has gone wrong!! eek!
+		doif va99 = 0
+			dbg: asrt "just invited" = "couldn't be added"
+		endi
+** Create the Parts...
+** Chat Text
+		pat: fixd 2 "chat text parts" 0 45 19 1 "GreyOnTransChars"
+		part 2
+		frmt 3 3 3 3 1 1 16
+		sets va00 read "Chat Module Text" 25
+		ptxt va00
+** Save the Chat Text... (this string could get ENORMOUS
+		adds va00 "\n"
+		sets name "ChatText" va00
+** Your Text
+		pat: text 3 "chat text parts" 4 45 109 2 1000 "WhiteOnTransparentChars"
+		part 3
+		frmt 2 2 2 2 1 1 0
+		fcus
+* Quit Chat
+		pat: butt 4 "chat" 38 2 410 134 1 [1] 1010 0
+		part 4
+		anim [0]
+* Invite User
+		pat: butt 5 "chat" 22 1 9 91 6 [] 1011 0
+		part 5
+		anim [0]
+** Back a page...
+		pat: butt 6 "chat" 46 2 264 21 2 [1] 1012 0
+		part 6
+		anim [0]
+** forward a page...
+		pat: butt 7 "chat" 48 2 264 88 2 [1] 1013 0
+		part 7
+		anim [0]
+** Red Text Button
+		pat: butt 8 "chat text colour button" 0 1 52 172 2 [] 1014 0
+		part 8
+		tint 96 0 0 128 128
+** Green Text Button
+		pat: butt 9 "chat text colour button" 0 1 78 172 2 [] 1014 0
+		part 9
+		tint 0 160 0 128 128
+** Blue Text Button
+		pat: butt 10 "chat text colour button" 0 1 104 172 2 [] 1014 0
+		part 10
+		tint 0 0 192 128 128
+** Text Focus Button
+		pat: butt 11 "chat" 52 2 408 78 2 [1] 1015 0
+		part 11
+		anim [0]
+** Iconise Button
+		pat: butt 12 "chat" 50 2 408 51 2 [1] 1016 0
+		part 12
+		anim [0]
+** Sizing Button
+		pat: butt 13 "chat" 54 2 408 103 2 [1] 1017 0
+		part 13
+		anim [0]
+* Red Text Colour - level indicator
+		pat: fixd 14 "ds gui" 54 60 178 3 "WhiteOnTransparentChars"
+		part 14
+		frmt 0 0 0 0 0 0 0
+		ptxt "3"
+* Green Text Colour - level indicator
+		pat: fixd 15 "ds gui" 54 86 178 3 "WhiteOnTransparentChars"
+		part 15
+		frmt 0 0 0 0 0 0 0
+		ptxt "5"
+* Blue Text Colour - level indicator
+		pat: fixd 16 "ds gui" 54 111 178 3 "WhiteOnTransparentChars"
+		part 16
+		frmt 0 0 0 0 0 0 0
+		ptxt "6"
+** Sample Text Colour (Creatures Chat)
+		pat: fixd 17 "chat text parts" 5 140 175 3 "GreyOnTransChars"
+		part 17
+		frmt 3 3 0 0 0 0 0
+		ptxt read "Chat Module Text" 25
+* Your Chat Text Colour
+		setv name "Text Colour Red" 96
+		setv name "Text Colour Green" 160
+		setv name "Text Colour Blue" 192
+** Chatter List
+		setv va00 285
+		setv va01 23
+		setv va02 21
+		loop
+			pat: fixd va02 "chat window" 8 va00 va01 2 "GreyOnTransChars"
+			part va02
+			frmt 3 3 2 2 1 1 0
+			addv va01 17
+			addv va02 1
+		untl va02 = 33
+** Move it
+		setv va90 wndw
+		divv va90 2
+		setv va91 wndh
+		divv va91 2
+		setv va92 wdth
+		divv va92 2
+		setv va93 hght
+		divv va93 2
+
+		subv va90 va92
+		subv va91 va93
+		addv va91 100
+		flto va90 va91
+** Update the List
+		tick 1
+** Kill the Chat Request Indicator
+		kill ownr
+	elif name "result" = "accept"
+** Load up the chat!!
+
+		inst
+** find a spare plane
+		doif game "chat_plane" < game "chat_plane_max"
+			setv va00 game "chat_plane"
+			setv va01 va00
+			addv va01 10
+			setv game "chat_plane" va01
+		else
+			setv game "chat_plane" 8500
+			setv va00 8500
+		endi
+** Create the Chat! :)
+		new: comp 1 1 210 "chat" 2 0 va00
+		attr 290
+** Listen for Raw Mouse Downs!
+		imsk 8
+** Save the Plane
+		setv name "Plane" va00
+** Save the ChatID
+		sets name "ChatID" mame "ChatID"
+** Chat initiator is Chatter1
+		sets name "chatter1_Nickname" va03
+		sets name "chatter1_UserID" va02
+** You are Chatter2
+		sets name "chatter2_Nickname" game "user_of_this_world"
+		sets name "chatter2_UserID" game "user_of_this_world"
+** Sizing
+		sets name "Sizing" "Minimum"
+** Fill in the other Chatters
+		setv va40 3
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+* sets name "chatterX_Nickname" ""
+			sets name va50 ""
+* sets name "chatterX_Nickname" ""
+			sets name va51 ""
+* Increment the X (va40)
+			addv va40 1
+		untl va40 = 31
+** Create the Parts...
+** Chat Text
+		pat: fixd 2 "chat text parts" 0 45 19 1 "GreyOnTransChars"
+		part 2
+		frmt 3 3 3 3 1 1 16
+		sets va00 read "Chat Module Text" 25
+		ptxt va00
+** Save the Chat Text... (this string could get ENORMOUS
+		adds va00 "\n"
+		sets name "ChatText" va00
+** Your Text
+		pat: text 3 "chat text parts" 4 45 109 2 1000 "WhiteOnTransparentChars"
+		part 3
+		frmt 2 2 2 2 1 1 0
+		fcus
+* Quit Chat
+		pat: butt 4 "chat" 38 2 410 134 1 [1] 1010 0
+		part 4
+		anim [0]
+* Invite User
+		pat: butt 5 "chat" 22 1 9 91 6 [] 1011 0
+		part 5
+		anim [0]
+** Back a page...
+		pat: butt 6 "chat" 46 2 264 21 2 [1] 1012 0
+		part 6
+		anim [0]
+** forward a page...
+		pat: butt 7 "chat" 48 2 264 88 2 [1] 1013 0
+		part 7
+		anim [0]
+** Red Text Button
+		pat: butt 8 "chat text colour button" 0 1 52 172 2 [] 1014 0
+		part 8
+		tint 96 0 0 128 128
+** Green Text Button
+		pat: butt 9 "chat text colour button" 0 1 78 172 2 [] 1014 0
+		part 9
+		tint 0 160 0 128 128
+** Blue Text Button
+		pat: butt 10 "chat text colour button" 0 1 104 172 2 [] 1014 0
+		part 10
+		tint 0 0 192 128 128
+** Text Focus Button
+		pat: butt 11 "chat" 52 2 408 78 2 [1] 1015 0
+		part 11
+		anim [0]
+** Iconise Button
+		pat: butt 12 "chat" 50 2 408 51 2 [1] 1016 0
+		part 12
+		anim [0]
+** Sizing Button
+		pat: butt 13 "chat" 54 2 408 103 2 [1] 1017 0
+		part 13
+		anim [0]
+* Red Text Colour - level indicator
+		pat: fixd 14 "ds gui" 54 60 178 3 "WhiteOnTransparentChars"
+		part 14
+		frmt 0 0 0 0 0 0 0
+		ptxt "3"
+* Green Text Colour - level indicator
+		pat: fixd 15 "ds gui" 54 86 178 3 "WhiteOnTransparentChars"
+		part 15
+		frmt 0 0 0 0 0 0 0
+		ptxt "5"
+* Blue Text Colour - level indicator
+		pat: fixd 16 "ds gui" 54 111 178 3 "WhiteOnTransparentChars"
+		part 16
+		frmt 0 0 0 0 0 0 0
+		ptxt "6"
+** Sample Text Colour (Creatures Chat)
+		pat: fixd 17 "chat text parts" 5 140 175 3 "GreyOnTransChars"
+		part 17
+		frmt 3 3 0 0 0 0 0
+		ptxt read "Chat Module Text" 26
+* Your Chat Text Colour
+		setv name "Text Colour Red" 96
+		setv name "Text Colour Green" 160
+		setv name "Text Colour Blue" 192
+** Chatter List
+		setv va00 285
+		setv va01 23
+		setv va02 21
+		loop
+			pat: fixd va02 "chat window" 8 va00 va01 2 "GreyOnTransChars"
+			part va02
+			frmt 3 3 2 2 1 1 0
+			addv va01 17
+			addv va02 1
+		untl va02 = 33
+** Move it
+		setv va90 wndw
+		divv va90 2
+		setv va91 wndh
+		divv va91 2
+		setv va92 wdth
+		divv va92 2
+		setv va93 hght
+		divv va93 2
+
+		subv va90 va92
+		subv va91 va93
+		addv va91 100
+		flto va90 va91
+** Update the List
+		tick 1
+** Kill the Chat Request Indicator
+		kill ownr
+	endi
+endm
