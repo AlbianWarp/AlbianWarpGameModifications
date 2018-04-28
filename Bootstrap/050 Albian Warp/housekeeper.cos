@@ -189,17 +189,19 @@ scrp 1 1 35700 9
 						sets va09 caos 0 1 va03 va08 game "f_GetVarInVList" 0 0 va99
 *						sets the agent name
 						seta va10 name va09
+						doif va10 ne null
 *						now you gotta tell the agent what's up!
 *						if status is 0, set the "went offline" message
-						doif name va05 eq 0
-							dbg: outs "sending an offline message about"
-							dbg: outs va04
-							mesg wrt+ va10 138 va04 0 0
-						elif name va05 eq 1
-*							if status is 1, set the "went online" message!
-							dbg: outs "sending an online message about"
-							dbg: outs va04
-							mesg wrt+ va10 137 va04 0 0
+							doif name va05 eq 0
+								dbg: outs "sending an offline message about"
+								dbg: outs va04
+								mesg wrt+ va10 138 va04 0 0
+							elif name va05 eq 1
+*								if status is 1, set the "went online" message!
+								dbg: outs "sending an online message about"
+								dbg: outs va04
+								mesg wrt+ va10 137 va04 0 0
+							endi
 						endi
 					repe
 				endi

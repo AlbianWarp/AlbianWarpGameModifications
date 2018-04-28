@@ -91,6 +91,8 @@ scrp 1 1 206 9
 				dbg: outs "message from "
 				dbg: outs name "aw_sender"
 		endi
+		else
+			dbg: outs "This is not a mail message"
 		endi
 	next
 *	If none found, stop.	
