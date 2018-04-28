@@ -490,7 +490,7 @@ scrp 1 1 184 9
 *		check if chamber is free
 		gsub chamberinactive
 *		first get ID of who it is from
-		sets va70 net: from va01
+		sets va70 va11
 
 *	set game variable such as:
 *	game "<moniker>_immigrant" = <user ID>

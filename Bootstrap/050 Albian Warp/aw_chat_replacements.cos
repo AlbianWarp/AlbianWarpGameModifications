@@ -1,0 +1,2254 @@
+*this replaces scripts in:
+* chat - the interpreters.cos
+* chat - in chat invitation manager.cos
+* chat - chat module.cos
+* chat - chat request indicator.cos
+* chat - chat scripts.cos
+
+*chat - in chat invitation manager scrps first:
+
+*  Update Recipient Display
+* _p1_ shows you which page to display
+* 0, 1, 2.. etc
+scrp 1 1 215 10000
+	inst
+	lock
+** Add up all the Chatter UserIDs into a String
+** This is so the string can be searched to find whether
+** someone is already in the Chat or not.
+	targ name "Chat"
+** Loop through all chatters
+	sets va10 "chatter"
+	sets va01 "_UserID"
+	setv va02 1
+	sets va77 "("
+	loop
+*		"chatter"
+		sets va03 va10
+*		"chatterX"
+		adds va03 vtos va02
+*		"chatterX_UserID"						
+		adds va03 va01
+		doif name va03 <> ""
+** Add to va77
+			adds va77 "["
+			adds va77 name va03
+			adds va77 "]"
+			doif va02 < 30
+** Add a divider
+				adds va77 ","
+			endi
+		endi
+** Increment counter
+		addv va02 1
+	untl va02 = 31
+	adds va77 ")"
+	targ ownr
+
+*	va15 is when to start displaying entries
+*	based on page number needed	
+	setv va15 _p1_
+	mulv va15 11
+*	doif _p1_ <> 0
+*		addv va15 2
+*	endi
+*	set page number variable
+	setv name "page" _p1_
+*	va16 is how many legit entries had so far	
+	setv va16 0
+
+*	show back arrow if this isn't page 1
+	doif _p1_ <> 0
+		part 5
+		pose 1
+	else
+		part 5
+		pose 0
+	endi
+
+*	Clear all info on NicknameDisplays
+	setv va00 120
+	loop
+		part va00
+		ptxt ""
+		addv va00 1
+	untl va00 = 132
+*	Clear all info on Recipient Choosing Buttons
+	setv va00 150
+	loop
+		part va00
+		pose 0
+		addv va00 1
+	untl va00 = 162
+
+*	UPDATE RECIPIENT LIST
+*     =====================
+
+	setv va33 0
+*	va00 is which part # to use, incremented with each entry
+	setv va00 120
+*	va01 is how many entries added
+	setv va01 0
+*	va99 is which game variable to search, start at ""
+	sets va99 ""
+*	search string
+	sets va02 "_contact"
+*	loop through all game variables
+	slow
+	wait 1
+	inst
+	loop
+		doif va01 > 11
+			sets va99 ""
+		endi
+*	set va10 to the string of the current game variable
+		sets va10 gamn va99
+*	set va20 to the value where search string is contained
+*	in current game variable
+		setv va20 sins va10 1 va02
+*	if va20 ne -1 then the current string is what we are looking for
+		doif va20 ne -1
+
+**only do this if this is the page you need
+*			addv va16 1
+			doif va16 ge va15
+*		chop up string so only head remains
+*		this makes va30 the USER ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+*			ignore random user contact
+*			only do this if it isn't 'random online user'
+				doif va30 <> "!net: ruso" and va30 <> "!friend"
+*			And if they aren't in the chat already!
+					sets va76 "["
+					adds va76 va30
+					adds va76 "]"
+					doif sins va77 1 va76 = -1
+** Only shows if the user is online
+						doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 = 1
+*			get Nicknamename for this user
+							sets va40 "_nick"
+*      		Store the UserID into a NAME variable, to use for the Recipient.
+							setv va88 va00
+							addv va88 30
+							sets name va88 va30
+*			copy user ID to another variable
+							sets va41 va30
+*			create Nickname string
+							adds va41 va40
+*			get value from Nickname string
+							sets va42 "<tint 120 220 250>"
+							adds va42 game va41
+*  			put Nickname in correct text box
+							part va00
+							ptxt va42
+*		increment part# to place text in
+							addv va00 1
+* save a record that a contact was actually found
+							setv va33 1
+*		increment counter
+							addv va01 1
+** increment entry counter
+							addv va16 1
+						endi
+					endi
+				endi
+
+** Bail if text parts get too high
+				doif va00 = 132
+					sets va10 ""
+				endi
+
+*	if this is enough entries to fill column
+				doif va01 = 11
+*		display forward arrow
+					part 6
+					pose 1
+*		and set condition to exit loop
+					sets va10 ""
+				else
+*		don't show forward arrow
+					part 6
+					pose 0
+				endi
+			endi
+
+		endi
+*	carry on loop, increment current game variable
+		sets va99 va10
+*	keep going until you've scanned them all
+	untl va10 eq ""
+** button
+	part 2
+	frat 4
+	anim [0 1 255]
+	part 1
+	frat 4
+	anim [1 0 255]
+	part 3
+	frat 4
+	anim [0 1 255]
+	slow
+	part 4
+	ptxt read "In Chat Invitation Manager Text" 1
+endm
+
+** Sending the Invitation
+scrp 1 1 215 5000
+	inst
+	targ name "Chat"
+	sets mame "ChatID" name "ChatID"
+	targ ownr
+** Send the invitation
+*	There is a Invitee... :)  Let's ask the Chat Host to invite the Invitee... :)
+
+*	Make an RTDMA!
+	new: simp 1 1 35755 "blnk" 1 0 0
+	dbg: outs "RTDMA Created-- REQU: Join Existing Chat"
+	seta va66 targ
+	sets name "aw_recipient" mame "Invitee_UserID"
+	sets name "REQU" "Join Existing Chat"
+	sets name "ChatID" mame "ChatID"
+*I am not convinced this even does anything:
+	sets name "Chat Host" "A Cat"
+
+** Add all the current chatters to the thing!
+	sets va31 "chatter"
+	sets va32 "_Nickname"
+	sets va33 "_UserID"
+	setv va30 1
+	loop
+		targ mame "Chat"
+		sets va40 va31
+		adds va40 vtos va30
+
+		sets va41 va40
+
+		adds va40 va32
+		adds va41 va33
+
+		doif type name va40 eq 2
+			sets va43 name va40
+			sets va44 name va41
+		else
+			sets va43 ""
+			sets va44 ""
+		endi
+
+		addv va30 1
+
+		targ va66
+		sets name va40 va43
+		sets name va41 va44
+
+	untl va30 = 31
+endm
+
+**This is where the real stuff happens: chat - the interpreters 
+
+** Chat Request Interpreter
+scrp 1 1 213 9
+	inst
+*wait til you're online
+	doif game "aw_status" = "online"
+* Check for "REQU" RTDMAs!
+		enum 1 1 35756
+			doif type name "REQU" eq 2
+				dbg: outs "Found a REQU RTDMA"
+*We're in. Save who you are because we need it.
+				seta va66 targ
+**				What ChatID are you waiting on? Why does this matter? A Mystery. 
+*				I think this might be an invite that you sent
+*				and are waiting for a reply on?
+				rtar 1 1 211
+				doif targ <> null
+					doif targ <> ownr
+						sets va35 name "CR_ChatID"
+						targ ownr
+						sets name "ChatID" va35
+					endi
+				else
+					targ ownr
+					sets name "ChatID" "None"
+				endi
+*				Okay we have the chat id, or lackthereof
+				targ va66
+*				Put the Message Sender's UserID into VA01
+				sets va01 name "aw_sender"
+*				now we have to figure out who this user is
+*				Is it a stranger? Make a contact:
+				sets va02 va01
+				adds va02 "_contact"
+				doif game va02 eq 0
+					rtar 1 1 157
+					mesg wrt+ targ 1000 va01 0 0
+					targ va66
+				else
+*				you know this person-- are they a foe?
+					sets va02 "_group"
+					sets va03 va01
+					adds va03 va02
+*					Are you a foe, little User? ;O)		
+					doif game va03 = 3
+*					Trash the foe's message!
+						kill va66
+*					And stop further processing! :0)
+						stop
+					endi
+				endi
+*				By now you know who they are and that they are not a foe:
+*				va02 should be the name too for reasons:
+				sets va02 va01
+*				Now we get to see what kind of message it actually is:
+				sets va01 name "REQU"
+*				Here we go the big doif that does it all:
+				doif va01 = "Invite Accept"
+					targ va66
+** A user you have invited to an existing chat has accepted your invitation.
+** You need to:  Add this user to your chatter list, add them to your who's wanted list, and then tell everyone else in the chat to do the same!
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+					sets va04 name "aw_sender"
+					sets va48 va03
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** 					Add the new chatter to the list, somewhere! :o)
+								setv va99 0
+								setv va40 1
+								sets va41 "chatter"
+								sets va42 "_Nickname"
+								sets va43 "_UserID"
+								loop
+* 						"chatter"
+									sets va50 va41
+* 						"chatterX"  (X = va40)
+									adds va50 vtos va40
+* 						same again for the UserID...
+									sets va51 va50
+* 						"chatterX_Nickname"
+									adds va50 va42
+* 						"chatterX_UserID"
+									adds va51 va43
+** 						Find a spare one...
+									doif name va50 = "" and va99 = 0
+										sets name va50 va03
+										sets name va51 va04
+** 							add them to your who's wanted register too
+										lock
+										sets va99 caos 0 0 va04 targ game "f_aw_whon" 0 0 va99
+										inst
+										setv va99 1
+									endi
+									addv va40 1
+								untl va40 = 31 or va99 = 1
+** 					If you haven't been added, then something has gone wrong!! eek!
+								doif va99 = 0
+									dbg: asrt "invitee accepted" = "couldn't be added"
+								endi
+** OK, so they are on your Chatter list now...  next is to tell everyone in the chat!
+**								Time to make a new RTDMA!!
+* You're going to have to make SEVERAL RTDMAs in the case of a group chat
+* Because you need to send one to each user!
+								setv va22 1
+								loop
+*						"chatter"
+									sets va03 va10
+*						"chatterX"
+									adds va03 vtos va22
+*						"chatterX_UserID"						
+									adds va03 va01
+*						Send to all Chatters, except to yourself and the new chatter! :o)
+									doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
+										new: simp 1 1 35755 "blnk" 1 0 0
+										dbg: outs "RTDMA Created-- CHAT: Update"
+										sets name "aw_recipient" mame va03
+										sets name "CHAT" "Update"
+										sets name "New Chatter Nickname" va04
+									endi
+									addv va22 1.
+								untl va22 = 31
+** 								There's a check for success here but for AW let's just 
+**								Assume we're always sucessful
+								sets va10 "<tint 120 220 250>"
+								adds va10 va48
+								adds va10 read "The Interpreters Text" 0
+** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va77 npgs
+								subv va77 1
+								page va77
+** Update the Contact List
+								setv ov70 0
+								tick 1
+
+* Update the ChatText... :O)
+							endi
+						endi
+					next
+					gsub delete
+					stop
+				elif va01 = "Invite Decline"
+** A user you have invited to an existing chat has declined your invitation.
+** You need to: Be notified they have declined.
+					targ va66
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+**
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 1
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va50 npgs
+								subv va50 1
+								page va50
+** Update the Contact List
+								setv ov70 0
+								tick 1
+							endi
+						endi
+					next
+					gsub delete
+					stop
+				elif va01 = "Invite Timeout"
+** A user you have invited to an existing chat has not responded to your invitation.
+** You need to: Be notified they have declined.
+					targ va66
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+**
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 2
+** Find the chat
+					setv va99 0
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+								setv va99 1
+** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va50 npgs
+								subv va50 1
+								page va50
+** Update the Contact List
+								setv ov70 0
+								tick 1
+							endi
+						endi
+					next
+					gsub delete
+					stop
+				elif va01 = "Join Existing Chat"
+					targ va66
+					sets va02 name "ChatID"
+					sets va03 name "aw_sender"
+					sets va04 name "aw_sender"
+					sets va05 name "Chat Host"
+					enum 1 1 214
+						doif targ <> null
+** Check to see if an invitation from a user in that chat is already being displayed
+							doif name "ChatID" = va02
+* if so, kill the chat request RTDMA and stop
+								kill va66
+								stop
+							endi
+						endi
+					next
+** check to see if a chat is already open for that ChatID
+					enum 1 1 210
+						doif targ <> null
+							doif name "ChatID" = va02
+* if so, kill the chat request RTDMA and stop
+								kill va66
+								stop
+							endi
+						endi
+					next
+					targ ownr
+					setv va69 9075
+					setv va68 totl 1 1 214
+					doif va68 > 0
+						enum 1 1 214
+							doif targ <> null
+								setv va68 plne
+								doif va68 < va69
+									setv va69 va68
+								endi
+							endi
+						next
+						subv va69 5
+					else
+						setv va69 9075
+					endi
+					targ ownr
+*	Create a chat request Agent
+*	===========================
+*	Pop it up on the Screen
+					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					seta va56 targ
+					attr 304
+** Decline Request button
+					pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
+					part 1
+					anim [0]
+** Accept Request button
+					pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
+					part 2
+					anim [0]
+** chat request Details
+					pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
+					sets va10 "<tint 120 220 250>"
+					adds va10 va03
+					adds va10 read "The Interpreters Text" 3
+					part 3
+					frmt 5 0 5 0 3 0 2
+					ptxt va10
+** What type is this? 1 = join existing, 0 = normal chat request...
+					setv ov81 1
+** Save chatID
+					sets name "ChatID" va02
+** Save the text
+					sets name "text" va10
+** Store who the host is
+					sets name "Chat_Host" va05
+** store the sender's Nickname and UserID
+					sets name "Sender_Nickname" va03
+					sets name "Sender_UserID" va04
+*** Add all the chatters straight from the RTDMA
+					setv va40 1
+					sets va41 "chatter"
+					sets va42 "_Nickname"
+					sets va43 "_UserID"
+					loop
+						sets va50 va41
+						adds va50 vtos va40
+						sets va51 va50
+						adds va50 va42
+						adds va51 va43
+						targ va66
+** save to "chatterX_Nickname" name variable
+						doif type name va50 eq 2
+							sets va57 name va50
+							sets va58 name va51
+							targ va56
+** save to "chatterX_UserID" name variable
+							sets name va50 va57
+							sets name va51 va58
+						else
+							targ va56
+							sets name va50 ""
+							sets name va51 ""
+						endi
+
+** Increment X		
+						addv va40 1
+					untl va40 = 31
+** Positioning!
+					setv va90 wndw
+					divv va90 2
+					setv va91 wndh
+					divv va91 2
+					setv va92 wdth
+					divv va92 2
+					setv va93 hght
+					divv va93 2
+					subv va90 va92
+					subv va91 va93
+** Float to...
+					flto va90 va91
+** timer
+					setv ov01 15
+					tick 20
+*** Kill the RTDMA File
+					kill va66
+					stop
+				elif va01 = "Request"
+*	Convert the Message to a chat request Agent... :o)
+*     =============================================
+					targ va66
+*	Store who it is from... :o) 
+					sets va02 name "aw_sender"
+*	Get the Date Sent..
+					sets va03 name "aw_date"
+*	Get the Sender's Nickname
+					sets va05 name "aw_sender"
+*	Get the ChatID
+					sets va06 name "ChatID"
+*	Create a chat request Agent
+*	===========================
+
+					inst
+					new: simp 1 1 212 "blnk" 0 0 0
+					attr 16
+*> Save the Sender's UserID
+					sets name "Sender UserID" va02
+*> Save the Date Sent
+					sets name "Date Sent" va03
+*> Save the Sender Nicknamename
+					sets name "Sender Nickname" va05
+** Save a target to this agent!
+					seta va88 targ
+** unique plane
+					targ ownr
+					setv va69 9075
+					setv va68 totl 1 1 214
+					doif va68 > 0
+						enum 1 1 214
+							doif targ <> null
+								setv va68 plne
+								doif va68 < va69
+									setv va69 va68
+								endi
+							endi
+						next
+						subv va69 5
+					else
+						setv va69 9075
+					endi
+					targ ownr
+*	Pop it up on the Screen
+					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					attr 304
+** Decline Request button
+					pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
+					part 1
+					anim [0]
+** Accept Request button
+					pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
+					part 2
+					anim [0]
+** chat request Details
+					pat: fixd 3 "small_useful_screen" 5 25 59 1 "GreyOnTransChars"
+					sets va10 "<tint 120 220 250>"
+					adds va10 va05
+					adds va10 read "The Interpreters Text" 4
+					part 3
+					frmt 5 0 5 0 3 0 2
+					ptxt va10
+** Save chatID
+					sets name "ChatID" va06
+** Save the text
+					sets name "text" va10
+** Save the target to the message!
+					seta name "request" va88
+** Positioning!
+					setv va90 wndw
+					divv va90 2
+					setv va91 wndh
+					divv va91 2
+					setv va92 wdth
+					divv va92 2
+					setv va93 hght
+					divv va93 2
+					subv va90 va92
+					subv va91 va93
+** Float to...
+					flto va90 va91
+** timer
+					setv ov01 15
+					tick 20
+					gsub delete
+				elif va01 = "Accept"
+					targ va66
+					sets va02 name "aw_sender"
+** What ChatID is this for?
+					sets va06 name "ChatID"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA
+					doif va06 = mame "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "accepted"
+*	Delete the RTDMA
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				elif va01 = "Decline"
+					targ va66
+					sets va02 name "aw_sender"
+** What ChatID is this for?
+					sets va06 name "ChatID"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA
+					doif va06 = mame "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "declined"
+*	Delete the RTDMA
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				elif va01 = "Timeout"
+					targ va66
+					sets va02 name "aw_sender"
+** What ChatID is this for?
+					sets va06 name "ChatID"
+** If it is the Chat I am waiting to create, continue... otherwise, trash this RTDMA!
+					doif va06 = mame "ChatID"
+** Check Comms Screen
+						rtar 1 2 210
+						setv va10 ov00
+						targ ownr
+						doif va10 = 6
+							rtar 1 1 211
+							doif targ <> null and targ <> ownr
+								doif name "state" = "initiateCR" and va02 = name "CR_recipient_UserID"
+									sets name "CR_result" "timeout"
+*	Delete the RTDMA!
+									gsub delete
+								else
+									gsub delete
+								endi
+							else
+								gsub delete
+							endi
+						else
+							gsub delete
+						endi
+					else
+						gsub delete
+					endi
+				else
+					gsub delete
+
+				endi
+** For some reason, the CR is no longer relevant
+				subr delete
+					kill va66
+				retn
+
+
+
+			endi
+		next
+
+** If there are no chats open, go to a slower timer. Otherwise, speed up.
+		doif totl 1 1 210 eq 0
+			tick 200
+		else
+			tick 10
+		endi
+
+	endi
+
+endm
+
+************************************
+*** CHAT MESSAGE INTERPRETER SCRIPTS
+************************************ 
+* left off 4/26
+
+scrp 1 1 209 9
+	inst
+*	If Offline, slow down the check
+	doif game "aw_status" = "offline"
+* slow down the check
+		tick 75
+		stop
+	endi
+** Otherwise, if you are online... :o)
+** stop and slow down the check if there are no chats up
+	doif totl 1 1 210 = 0
+		tick 40
+		stop
+	endi
+
+* Chat windows are open! speed up the check!
+	tick 10
+* start checking messages!
+	enum 1 1 35756
+		doif type name "CHAT" eq 2
+			dbg: outs "Found a CHAT RTDMA"
+*		va66 will be the current message you are looking at
+			seta va66 targ
+
+*			Put the Message Sender's UserID into VA01
+			sets va01 name "aw_sender"
+*			get what kind of message this is
+			sets va10 name "CHAT"
+
+*			now we have to figure out who sent it
+*			Is it a stranger? Make a contact:
+			sets va02 va01
+			adds va02 "_contact"
+			doif game va02 eq 0
+				rtar 1 1 157
+				mesg wrt+ targ 1000 va01 0 0
+				targ va66
+			else
+*			you know this person-- are they a foe?
+				sets va02 "_group"
+				sets va03 va01
+				adds va03 va02
+*				Are you a foe, little User? ;O)		
+				doif game va03 = 3
+*				Trash the foe's message!
+					kill va66
+*				And stop further processing! :0)
+					stop
+				endi
+			endi
+*			By now you know who they are and that they are not a foe:
+*			va02 should be the name too for reasons:
+			sets va02 va01
+
+			targ va66
+*			alright, here's the big DOIF:
+			doif va10 = "Chatter go Bye Bye"
+** You have been informed of an exiting chatter...
+** You need to: Remove the new chatter from your Chatter List, and also from your Who's Wanted Register!
+				sets va80 name "ChatID"
+				sets va81 name "aw_sender"
+				sets va82 name "Exiting Chatter Nickname"
+				sets va83 name "Exiting Chatter Nickname"
+				kill va66
+** Find the chat
+				setv va99 0
+				enum 1 1 210
+					setv va88 1
+					doif targ <> null
+						doif name "ChatID" = va80
+** Warn if Minimised!
+							seta va44 targ
+							doif name "Iconised" = 1
+								rtar 1 1 164
+								doif targ ne null
+									mesg wrt+ targ 1000 5 0 0
+								endi
+							endi
+							targ va44
+							setv ov70 0
+							tick 1
+							wait 2
+							inst
+** 					Add the new chatter to the list, somewhere! :o)
+							setv va99 0
+							setv va40 1
+							sets va41 "chatter"
+							sets va42 "_Nickname"
+							sets va43 "_UserID"
+							loop
+* 						"chatter"
+								sets va50 va41
+* 						"chatterX"  (X = va40)
+								adds va50 vtos va40
+* 						same again for the UserID...
+								sets va51 va50
+* 						"chatterX_Nickname"
+								adds va50 va42
+* 						"chatterX_UserID"
+								adds va51 va43
+** 						Find the one.. :)
+								doif name va51 = va83
+									sets name va50 ""
+									sets name va51 ""
+** 							Remove them from your who's wanted register too
+									sets va99 caos 0 0 va83 targ game "f_aw_whof" 0 0 va99
+									setv va99 1
+								endi
+								addv va40 1
+							untl va40 = 31 or va99 = 1
+* I have replaced my debug assert style error with a less intrusive one that will simply
+* tell the user that an error has occured and to report it to Creature Labs.
+*					doif va99 = 0
+*						dbg: asrt "leaving chatter" = "not removed"
+*					endi
+*** Instead I added this error text! A polite Grendel error!  
+							doif va99 <> 0
+								sets va10 "<tint 120 220 250>"
+								adds va10 va82
+								adds va10 read "The Interpreters Text" 5
+							else
+								sets va10 ""
+*					adds va10 "<tint 255 0 0>A polite Grendel error has occured. The secret code is: [<tint 255 255 255>Leaving_1<tint 255 0 0>] Please tell Creature Labs the code!"
+							endi
+*** Update the ChatText... :O)
+							adds name "ChatText" va10
+							part 2
+							ptxt name "ChatText"
+							setv va77 npgs
+							subv va77 1
+							page va77
+** Update the Contact List
+							setv ov70 0
+							tick 1
+** stopOK
+							stop
+						endi
+					endi
+				next
+				stop
+			elif va10 = "Update"
+** You have been informed of a new Chatter...
+** You need to: Add the new chatter to your Chatter list, and to your who's wanted register! :o)
+				sets va80 name "ChatID"
+				sets va81 name "aw_sender"
+				sets va82 name "New Chatter Nickname"
+				sets va83 name "New Chatter Nickname"
+				kill va66
+** Find the chat
+				setv va99 0
+				enum 1 1 210
+					setv va88 1
+					doif targ <> null
+						doif name "ChatID" = va80
+** Warn if Minimised!
+							seta va44 targ
+							doif name "Iconised" = 1
+								rtar 1 1 164
+								doif targ ne null
+									mesg wrt+ targ 1000 5 0 0
+								endi
+							endi
+							targ va44
+** 					Add the new chatter to the list, somewhere! :o)
+							setv va99 0
+							setv va40 1
+							sets va41 "chatter"
+							sets va42 "_Nickname"
+							sets va43 "_UserID"
+*					First check to see if they are already in there... :)
+							loop
+* 						"chatter"
+								sets va50 va41
+* 						"chatterX"  (X = va40)
+								adds va50 vtos va40
+* 						same again for the UserID...
+								sets va51 va50
+* 						"chatterX_Nickname"
+								adds va50 va42
+* 						"chatterX_UserID"
+								adds va51 va43
+**						Stop if Chatter is already found!
+								doif name va51 = va83
+									stop
+								endi
+								addv va40 1
+							untl va40 = 31
+** If it has got this far, the chatter is not already in there.. :)
+** So we need to scan through again and find a spare slot! 
+							setv va99 0
+							setv va40 1
+							sets va41 "chatter"
+							sets va42 "_Nickname"
+							sets va43 "_UserID"
+							loop
+* 						"chatter"
+								sets va50 va41
+* 						"chatterX"  (X = va40)
+								adds va50 vtos va40
+* 						same again for the UserID...
+								sets va51 va50
+* 						"chatterX_Nickname"
+								adds va50 va42
+* 						"chatterX_UserID"
+								adds va51 va43
+** 						Find a spare one...
+								doif name va50 = ""
+									sets name va50 va82
+									sets name va51 va83
+** 							add them to your who's wanted register too
+									lock
+									sets va99 caos 0 0 va83 targ game "f_aw_whon" 0 0 va99
+									inst
+									setv va99 1
+								endi
+								addv va40 1
+							untl va40 = 31 or va99 = 1
+** 					If you haven't been added, then something has gone wrong!! eek!
+							doif va99 = 0
+								dbg: asrt "chatter" = "not added"
+							else
+								sets va10 "<tint 120 220 250>"
+								adds va10 va82
+								adds va10 read "The Interpreters Text" 6
+*** Update the ChatText... :O)
+								adds name "ChatText" va10
+								part 2
+								ptxt name "ChatText"
+								setv va77 npgs
+								subv va77 1
+								page va77
+** Update the Contact List
+								setv ov70 0
+								tick 1
+							endi
+						endi
+					endi
+				next
+				doif va88 <> 1
+					dbg: asrt 1 = 666
+				endi
+				stop
+			elif va10 = "Message"
+*	Grab all the Message Details.
+				sets va01 name "aw_sender"
+				sets va02 name "ChatID"
+				sets va03 name "aw_sender"
+				sets va04 name "Chat Message"
+				kill va66
+*	Search all Chats for the one with this ChatID
+				setv va99 0
+				enum 1 1 210
+					doif name "ChatID" = va02
+						inst
+** Warn if Minimised!
+						seta va44 targ
+						doif name "Iconised" = 1
+							rtar 1 1 164
+							doif targ ne null
+								mesg wrt+ targ 1000 5 0 0
+							endi
+						endi
+						targ va44
+						setv va99 1
+						adds name "ChatText" "<tint 120 220 250>"
+						adds name "ChatText" va03
+						adds name "ChatText" ": "
+						adds name "ChatText" va04
+						part 2
+						ptxt name "ChatText"
+						setv va10 npgs
+						subv va10 1
+						page va10
+** Update the Contact List
+						setv ov70 0
+						tick 1
+					endi
+				next
+			else
+*			A  chat message with nowhere to go...
+				dbg: outs "Unable to interpret a CHAT message"
+			endi
+*			this has us kill the RTDMA but it should have already
+*			been killed if it was used
+*			if it wasn't used maybe we should let it live
+*			in case another agent needs it for something?
+*			kill va66
+
+		endi
+	next
+endm
+
+*scripts from 'chat - chat module.cos'
+*  Update Recipient Display
+* _p1_ shows you which page to display
+* 0, 1, 2.. etc
+scrp 1 1 211 4000
+	inst
+	doif game "aw_status" = "offline"
+		part 21
+		ptxt read "Chat Module Text" 3
+		part 23
+		frat 6
+		anim [1 0 255]
+** Trigger the "Click when ready to go online" message!
+*!* NO. NEVER DO THIS AGAIN
+*		inst
+*		rtar 1 1 224
+*		doif targ <> null
+*			mesg writ targ 1000
+*		endi
+		stop
+	else
+		part 23
+		anim [0]
+		part 22
+		anim [0]
+	endi
+*	dbg: outs "----------------"
+*	dbg: outs "FILL CONTACTS"
+*	dbg: outs "_p1_ is:"
+*	dbg: outv _p1_
+*	dbg: outs "----------------"
+*	va15 is when to start displaying entries
+*	based on page number needed	
+	setv va15 _p1_
+	mulv va15 11
+*	doif _p1_ <> 0
+*		addv va15 2
+*	endi
+*	set page number variable
+	setv name "page" _p1_
+*	va16 is how many legit entries had so far	
+	setv va16 0
+
+*	show back arrow if this isn't page 1
+	doif _p1_ <> 0
+		part 24
+		pose 1
+	else
+		part 24
+		pose 0
+	endi
+
+*	Clear all info on NicknameDisplays
+	setv va00 120
+	loop
+		part va00
+		ptxt ""
+		addv va00 1
+	untl va00 = 132
+*	Clear all info on Recipient Choosing Buttons
+	setv va00 150
+	loop
+		part va00
+		pose 0
+		addv va00 1
+	untl va00 = 162
+
+*	UPDATE RECIPIENT LIST
+*     =====================
+
+	setv va33 0
+*	va00 is which part # to use, incremented with each entry
+	setv va00 120
+*	va01 is how many entries added
+	setv va01 0
+*	va99 is which game variable to search, start at ""
+	sets va99 ""
+*	search string
+	sets va02 "_contact"
+*	loop through all game variables
+	slow
+	wait 1
+	inst
+	loop
+		doif va01 > 11
+			sets va99 ""
+		endi
+*	set va10 to the string of the current game variable
+		sets va10 gamn va99
+*	set va20 to the value where search string is contained
+*	in current game variable
+		setv va20 sins va10 1 va02
+*	if va20 ne -1 then the current string is what we are looking for
+		doif va20 ne -1
+
+**only do this if this is the page you need
+*			addv va16 1
+			doif va16 ge va15
+*		chop up string so only head remains
+*		this makes va30 the USER ID
+				subv va20 1
+				sets va30 subs va10 1 va20
+*			ignore random user contact
+*			only do this if it isn't 'random online user'
+				doif va30 <> "!net: ruso" and va30 <> "!friend"
+
+* Only shows if they aren't a foe...
+					sets va53 "_group"
+					sets va54 va30
+					adds va54 va53
+** do the following code if they aren't marked as a foe
+					doif game va54 <> 3
+
+** Only shows if the user is online
+						doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 = 1
+*			get Nicknamename for this user
+							sets va40 "_nick"
+*      		Store the UserID into a NAME variable, to use for the Recipient.
+							setv va77 va00
+							addv va77 30
+							sets name va77 va30
+*			copy user ID to another variable
+							sets va41 va30
+*			create Nickname string
+							adds va41 va40
+*			get value from Nickname string
+							sets va42 "<tint 120 220 250>"
+							adds va42 game va41
+*  			put Nickname in correct text box
+							part va00
+							ptxt va42
+* If that is the selected recipient, change icons as necessary..
+							doif name "CR_recipient_Nickname" <> ""
+								sets va13 "<tint 120 220 250>"
+								adds va13 name "CR_recipient_Nickname"
+								doif va42 = va13
+									setv va13 va00
+									addv va13 30
+									part va13
+									pose 1
+								endi
+							endi
+*		increment part# to place text in
+							addv va00 1
+* save a record that a contact was actually found
+							setv va33 1
+*		increment counter
+							addv va01 1
+** increment entry counter
+							addv va16 1
+						endi
+					endi
+				endi
+
+** Bail if text parts get too high
+				doif va00 = 132
+					sets va10 ""
+				endi
+
+*	if this is enough entries to fill colum
+				doif va01 = 11
+*		display forward arrow
+					part 25
+					pose 1
+*		and set condition to exit loop
+					sets va10 ""
+				else
+*		don't show forward arrow
+					part 25
+					pose 0
+				endi
+			endi
+
+		endi
+*	carry on loop, increment current game variable
+		sets va99 va10
+*	keep going until you've scanned them all
+	untl va10 eq ""
+	slow
+	doif va33 = 0
+		part 21
+		doif _p1_ = 0
+			ptxt read "Chat Module Text" 4
+		else
+			wait 20
+			ptxt read "Chat Module Text" 5
+		endi
+		part 23
+		frat 4
+		anim [1 0 255]
+		part 22
+		anim [0]
+		part 23
+		frat 4
+		anim [0 1 255]
+	elif va33 = 1
+		part 21
+		ptxt read "Chat Module Text" 6
+		part 22
+		frat 4
+		anim [1 0 255]
+		part 23
+		frat 4
+		anim [0 1 255]
+	endi
+endm
+
+* Accept Selected Contact for chat request
+scrp 1 1 211 1004
+	inst
+* Are we online?
+	doif game "aw_status" = "offline"
+		snde "buzz"
+		part 21
+		ptxt read "Chat Module Text" 7
+** Trigger the "Click when ready to go online" message!
+*		inst
+*		rtar 1 1 224
+*		doif targ <> null
+*			mesg writ targ 1000
+*		endi
+		stop
+	endi
+*	Check we have the Recipient info
+	doif name "CR_recipient_Nickname" = ""
+		snde "buzz"
+		part 21
+		ptxt read "Chat Module Text" 8
+		stop
+	endi
+	snde "2bep"
+*	There is a recipient, so it is OK to go on to composing a message.
+*	Change State
+	sets name "oldstate" name "state"
+	sets name "state" "initiateCR"
+*	Clear old Parts / Create new Parts
+	call 2000 0 0
+*	Update Text Displays
+	sets va00 read "Chat Module Text" 9
+	adds va00 name "CR_recipient_Nickname"
+	adds va00 read "Chat Module Text" 10
+	adds va00 name "CR_recipient_Nickname"
+	adds va00 read "Chat Module Text" 11
+	part 31
+	ptxt va00
+** Call Send CR Script
+	call 1009 0 0
+endm
+
+** Send CR & Update CR display as you go... :)
+scrp 1 1 211 1009
+	inst
+* Figure some stuff out:
+
+** Make up a ChatID
+	sets va77 rtif rtim "%Y%m%d%H%M%S"
+	setv va22 rand 0 32
+	sets va23 read "Moniker Friendly Names 1" va22
+	adds va23 " ("
+	adds va23 va77
+	adds va23 ") - "
+	adds va23 game "user_of_this_world"
+** 	Set the CR ChatID variable - very important :)
+	sets name "CR_ChatID" va23
+
+**	Create chat request RTDMA!
+	new: simp 1 1 35755 "blnk" 1 0 0
+	dbg: outs "RTDMA Created-- REQU: Request"
+	sets name "REQU" "Request"
+	sets name "ChatID" mame "CR_ChatID"
+	sets name "aw_recipient" mame "CR_recipient_UserID"
+
+** Always assume success with AW (we are overconfident maybe)
+	doif 0 = 0
+		targ ownr
+		sets name "CR_status" ""
+		sets name "CR_result" "awaiting"
+** Loop, incrementing timer... until the CR recipient accepts the CR.
+		setv va00 244
+		setv va01 1
+		part 34
+		frat 3
+		anim [1 2 3 4 255]
+		rtar 1 1 213
+		tick 20
+		targ ownr
+		setv va73 999
+		loop
+			doif va01 = 1
+				setv va01 2
+				sets va02 read "Chat Module Text" 12
+			elif va01 = 2
+				setv va01 3
+				sets va02 read "Chat Module Text" 13
+			elif va01 = 3
+				setv va01 1
+				sets va02 read "Chat Module Text" 14
+			endi
+			part 33
+			ptxt va02
+			subv va00 1
+			wait 3
+			setv va73 stoi caos 0 0 name "CR_recipient_UserID" 0 game "f_aw_ulin" 0 1 va99
+		untl va00 = 0 or name "CR_result" = "declined" or name "CR_result" = "accepted" or name "CR_result" = "timeout" or va73 = 0
+		rtar 1 1 213
+		tick 200
+		targ ownr
+		part 34
+		anim [0]
+** have they gone offline?
+		doif va73 = 0
+** if so, tell the user! ;-)
+			sets va35 read "Chat Module Text" 15
+			adds va35 name "CR_recipient_Nickname"
+			adds va35 read "Chat Module Text" 16
+			part 33
+			ptxt va35
+			part 34
+			anim [2]
+*	      Cancel Button
+			pat: butt 32 "chat" 38 2 410 134 3 [0 1 255] 1005 1
+			part 32
+			frat 3
+			anim [0 1 255]
+		else
+** Depending on the Result...
+			doif va00 = 0 and va73 = 1
+				sets va35 read "Chat Module Text" 17
+				adds va35 name "CR_recipient_Nickname"
+				adds va35 read "Chat Module Text" 18
+				part 33
+				ptxt va35
+				part 34
+				anim [1]
+*	      Cancel Button
+				pat: butt 32 "chat" 38 2 410 134 3 [0 1 255] 1005 1
+				part 32
+				frat 3
+				anim [0 1 255]
+			endi
+			doif name "CR_result" = "timeout" and va73 = 1
+				sets va35 read "Chat Module Text" 19
+				adds va35 name "CR_recipient_Nickname"
+				adds va35 read "Chat Module Text" 20
+				part 33
+				ptxt va35
+				part 34
+				anim [2]
+*	      Cancel Button
+				pat: butt 32 "chat" 38 2 410 134 3 [0 1 255] 1005 1
+				part 32
+				frat 3
+				anim [0 1 255]
+			elif name "CR_result" = "declined"
+				sets va35 read "Chat Module Text" 21
+				adds va35 name "CR_recipient_Nickname"
+				adds va35 read "Chat Module Text" 22
+				part 33
+				ptxt va35
+				part 34
+				anim [3]
+*	      Cancel Button
+				pat: butt 32 "chat" 38 2 410 134 3 [0 1 255] 1005 1
+				part 32
+				frat 3
+				anim [0 1 255]
+			elif name "CR_result" = "accepted"
+				sets va35 read "Chat Module Text" 23
+				adds va35 name "CR_recipient_Nickname"
+				adds va35 read "Chat Module Text" 24
+				part 33
+				ptxt va35
+				part 34
+				frat 1
+				anim [1 2 255]
+** Create the Chat Agent
+				sets va88 name "CR_recipient_Nickname"
+				sets va89 name "CR_recipient_UserID"
+				sets va44 name "CR_ChatID"
+				inst
+** find a spare plane
+				doif game "chat_plane" < game "chat_plane_max"
+					setv va00 game "chat_plane"
+					setv va01 va00
+					addv va01 10
+					setv game "chat_plane" va01
+				else
+					setv game "chat_plane" 8500
+					setv va00 8500
+				endi
+				targ ownr
+				new: comp 1 1 210 "chat" 2 0 va00
+				attr 290
+** listen for raw mouse downs
+				imsk 8
+** Save the ChatID
+				sets name "ChatID" va44
+** Save the Plane
+				setv name "Plane" va00
+** You are Chatter1
+				sets name "chatter1_Nickname" game "user_of_this_world"
+				sets name "chatter1_UserID" game "user_of_this_world"
+** The other person is Chatter2
+				sets name "chatter2_Nickname" va88
+				sets name "chatter2_UserID" va89
+** Sizing
+				sets name "Sizing" "Minimum"
+** Fill in the other Chatters
+				setv va40 3
+				sets va41 "chatter"
+				sets va42 "_Nickname"
+				sets va43 "_UserID"
+				sets va44 "<tint 128 128 200>"
+				loop
+* "chatter"
+					sets va50 va41
+* "chatterX"  (X = va40)
+					adds va50 vtos va40
+* same again for the UserID...
+					sets va51 va50
+* "chatterX_Nickname"
+					adds va50 va42
+* "chatterX_UserID"
+					adds va51 va43
+* sets name "chatterX_Nickname" ""
+					sets name va50 ""
+* sets name "chatterX_Nickname" ""
+					sets name va51 ""
+
+* Increment the X (va40)
+					addv va40 1
+				untl va40 = 31
+** Create the Who's Wanted Register
+				sets va99 caos 0 0 va89 targ game "f_aw_whon" 0 0 va99
+				inst
+** Create the Parts...
+** Chat Text
+				pat: fixd 2 "chat text parts" 0 45 19 1 "GreyOnTransChars"
+				part 2
+				frmt 3 3 3 3 1 1 16
+				sets va00 read "Chat Module Text" 25
+				ptxt va00
+** Save the Chat Text... (this string could get ENORMOUS
+				adds va00 "\n"
+				sets name "ChatText" va00
+** Your Text
+				pat: text 3 "chat text parts" 4 45 109 2 1000 "WhiteOnTransparentChars"
+				part 3
+				frmt 2 2 2 2 1 1 0
+				fcus
+* Quit Chat
+				pat: butt 4 "chat" 38 2 410 134 1 [1] 1010 0
+				part 4
+				anim [0]
+* Invite User
+				pat: butt 5 "chat" 22 1 9 91 6 [] 1011 0
+				part 5
+				anim [0]
+** Back a page...
+				pat: butt 6 "chat" 46 2 264 21 2 [1] 1012 0
+				part 6
+				anim [0]
+** forward a page...
+				pat: butt 7 "chat" 48 2 264 88 2 [1] 1013 0
+				part 7
+				anim [0]
+** Red Text Button
+				pat: butt 8 "chat text colour button" 0 1 52 172 2 [] 1014 0
+				part 8
+				tint 96 0 0 128 128
+** Green Text Button
+				pat: butt 9 "chat text colour button" 0 1 78 172 2 [] 1014 0
+				part 9
+				tint 0 160 0 128 128
+** Blue Text Button
+				pat: butt 10 "chat text colour button" 0 1 104 172 2 [] 1014 0
+				part 10
+				tint 0 0 192 128 128
+** Text Focus Button
+				pat: butt 11 "chat" 52 2 408 78 2 [1] 1015 0
+				part 11
+				anim [0]
+** Iconise Button
+				pat: butt 12 "chat" 50 2 408 51 2 [1] 1016 0
+				part 12
+				anim [0]
+** Sizing Button
+				pat: butt 13 "chat" 54 2 408 103 2 [1] 1017 0
+				part 13
+				anim [0]
+* Red Text Colour - level indicator
+				pat: fixd 14 "ds gui" 54 60 178 3 "WhiteOnTransparentChars"
+				part 14
+				frmt 0 0 0 0 0 0 0
+				ptxt "3"
+* Green Text Colour - level indicator
+				pat: fixd 15 "ds gui" 54 86 178 3 "WhiteOnTransparentChars"
+				part 15
+				frmt 0 0 0 0 0 0 0
+				ptxt "5"
+* Blue Text Colour - level indicator
+				pat: fixd 16 "ds gui" 54 111 178 3 "WhiteOnTransparentChars"
+				part 16
+				frmt 0 0 0 0 0 0 0
+				ptxt "6"
+** Sample Text Colour (Creatures Chat)
+				pat: fixd 17 "chat text parts" 5 140 175 3 "GreyOnTransChars"
+				part 17
+				frmt 3 3 0 0 0 0 0
+				ptxt read "Chat Module Text" 26
+* Your Chat Text Colour
+				setv name "Text Colour Red" 96
+				setv name "Text Colour Green" 160
+				setv name "Text Colour Blue" 192
+** Chatter List
+				setv va00 285
+				setv va01 23
+				setv va02 21
+				loop
+					pat: fixd va02 "chat window" 8 va00 va01 2 "GreyOnTransChars"
+					part va02
+					frmt 3 3 2 2 1 1 0
+					addv va01 17
+					addv va02 1
+				untl va02 = 33
+** Move it
+				setv va90 wndw
+				divv va90 2
+				setv va91 wndh
+				divv va91 2
+				setv va92 wdth
+				divv va92 2
+				setv va93 hght
+				divv va93 2
+
+				subv va90 va92
+				subv va91 va93
+				addv va91 100
+
+				flto va90 va91
+** Update the List
+				tick 1
+				targ ownr
+				call 1005 0 0
+			endi
+		endi
+	else
+		sets va33 read "Chat Module Text" 27
+		part 33
+		ptxt va33
+		dbg: asrt "something" = "is wrong"
+*		va81 has more info on this error!
+	endi
+endm
+
+* chat - chat request indicator.cos
+
+** Send Result
+scrp 1 1 214 1002
+	lock
+	inst
+** Get all the necessary details first..
+	doif ov81 = 0
+		targ name "request"
+
+		sets va02 name "Sender UserID"
+		sets va03 name "Sender Nickname"
+		targ ownr
+** Kill the Request
+
+		kill name "request"
+
+	else
+		sets va02 name "Sender_UserID"
+		sets va03 name "Sender_Nickname"
+	endi
+*	
+*	Create RTDMA:
+	new: simp 1 1 35755 "blnk" 1 0 0
+	sets name "aw_recipient" va02
+	sets name "ChatID" mame "ChatID"
+*	What are you actually doing here	
+	doif mame "result" = "decline"
+		sets name "REQU" "Decline"
+		dbg: outs "RTDMA Created-- REQU: Decline"
+	elif mame "result" = "accept"
+		sets name "REQU" "Accept"
+		dbg: outs "RTDMA Created-- REQU: Accept"
+	elif mame "result" = "timeout"
+		sets name "REQU" "Timeout"
+		dbg: outs "RTDMA Created-- REQU: Timeout"
+	elif mame "result" = "invite_accept"
+		sets name "REQU" "Invite Accept"
+		dbg: outs "RTDMA Created-- REQU: Invite Accept"
+	elif mame "result" = "invite_decline"
+		sets name "REQU" "Invite Decline"
+		dbg: outs "RTDMA Created-- REQU: Invite Decline"
+	elif mame "result" = "invite_timeout"
+		sets name "REQU" "Invite Timeout"
+		dbg: outs "RTDMA Created-- REQU: Invite Timeout"
+	endi
+
+	targ ownr
+	doif name "result" = "decline" or name "result" = "invite_decline"
+		kill ownr
+	elif name "result" = "invite_accept"
+		inst
+** find a spare plane
+		doif game "chat_plane" < game "chat_plane_max"
+			setv va00 game "chat_plane"
+			setv va01 va00
+			addv va01 10
+			setv game "chat_plane" va01
+		else
+			setv game "chat_plane" 8500
+			setv va00 8500
+		endi
+** Create the chat!
+		new: comp 1 1 210 "chat" 2 0 va00
+		attr 290
+** Listen for raw mouse downs!
+		imsk 8
+** Save the Plane
+		setv name "Plane" va00
+** Grab all the Chat Details... :)
+		sets name "ChatID" mame "ChatID"
+** Sizing
+		sets name "Sizing" "Minimum"
+** Fill in all the chatters!
+		setv va40 1
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+* sets name "chatterX_Nickname" the same as the Chat Invitation said..
+			sets name va50 mame va50
+* sets name "chatterX_UserID" the same as the Chat Invitation said..
+			sets name va51 mame va51
+** Also add to the Who's Wanted register... :o)
+			doif name va51 <> ""
+				lock
+				sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
+				inst
+			endi
+* Increment the X (va40)
+			addv va40 1
+		untl va40 = 31
+** Add yourself to this list, somewhere! :o)
+		setv va99 0
+		setv va40 1
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+** Find a spare one...
+			doif name va50 = ""
+				sets name va50 game "user_of_this_world"
+				sets name va51 game "user_of_this_world"
+				setv va99 1
+			endi
+			addv va40 1
+		untl va40 = 31 or va99 = 1
+** If you haven't been added, then something has gone wrong!! eek!
+		doif va99 = 0
+			dbg: asrt "just invited" = "couldn't be added"
+		endi
+** Create the Parts...
+** Chat Text
+		pat: fixd 2 "chat text parts" 0 45 19 1 "GreyOnTransChars"
+		part 2
+		frmt 3 3 3 3 1 1 16
+		sets va00 read "Chat Module Text" 25
+		ptxt va00
+** Save the Chat Text... (this string could get ENORMOUS
+		adds va00 "\n"
+		sets name "ChatText" va00
+** Your Text
+		pat: text 3 "chat text parts" 4 45 109 2 1000 "WhiteOnTransparentChars"
+		part 3
+		frmt 2 2 2 2 1 1 0
+		fcus
+* Quit Chat
+		pat: butt 4 "chat" 38 2 410 134 1 [1] 1010 0
+		part 4
+		anim [0]
+* Invite User
+		pat: butt 5 "chat" 22 1 9 91 6 [] 1011 0
+		part 5
+		anim [0]
+** Back a page...
+		pat: butt 6 "chat" 46 2 264 21 2 [1] 1012 0
+		part 6
+		anim [0]
+** forward a page...
+		pat: butt 7 "chat" 48 2 264 88 2 [1] 1013 0
+		part 7
+		anim [0]
+** Red Text Button
+		pat: butt 8 "chat text colour button" 0 1 52 172 2 [] 1014 0
+		part 8
+		tint 96 0 0 128 128
+** Green Text Button
+		pat: butt 9 "chat text colour button" 0 1 78 172 2 [] 1014 0
+		part 9
+		tint 0 160 0 128 128
+** Blue Text Button
+		pat: butt 10 "chat text colour button" 0 1 104 172 2 [] 1014 0
+		part 10
+		tint 0 0 192 128 128
+** Text Focus Button
+		pat: butt 11 "chat" 52 2 408 78 2 [1] 1015 0
+		part 11
+		anim [0]
+** Iconise Button
+		pat: butt 12 "chat" 50 2 408 51 2 [1] 1016 0
+		part 12
+		anim [0]
+** Sizing Button
+		pat: butt 13 "chat" 54 2 408 103 2 [1] 1017 0
+		part 13
+		anim [0]
+* Red Text Colour - level indicator
+		pat: fixd 14 "ds gui" 54 60 178 3 "WhiteOnTransparentChars"
+		part 14
+		frmt 0 0 0 0 0 0 0
+		ptxt "3"
+* Green Text Colour - level indicator
+		pat: fixd 15 "ds gui" 54 86 178 3 "WhiteOnTransparentChars"
+		part 15
+		frmt 0 0 0 0 0 0 0
+		ptxt "5"
+* Blue Text Colour - level indicator
+		pat: fixd 16 "ds gui" 54 111 178 3 "WhiteOnTransparentChars"
+		part 16
+		frmt 0 0 0 0 0 0 0
+		ptxt "6"
+** Sample Text Colour (Creatures Chat)
+		pat: fixd 17 "chat text parts" 5 140 175 3 "GreyOnTransChars"
+		part 17
+		frmt 3 3 0 0 0 0 0
+		ptxt read "Chat Module Text" 25
+* Your Chat Text Colour
+		setv name "Text Colour Red" 96
+		setv name "Text Colour Green" 160
+		setv name "Text Colour Blue" 192
+** Chatter List
+		setv va00 285
+		setv va01 23
+		setv va02 21
+		loop
+			pat: fixd va02 "chat window" 8 va00 va01 2 "GreyOnTransChars"
+			part va02
+			frmt 3 3 2 2 1 1 0
+			addv va01 17
+			addv va02 1
+		untl va02 = 33
+** Move it
+		setv va90 wndw
+		divv va90 2
+		setv va91 wndh
+		divv va91 2
+		setv va92 wdth
+		divv va92 2
+		setv va93 hght
+		divv va93 2
+
+		subv va90 va92
+		subv va91 va93
+		addv va91 100
+		flto va90 va91
+** Update the List
+		tick 1
+** Kill the Chat Request Indicator
+		kill ownr
+	elif name "result" = "accept"
+** Load up the chat!!
+
+		inst
+** find a spare plane
+		doif game "chat_plane" < game "chat_plane_max"
+			setv va00 game "chat_plane"
+			setv va01 va00
+			addv va01 10
+			setv game "chat_plane" va01
+		else
+			setv game "chat_plane" 8500
+			setv va00 8500
+		endi
+** Create the Chat! :)
+		new: comp 1 1 210 "chat" 2 0 va00
+		attr 290
+** Listen for Raw Mouse Downs!
+		imsk 8
+** Save the Plane
+		setv name "Plane" va00
+** Save the ChatID
+		sets name "ChatID" mame "ChatID"
+** Chat initiator is Chatter1
+		sets name "chatter1_Nickname" va03
+		sets name "chatter1_UserID" va02
+** You are Chatter2
+		sets name "chatter2_Nickname" game "user_of_this_world"
+		sets name "chatter2_UserID" game "user_of_this_world"
+** Sizing
+		sets name "Sizing" "Minimum"
+** Fill in the other Chatters
+		setv va40 3
+		sets va41 "chatter"
+		sets va42 "_Nickname"
+		sets va43 "_UserID"
+		loop
+* "chatter"
+			sets va50 va41
+* "chatterX"  (X = va40)
+			adds va50 vtos va40
+* same again for the UserID...
+			sets va51 va50
+* "chatterX_Nickname"
+			adds va50 va42
+* "chatterX_UserID"
+			adds va51 va43
+* sets name "chatterX_Nickname" ""
+			sets name va50 ""
+* sets name "chatterX_Nickname" ""
+			sets name va51 ""
+* Increment the X (va40)
+			addv va40 1
+		untl va40 = 31
+** Create the Parts...
+** Chat Text
+		pat: fixd 2 "chat text parts" 0 45 19 1 "GreyOnTransChars"
+		part 2
+		frmt 3 3 3 3 1 1 16
+		sets va00 read "Chat Module Text" 25
+		ptxt va00
+** Save the Chat Text... (this string could get ENORMOUS
+		adds va00 "\n"
+		sets name "ChatText" va00
+** Your Text
+		pat: text 3 "chat text parts" 4 45 109 2 1000 "WhiteOnTransparentChars"
+		part 3
+		frmt 2 2 2 2 1 1 0
+		fcus
+* Quit Chat
+		pat: butt 4 "chat" 38 2 410 134 1 [1] 1010 0
+		part 4
+		anim [0]
+* Invite User
+		pat: butt 5 "chat" 22 1 9 91 6 [] 1011 0
+		part 5
+		anim [0]
+** Back a page...
+		pat: butt 6 "chat" 46 2 264 21 2 [1] 1012 0
+		part 6
+		anim [0]
+** forward a page...
+		pat: butt 7 "chat" 48 2 264 88 2 [1] 1013 0
+		part 7
+		anim [0]
+** Red Text Button
+		pat: butt 8 "chat text colour button" 0 1 52 172 2 [] 1014 0
+		part 8
+		tint 96 0 0 128 128
+** Green Text Button
+		pat: butt 9 "chat text colour button" 0 1 78 172 2 [] 1014 0
+		part 9
+		tint 0 160 0 128 128
+** Blue Text Button
+		pat: butt 10 "chat text colour button" 0 1 104 172 2 [] 1014 0
+		part 10
+		tint 0 0 192 128 128
+** Text Focus Button
+		pat: butt 11 "chat" 52 2 408 78 2 [1] 1015 0
+		part 11
+		anim [0]
+** Iconise Button
+		pat: butt 12 "chat" 50 2 408 51 2 [1] 1016 0
+		part 12
+		anim [0]
+** Sizing Button
+		pat: butt 13 "chat" 54 2 408 103 2 [1] 1017 0
+		part 13
+		anim [0]
+* Red Text Colour - level indicator
+		pat: fixd 14 "ds gui" 54 60 178 3 "WhiteOnTransparentChars"
+		part 14
+		frmt 0 0 0 0 0 0 0
+		ptxt "3"
+* Green Text Colour - level indicator
+		pat: fixd 15 "ds gui" 54 86 178 3 "WhiteOnTransparentChars"
+		part 15
+		frmt 0 0 0 0 0 0 0
+		ptxt "5"
+* Blue Text Colour - level indicator
+		pat: fixd 16 "ds gui" 54 111 178 3 "WhiteOnTransparentChars"
+		part 16
+		frmt 0 0 0 0 0 0 0
+		ptxt "6"
+** Sample Text Colour (Creatures Chat)
+		pat: fixd 17 "chat text parts" 5 140 175 3 "GreyOnTransChars"
+		part 17
+		frmt 3 3 0 0 0 0 0
+		ptxt read "Chat Module Text" 26
+* Your Chat Text Colour
+		setv name "Text Colour Red" 96
+		setv name "Text Colour Green" 160
+		setv name "Text Colour Blue" 192
+** Chatter List
+		setv va00 285
+		setv va01 23
+		setv va02 21
+		loop
+			pat: fixd va02 "chat window" 8 va00 va01 2 "GreyOnTransChars"
+			part va02
+			frmt 3 3 2 2 1 1 0
+			addv va01 17
+			addv va02 1
+		untl va02 = 33
+** Move it
+		setv va90 wndw
+		divv va90 2
+		setv va91 wndh
+		divv va91 2
+		setv va92 wdth
+		divv va92 2
+		setv va93 hght
+		divv va93 2
+
+		subv va90 va92
+		subv va91 va93
+		addv va91 100
+		flto va90 va91
+** Update the List
+		tick 1
+** Kill the Chat Request Indicator
+		kill ownr
+	endi
+endm
+
+* chat - chat scripts.cos
+
+* Send a Chat Message
+scrp 1 1 210 1000
+	inst
+*	dbg: outs "About to send a chat message"
+** First, grab your chat colour!
+	sets va66 "<tint "
+	adds va66 vtos name "Text Colour Red"
+	adds va66 " "
+	adds va66 vtos name "Text Colour Green"
+	adds va66 " "
+	adds va66 vtos name "Text Colour Blue"
+	adds va66 " 128 128>"
+** Get what you have just written, blanking the text part afterwards... :)
+	part 3
+	adds va66 ptxt
+	adds va66 "\n"
+	part 3
+	ptxt ""
+** Send it to all the other Chatters! :)
+** (You're going to have to make an RTDMA for each person in the chat)
+	sets va10 "chatter"
+	sets va01 "_UserID"
+	setv va02 1
+	sets va88 game "user_of_this_world"
+	loop
+*		dbg: outs "in the chat message loop"
+		targ ownr
+		sets va03 va10
+		adds va03 vtos va02
+		adds va03 va01
+		doif name va03 <> "" and name va03 <> va88
+			new: simp 1 1 35755 "blnk" 1 0 0
+			dbg: outs "RTDMA Created-- CHAT: Message"
+			sets name "aw_recipient" mame va03
+			sets name "CHAT" "Message"
+			sets name "Chat Message" va66
+			sets name "ChatID" mame "ChatID"
+		else
+*			this is you or nobody
+		endi
+		addv va02 1
+	untl va02 = 31
+
+** Update the ChatText... :O)
+	adds name "ChatText" "<tint 120 220 250>"
+	adds name "ChatText" game "user_of_this_world"
+	adds name "ChatText" ": "
+	adds name "ChatText" va66
+	part 2
+	ptxt name "ChatText"
+	part 2
+	setv va00 npgs
+	subv va00 1
+	page va00
+** Update the Contact List
+	setv ov70 0
+	tick 1
+
+
+endm
+
+* A Chatter has gone Offline
+scrp 1 1 210 138
+	inst
+	lock
+*	If Offline, Kill this chat! :o(
+	doif game "aw_status" = "offline"
+		kill ownr
+	endi
+** Grab the UserID
+	sets va00 _p1_
+** Loop through all the Chatters until we find this chatter, and remove them from the Chatter list (and the Who's Wanted Register).
+	sets va01 "chatter"
+	sets va02 "_UserID"
+	sets va03 "_Nickname"
+	setv va04 1
+	loop
+*		"chatter"
+		sets va05 va01
+*		"chatterX"
+		adds va05 vtos va04
+*		Copied for Nickname		
+		sets va06 va05
+*		"chatterX_UserID"
+		adds va05 va02
+*		"chatterX_Nickname"
+		adds va06 va03
+		doif name va05 = va00
+			setv va07 va04
+** Update the Chat with this info!
+			adds name "ChatText" read "Chat Scripts Text" 0
+			adds name "ChatText" "<tint 120 220 250>"
+			adds name "ChatText" name va06
+			adds name "ChatText" read "Chat Scripts Text" 1
+			part 2
+			ptxt name "ChatText"
+			setv va10 npgs
+			subv va10 1
+			page va10
+** Clear the "chatterX_UserID" name variable.
+			sets name va05 ""
+			adds va06 va03
+** Clear the "chatterX_Nickname" name variable.
+			sets name va06 ""
+** Remove from Who's Wanted Register
+			sets va99 caos 0 0 va00 targ game "f_aw_whof" 0 0 va99
+** cut out
+			setv va99 1
+		endi
+		addv va04 1
+	untl va04 = 31 or va99 = 1
+	unlk
+** Force an Update to the Contact List
+	setv ov70 0
+	tick 1
+endm
+
+** Update Chat Contact List
+scrp 1 1 210 3000
+	inst
+	lock
+	setv va00 21
+	sets va01 "chatter"
+	sets va02 "_Nickname"
+	setv va03 1
+	sets va05 "_UserID"
+	doif name "Sizing" = "Maximum"
+		setv va99 43
+	elif name "Sizing" = "Minimum"
+		setv va99 33
+	endi
+	loop
+		doif va03 <= 9
+			sets va04 va01
+			adds va04 vtos va03
+			sets va06 va04
+			adds va04 va02
+			adds va06 va05
+** Remove them if they are offline.
+			doif name va04 <> ""
+				doif stoi caos 0 0 va06 0 game "f_aw_ulin" 0 1 va99 eq 0
+** Update the Chat with this info!
+					adds name "ChatText" read "Chat Scripts Text" 0
+					adds name "ChatText" "<tint 120 220 250>"
+					adds name "ChatText" name va04
+					adds name "ChatText" read "Chat Scripts Text" 1
+					part 2
+					ptxt name "ChatText"
+					setv va10 npgs
+					subv va10 1
+					page va10
+					sets name va04 ""
+					sets name va06 ""
+					sets va99 caos 0 0 va06 targ game "f_aw_whof" 0 0 va99
+				endi
+			endi
+** Add them to the displayed contact list
+			doif name va04 <> ""
+				sets va20 "<tint 120 220 250>"
+				sets va30 va20
+				adds va30 name va04
+				part va00
+				ptxt va30
+				addv va00 1
+			endi
+		else
+			doif va00 < va99
+				addv va00 1
+			endi
+		endi
+** Increment the ChatterX
+		addv va03 1
+** If we have gone beyond Chatter30, ptxt all further parts with nothing (clears them.)
+		doif va03 > 9 and va00 < 30
+			part va00
+			ptxt ""
+		endi
+	untl va00 = 30
+endm
+
+** Quit Chat
+scrp 1 1 210 1010
+	lock
+	inst
+	snde "bep2"
+** OK, so you want to leave the chat?
+** You need to: Tell all the chatters that you are leaving, then kill the chat screen! :o)
+
+** An RTDMA for every chatter
+	sets va10 "chatter"
+	sets va01 "_UserID"
+	setv va02 1
+	sets va88 game "user_of_this_world"
+	loop
+		targ ownr
+*		"chatter"
+		sets va03 va10
+*		"chatterX"
+		adds va03 vtos va02
+*		"chatterX_UserID"						
+		adds va03 va01
+*		Send to all Chatters, except to yourself!
+		doif name va03 <> "" and name va03 <> va88
+			new: simp 1 1 35755 "blnk" 1 0 0
+			dbg: outs "RTDMA Created-- CHAT: Chatter go Bye Bye"
+			sets name "aw_recipient" mame va03
+			sets name "CHAT" "Chatter go Bye Bye"
+			sets name "ChatID" mame "ChatID"
+		endi
+		addv va02 1
+	untl va02 = 31
+* close the chat window
+	kill ownr
+endm
