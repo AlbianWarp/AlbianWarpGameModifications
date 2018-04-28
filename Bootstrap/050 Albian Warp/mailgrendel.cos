@@ -85,10 +85,12 @@ scrp 1 1 206 9
 *	Does a Mail Message exist?
 	seta va00 null
 	enum 1 1 35754
-		doif name "type" = "mail_message"
-			seta va00 targ
-			dbg: outs "message from "
-			dbg: outs name "aw_sender"
+		doif type name "type" eq 2
+			doif name "type" = "mail_message"
+				seta va00 targ
+				dbg: outs "message from "
+				dbg: outs name "aw_sender"
+		endi
 		endi
 	next
 *	If none found, stop.	

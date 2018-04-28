@@ -17,7 +17,7 @@ scrx 1 1 35700 9000
 *1 if online
 *2 if there is no such contact
 *_p1_ must be set to the username you are checking
-*use with setv vaXX stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99
+*use with setv va99 stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99
 sets game "f_aw_ulin" sorc 1 1 35700 9001
 setv game "f_aw_ulin:v" 1
 scrx 1 1 35700 9001
@@ -33,7 +33,7 @@ scrx 1 1 35700 9002
 *remove user from WWR (net: whof)
 *returns nothing!
 *_p1_ is the username, _p2_ is the agent to get WW messages
-*use with sets vaXX caos 0 0 _p1_ _p2_ game "f_aw_whof" 0 0 va99
+*use with sets va99 caos 0 0 _p1_ targ game "f_aw_whof" 0 0 va99
 sets game "f_aw_whof" sorc 1 1 35700 9003
 setv game "f_aw_whof:v" 1
 scrx 1 1 35700 9003

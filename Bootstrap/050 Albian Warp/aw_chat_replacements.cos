@@ -208,7 +208,7 @@ scrp 1 1 215 5000
 	sets name "aw_recipient" mame "Invitee_UserID"
 	sets name "REQU" "Join Existing Chat"
 	sets name "ChatID" mame "ChatID"
-	*I am not convinced this even does anything:
+*I am not convinced this even does anything:
 	sets name "Chat Host" "A Cat"
 
 ** Add all the current chatters to the thing!
@@ -542,16 +542,16 @@ scrp 1 1 213 9
 						targ va66
 ** save to "chatterX_Nickname" name variable
 						doif type name va50 eq 2
-						sets va57 name va50
-						sets va58 name va51
-						targ va56
+							sets va57 name va50
+							sets va58 name va51
+							targ va56
 ** save to "chatterX_UserID" name variable
-						sets name va50 va57
-						sets name va51 va58
+							sets name va50 va57
+							sets name va51 va58
 						else
-						targ va56
-						sets name va50 ""
-						sets name va51 ""
+							targ va56
+							sets name va50 ""
+							sets name va51 ""
 						endi
 
 ** Increment X		
@@ -924,7 +924,7 @@ scrp 1 1 209 9
 			elif va10 = "Update"
 ** You have been informed of a new Chatter...
 ** You need to: Add the new chatter to your Chatter list, and to your who's wanted register! :o)
-				sets va80 name "ChatID" 
+				sets va80 name "ChatID"
 				sets va81 name "aw_sender"
 				sets va82 name "New Chatter Nickname"
 				sets va83 name "New Chatter Nickname"
@@ -1346,6 +1346,7 @@ scrp 1 1 211 1009
 
 ** Always assume success with AW (we are overconfident maybe)
 	doif 0 = 0
+		targ ownr
 		sets name "CR_status" ""
 		sets name "CR_result" "awaiting"
 ** Loop, incrementing timer... until the CR recipient accepts the CR.
@@ -2080,7 +2081,7 @@ scrp 1 1 210 1000
 	setv ov70 0
 	tick 1
 
-	endi
+
 endm
 
 * A Chatter has gone Offline
@@ -2088,7 +2089,7 @@ scrp 1 1 210 138
 	inst
 	lock
 *	If Offline, Kill this chat! :o(
-	doif  game "aw_status" =  "offline"
+	doif game "aw_status" = "offline"
 		kill ownr
 	endi
 ** Grab the UserID
@@ -2234,6 +2235,3 @@ scrp 1 1 210 1010
 	untl va02 = 31
 * close the chat window
 	kill ownr
-
-endm
-
