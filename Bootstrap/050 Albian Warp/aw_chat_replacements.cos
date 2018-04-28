@@ -846,8 +846,13 @@ scrp 1 1 209 9
 ** You need to: Remove the new chatter from your Chatter List, and also from your Who's Wanted Register!
 				sets va80 name "ChatID"
 				sets va81 name "aw_sender"
+				doif type name "Exiting Chatter Nickname" eq 2
 				sets va82 name "Exiting Chatter Nickname"
 				sets va83 name "Exiting Chatter Nickname"
+				else
+				sets va82 name "aw_sender" 
+				sets va83 name "aw_sender"
+				endi
 				kill va66
 ** Find the chat
 				setv va99 0
@@ -2246,6 +2251,7 @@ scrp 1 1 210 1010
 			sets name "aw_recipient" mame va03
 			sets name "CHAT" "Chatter go Bye Bye"
 			sets name "ChatID" mame "ChatID"
+			sets name "Exiting Chatter Nickname" game "user_of_this_world"
 		endi
 		addv va02 1
 	untl va02 = 31
