@@ -2163,7 +2163,7 @@ scrp 1 1 210 3000
 			adds va06 va05
 ** Remove them if they are offline.
 			doif name va04 <> ""
-				doif stoi caos va06 0 "username" 0 game "f_aw_ulin" 0 1 va99 eq 0
+				doif stoi caos 0 0 va06 0 game "f_aw_ulin" 0 1 va99 eq 0
 ** Update the Chat with this info!
 					adds name "ChatText" read "Chat Scripts Text" 0
 					adds name "ChatText" "<tint 120 220 250>"
@@ -2215,7 +2215,7 @@ scrp 1 1 210 1010
 	sets va10 "chatter"
 	sets va01 "_UserID"
 	setv va02 1
-	sets va88 va70
+	sets va88 game "user_of_this_world"
 	loop
 		targ ownr
 *		"chatter"
@@ -2235,3 +2235,4 @@ scrp 1 1 210 1010
 	untl va02 = 31
 * close the chat window
 	kill ownr
+endm
