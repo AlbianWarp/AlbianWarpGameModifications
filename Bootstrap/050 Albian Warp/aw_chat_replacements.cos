@@ -204,6 +204,7 @@ scrp 1 1 215 5000
 
 *	Make an RTDMA!
 	new: simp 1 1 35755 "blnk" 1 0 0
+	dbg: outs "RTDMA Created-- REQU: Join Existing Chat"
 	seta va66 targ
 	sets name "aw_recipient" mame "Invitee_UserID"
 	sets name "REQU" "Join Existing Chat"
@@ -253,6 +254,7 @@ scrp 1 1 213 9
 * Check for "REQU" RTDMAs!
 		enum 1 1 35756
 			doif type name "REQU" eq 2
+				dbg: outs "Found a REQU RTDMA"
 *We're in. Save who you are because we need it.
 				seta va66 targ
 **				What ChatID are you waiting on? Why does this matter? A Mystery. 
@@ -362,6 +364,7 @@ scrp 1 1 213 9
 *						Send to all Chatters, except to yourself and the new chatter! :o)
 									doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
 										new: simp 1 1 35755 "blnk" 1 0 0
+										dbg: outs "RTDMA Created-- CHAT: Update"
 										sets name "aw_recipient" mame va03
 										sets name "CHAT" "Update"
 										sets name "New Chatter Nickname" va04
@@ -802,6 +805,7 @@ scrp 1 1 209 9
 * start checking messages!
 	enum 1 1 35756
 		doif type name "CHAT" eq 2
+			dbg: outs "Found a CHAT RTDMA"
 *		va66 will be the current message you are looking at
 			seta va66 targ
 
@@ -1340,6 +1344,7 @@ scrp 1 1 211 1009
 
 **	Create chat request RTDMA!
 	new: simp 1 1 35755 "blnk" 1 0 0
+	dbg: outs "RTDMA Created-- REQU: Request"
 	sets name "REQU" "Request"
 	sets name "ChatID" mame "CR_ChatID"
 	sets name "aw_recipient" mame "CR_recipient_UserID"
@@ -1656,16 +1661,22 @@ scrp 1 1 214 1002
 *	What are you actually doing here	
 	doif mame "result" = "decline"
 		sets name "REQU" "Decline"
+		dbg: outs "RTDMA Created-- REQU: Decline"
 	elif mame "result" = "accept"
 		sets name "REQU" "Accept"
+		dbg: outs "RTDMA Created-- REQU: Accept"
 	elif mame "result" = "timeout"
 		sets name "REQU" "Timeout"
+		dbg: outs "RTDMA Created-- REQU: Timeout"
 	elif mame "result" = "invite_accept"
 		sets name "REQU" "Invite Accept"
+		dbg: outs "RTDMA Created-- REQU: Invite Accept"
 	elif mame "result" = "invite_decline"
 		sets name "REQU" "Invite Decline"
+		dbg: outs "RTDMA Created-- REQU: Invite Decline"
 	elif mame "result" = "invite_timeout"
 		sets name "REQU" "Invite Timeout"
+		dbg: outs "RTDMA Created-- REQU: Invite Timeout"
 	endi
 
 	targ ownr
@@ -2030,6 +2041,7 @@ endm
 * Send a Chat Message
 scrp 1 1 210 1000
 	inst
+*	dbg: outs "About to send a chat message"
 ** First, grab your chat colour!
 	sets va66 "<tint "
 	adds va66 vtos name "Text Colour Red"
@@ -2051,17 +2063,20 @@ scrp 1 1 210 1000
 	setv va02 1
 	sets va88 game "user_of_this_world"
 	loop
+*		dbg: outs "in the chat message loop"
 		targ ownr
 		sets va03 va10
 		adds va03 vtos va02
 		adds va03 va01
 		doif name va03 <> "" and name va03 <> va88
 			new: simp 1 1 35755 "blnk" 1 0 0
+			dbg: outs "RTDMA Created-- CHAT: Message"
 			sets name "aw_recipient" mame va03
 			sets name "CHAT" "Message"
 			sets name "Chat Message" va66
 			sets name "ChatID" mame "ChatID"
-
+		else
+*			this is you or nobody
 		endi
 		addv va02 1
 	untl va02 = 31
@@ -2227,6 +2242,7 @@ scrp 1 1 210 1010
 *		Send to all Chatters, except to yourself!
 		doif name va03 <> "" and name va03 <> va88
 			new: simp 1 1 35755 "blnk" 1 0 0
+			dbg: outs "RTDMA Created-- CHAT: Chatter go Bye Bye"
 			sets name "aw_recipient" mame va03
 			sets name "CHAT" "Chatter go Bye Bye"
 			sets name "ChatID" mame "ChatID"
