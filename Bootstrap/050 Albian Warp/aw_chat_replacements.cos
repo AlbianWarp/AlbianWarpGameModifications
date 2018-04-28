@@ -193,6 +193,49 @@ scrp 1 1 215 10000
 	ptxt read "In Chat Invitation Manager Text" 1
 endm
 
+** Accept the Invitation
+**Basically this is only included here because we have to assume success all the time
+scrp 1 1 215 1001
+	inst
+	lock
+	doif name "Invitee_Nickname" = ""
+		snde "buzz"
+		part 4
+		ptxt read "In Chat Invitation Manager Text" 5
+		snde "buzz"
+	else
+		snde "bep2"
+		part 4
+		ptxt ""
+** Close Left Side Display
+		anim [6 5 4 3 2 1 0]
+		over
+** Hide this Invitation Manager briefly!
+		inst
+		flto 0 -64000
+		unlk
+		call 5000 0 0
+		inst
+		lock
+** Target the Chat and update it!
+		targ name "Chat"
+		sets va99 read "In Chat Invitation Manager Text" 6
+		adds va99 mame "Invitee_Nickname"
+		adds va99 read "In Chat Invitation Manager Text" 7
+** Update the ChatText... :O)
+		adds name "ChatText" va99
+		part 2
+		ptxt name "ChatText"
+		setv va50 npgs
+		subv va50 1
+		page va50
+** reset chat attributes
+			attr 290
+** Kill the In-Chat Invitation Manager
+		kill ownr
+	endi
+endm
+
 ** Sending the Invitation
 scrp 1 1 215 5000
 	inst
@@ -228,20 +271,28 @@ scrp 1 1 215 5000
 		adds va41 va33
 
 		doif type name va40 eq 2
+			doif name va40 ne ""
 			sets va43 name va40
 			sets va44 name va41
+			else
+				setv va43 0
+				setv va44 0
+			endi
 		else
-			sets va43 ""
-			sets va44 ""
+			setv va43 0
+			setv va44 0
 		endi
 
 		addv va30 1
 
 		targ va66
-		sets name va40 va43
-		sets name va41 va44
+		doif type va43 eq 2
+			sets name va40 va43
+			sets name va41 va44
+		endi
 
-	untl va30 = 31
+	untl va30 = 31 or type name va40 ne 2
+	sets name "Result" "Success"
 endm
 
 **This is where the real stuff happens: chat - the interpreters 
@@ -353,6 +404,9 @@ scrp 1 1 213 9
 **								Time to make a new RTDMA!!
 * You're going to have to make SEVERAL RTDMAs in the case of a group chat
 * Because you need to send one to each user!
+								sets va10 "chatter"
+								sets va01 "_UserID"
+								sets va88 game "user_of_this_world"
 								setv va22 1
 								loop
 *						"chatter"
@@ -361,13 +415,16 @@ scrp 1 1 213 9
 									adds va03 vtos va22
 *						"chatterX_UserID"						
 									adds va03 va01
+*									this is a new check.... but it shouldnt have to check this...
+									doif type name va03 eq 2
 *						Send to all Chatters, except to yourself and the new chatter! :o)
-									doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
-										new: simp 1 1 35755 "blnk" 1 0 0
-										dbg: outs "RTDMA Created-- CHAT: Update"
-										sets name "aw_recipient" mame va03
-										sets name "CHAT" "Update"
-										sets name "New Chatter Nickname" va04
+										doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
+											new: simp 1 1 35755 "blnk" 1 0 0
+											dbg: outs "RTDMA Created-- CHAT: Update"
+											sets name "aw_recipient" mame va03
+											sets name "CHAT" "Update"
+											sets name "New Chatter Nickname" va04
+										endi
 									endi
 									addv va22 1.
 								untl va22 = 31
