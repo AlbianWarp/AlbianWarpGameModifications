@@ -188,8 +188,8 @@ scrp 1 1 35700 9
 *						get the agent name:
 						sets va09 caos 0 1 va03 va08 game "f_GetVarInVList" 0 0 va99
 *						sets the agent name
+						doif name va09 ne null
 						seta va10 name va09
-						doif va10 ne null
 *						now you gotta tell the agent what's up!
 *						if status is 0, set the "went offline" message
 							doif name va05 eq 0
@@ -202,6 +202,9 @@ scrp 1 1 35700 9
 								dbg: outs va04
 								mesg wrt+ va10 137 va04 0 0
 							endi
+*							That agent wasn't found!! It must not exist anymore.
+						else
+							
 						endi
 					repe
 				endi

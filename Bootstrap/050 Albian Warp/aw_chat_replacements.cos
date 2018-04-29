@@ -230,7 +230,7 @@ scrp 1 1 215 1001
 		subv va50 1
 		page va50
 ** reset chat attributes
-			attr 290
+		attr 290
 ** Kill the In-Chat Invitation Manager
 		kill ownr
 	endi
@@ -253,7 +253,7 @@ scrp 1 1 215 5000
 	sets name "REQU" "Join Existing Chat"
 	sets name "ChatID" mame "ChatID"
 *I am not convinced this even does anything:
-	sets name "Chat Host" "A Cat"
+	sets name "Chat Host" "Albian Warp"
 
 ** Add all the current chatters to the thing!
 	sets va31 "chatter"
@@ -272,8 +272,8 @@ scrp 1 1 215 5000
 
 		doif type name va40 eq 2
 			doif name va40 ne ""
-			sets va43 name va40
-			sets va44 name va41
+				sets va43 name va40
+				sets va44 name va41
 			else
 				setv va43 0
 				setv va44 0
@@ -286,7 +286,7 @@ scrp 1 1 215 5000
 		addv va30 1
 
 		targ va66
-		doif type va43 eq 2
+		doif type va43 eq 2 and type va44 eq 2
 			sets name va40 va43
 			sets name va41 va44
 		endi
@@ -356,7 +356,9 @@ scrp 1 1 213 9
 				doif va01 = "Invite Accept"
 					targ va66
 ** A user you have invited to an existing chat has accepted your invitation.
-** You need to:  Add this user to your chatter list, add them to your who's wanted list, and then tell everyone else in the chat to do the same!
+**	You need to:  Add this user to your chatter list,
+**		add them to your who's wanted list,
+**		and then tell everyone else in the chat to do the same!
 					sets va02 name "ChatID"
 					sets va03 name "aw_sender"
 					sets va04 name "aw_sender"
@@ -366,6 +368,7 @@ scrp 1 1 213 9
 					enum 1 1 210
 						doif targ <> null
 							doif name "ChatID" = va02
+								seta va70 targ
 								setv va99 1
 ** 					Add the new chatter to the list, somewhere! :o)
 								setv va99 0
@@ -385,6 +388,9 @@ scrp 1 1 213 9
 * 						"chatterX_UserID"
 									adds va51 va43
 ** 						Find a spare one...
+									doif type name va50 ne 2
+										sets name va50 ""
+									endi
 									doif name va50 = "" and va99 = 0
 										sets name va50 va03
 										sets name va51 va04
@@ -408,26 +414,36 @@ scrp 1 1 213 9
 								sets va01 "_UserID"
 								sets va88 game "user_of_this_world"
 								setv va22 1
+								dbg: outs "starting the chat update invites loop"
 								loop
 *						"chatter"
 									sets va03 va10
+*									dbg: outs va03
 *						"chatterX"
 									adds va03 vtos va22
+*									dbg: outs va03
 *						"chatterX_UserID"						
 									adds va03 va01
-*									this is a new check.... but it shouldnt have to check this...
+*									dbg: outs va03
+									targ va70
+*						this is a new check.... but it shouldnt have to check this?
 									doif type name va03 eq 2
+										sets va03 name va03
 *						Send to all Chatters, except to yourself and the new chatter! :o)
-										doif name va03 <> "" and name va03 <> va88 and name va03 <> va04
+										doif va03 <> "" and va03 <> va88 and va03 <> va04
 											new: simp 1 1 35755 "blnk" 1 0 0
 											dbg: outs "RTDMA Created-- CHAT: Update"
-											sets name "aw_recipient" mame va03
+*											dbg: outs "Sent to: "
+*											dbg: outs va03
+											sets name "aw_recipient" va03
 											sets name "CHAT" "Update"
 											sets name "New Chatter Nickname" va04
 										endi
+									else
+										setv va03 0
 									endi
-									addv va22 1.
-								untl va22 = 31
+									addv va22 1
+								untl va22 = 31 or va03 = ""
 ** 								There's a check for success here but for AW let's just 
 **								Assume we're always sucessful
 								sets va10 "<tint 120 220 250>"
@@ -513,6 +529,7 @@ scrp 1 1 213 9
 					gsub delete
 					stop
 				elif va01 = "Join Existing Chat"
+					dbg: outs "Found a join existing chat invite"
 					targ va66
 					sets va02 name "ChatID"
 					sets va03 name "aw_sender"
@@ -523,6 +540,7 @@ scrp 1 1 213 9
 ** Check to see if an invitation from a user in that chat is already being displayed
 							doif name "ChatID" = va02
 * if so, kill the chat request RTDMA and stop
+								dbg: outs "killing this because it's already here"
 								kill va66
 								stop
 							endi
@@ -533,11 +551,13 @@ scrp 1 1 213 9
 						doif targ <> null
 							doif name "ChatID" = va02
 * if so, kill the chat request RTDMA and stop
+								dbg: outs "killing this invite because the chat is already open"
 								kill va66
 								stop
 							endi
 						endi
 					next
+					dbg: outs "good to go ahead and make the invite"
 					targ ownr
 					setv va69 9075
 					setv va68 totl 1 1 214
@@ -554,11 +574,13 @@ scrp 1 1 213 9
 					else
 						setv va69 9075
 					endi
+					dbg: outs "figured out the plane"
 					targ ownr
 *	Create a chat request Agent
 *	===========================
 *	Pop it up on the Screen
 					new: comp 1 1 214 "small_useful_screen" 1 0 va69
+					dbg: outs "the agent now exists"
 					seta va56 targ
 					attr 304
 ** Decline Request button
@@ -576,6 +598,7 @@ scrp 1 1 213 9
 					adds va10 read "The Interpreters Text" 3
 					part 3
 					frmt 5 0 5 0 3 0 2
+					dbg: outs "made all the buttons"
 					ptxt va10
 ** What type is this? 1 = join existing, 0 = normal chat request...
 					setv ov81 1
@@ -588,6 +611,7 @@ scrp 1 1 213 9
 ** store the sender's Nickname and UserID
 					sets name "Sender_Nickname" va03
 					sets name "Sender_UserID" va04
+					dbg: outs "figured out the plane"
 *** Add all the chatters straight from the RTDMA
 					setv va40 1
 					sets va41 "chatter"
@@ -609,15 +633,16 @@ scrp 1 1 213 9
 							sets name va50 va57
 							sets name va51 va58
 						else
-							targ va56
-							sets name va50 ""
-							sets name va51 ""
+*targ va56
+*sets name va50 ""
+*sets name va51 ""
 						endi
 
 ** Increment X		
 						addv va40 1
 					untl va40 = 31
 ** Positioning!
+					targ va56
 					setv va90 wndw
 					divv va90 2
 					setv va91 wndh
@@ -863,6 +888,12 @@ scrp 1 1 209 9
 	enum 1 1 35756
 		doif type name "CHAT" eq 2
 			dbg: outs "Found a CHAT RTDMA"
+*		validity checks
+			doif type name "aw_sender" ne 2 or type name "ChatID" ne 2
+				dbg: outs "Killing an invalid CHAT RTDMA"
+				kill targ
+				stop
+			endi
 *		va66 will be the current message you are looking at
 			seta va66 targ
 
@@ -904,11 +935,11 @@ scrp 1 1 209 9
 				sets va80 name "ChatID"
 				sets va81 name "aw_sender"
 				doif type name "Exiting Chatter Nickname" eq 2
-				sets va82 name "Exiting Chatter Nickname"
-				sets va83 name "Exiting Chatter Nickname"
+					sets va82 name "Exiting Chatter Nickname"
+					sets va83 name "Exiting Chatter Nickname"
 				else
-				sets va82 name "aw_sender" 
-				sets va83 name "aw_sender"
+					sets va82 name "aw_sender"
+					sets va83 name "aw_sender"
 				endi
 				kill va66
 ** Find the chat
@@ -1053,6 +1084,10 @@ scrp 1 1 209 9
 * 						"chatterX_UserID"
 								adds va51 va43
 ** 						Find a spare one...
+								doif type name va50 ne 2
+									sets name va50 ""
+								endi
+
 								doif name va50 = ""
 									sets name va50 va82
 									sets name va51 va83
@@ -1784,18 +1819,20 @@ scrp 1 1 214 1002
 * "chatterX_UserID"
 			adds va51 va43
 * sets name "chatterX_Nickname" the same as the Chat Invitation said..
-			sets name va50 mame va50
+			doif type mame va50 eq 2
+				sets name va50 mame va50
 * sets name "chatterX_UserID" the same as the Chat Invitation said..
-			sets name va51 mame va51
+				sets name va51 mame va51
 ** Also add to the Who's Wanted register... :o)
-			doif name va51 <> ""
-				lock
-				sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
-				inst
+				doif name va51 <> ""
+					lock
+					sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
+					inst
+				endi
 			endi
 * Increment the X (va40)
 			addv va40 1
-		untl va40 = 31
+		untl va40 = 31 or type mame va50 ne 2
 ** Add yourself to this list, somewhere! :o)
 		setv va99 0
 		setv va40 1
@@ -1814,6 +1851,10 @@ scrp 1 1 214 1002
 * "chatterX_UserID"
 			adds va51 va43
 ** Find a spare one...
+			doif type name va50 eq 2
+				sets name va50 ""
+			endi
+
 			doif name va50 = ""
 				sets name va50 game "user_of_this_world"
 				sets name va51 game "user_of_this_world"
