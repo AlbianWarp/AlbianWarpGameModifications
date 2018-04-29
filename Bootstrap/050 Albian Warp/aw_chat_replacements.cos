@@ -29,6 +29,11 @@ scrp 1 1 215 10000
 		adds va03 vtos va02
 *		"chatterX_UserID"						
 		adds va03 va01
+
+		doif type name va03 ne 2
+			sets name va03 ""
+		endi
+
 		doif name va03 <> ""
 ** Add to va77
 			adds va77 "["
@@ -241,7 +246,7 @@ scrp 1 1 215 5000
 	inst
 	targ name "Chat"
 	sets mame "ChatID" name "ChatID"
-	targ ownr
+
 ** Send the invitation
 *	There is a Invitee... :)  Let's ask the Chat Host to invite the Invitee... :)
 
@@ -255,7 +260,7 @@ scrp 1 1 215 5000
 *I am not convinced this even does anything:
 	sets name "Chat Host" "Albian Warp"
 
-** Add all the current chatters to the thing!
+** Add all the current chatters to the RTDMA!
 	sets va31 "chatter"
 	sets va32 "_Nickname"
 	sets va33 "_UserID"
@@ -269,9 +274,10 @@ scrp 1 1 215 5000
 
 		adds va40 va32
 		adds va41 va33
-
-		doif type name va40 eq 2
-			doif name va40 ne ""
+*		make sure you're only sending names!
+		doif type name va40 eq 2 and type name va41 eq 2
+			doif name va40 ne "" and name va41 ne ""
+				stop
 				sets va43 name va40
 				sets va44 name va41
 			else
@@ -289,9 +295,13 @@ scrp 1 1 215 5000
 		doif type va43 eq 2 and type va44 eq 2
 			sets name va40 va43
 			sets name va41 va44
+			dbg: outs "Set these:"
+			dbg: outs va41
+			dbg: outs va40
 		endi
 
 	untl va30 = 31 or type name va40 ne 2
+	targ ownr
 	sets name "Result" "Success"
 endm
 
@@ -1823,6 +1833,10 @@ scrp 1 1 214 1002
 				sets name va50 mame va50
 * sets name "chatterX_UserID" the same as the Chat Invitation said..
 				sets name va51 mame va51
+
+				dbg: outs "Adding this person to the chat:"
+				dbg: outs va51
+				dbg: outs name va51
 ** Also add to the Who's Wanted register... :o)
 				doif name va51 <> ""
 					lock
@@ -1851,7 +1865,7 @@ scrp 1 1 214 1002
 * "chatterX_UserID"
 			adds va51 va43
 ** Find a spare one...
-			doif type name va50 eq 2
+			doif type name va50 ne 2
 				sets name va50 ""
 			endi
 
@@ -1859,6 +1873,8 @@ scrp 1 1 214 1002
 				sets name va50 game "user_of_this_world"
 				sets name va51 game "user_of_this_world"
 				setv va99 1
+				dbg: outs "setting the user as"
+				dbg: outs va50
 			endi
 			addv va40 1
 		untl va40 = 31 or va99 = 1
@@ -2171,6 +2187,11 @@ scrp 1 1 210 1000
 		sets va03 va10
 		adds va03 vtos va02
 		adds va03 va01
+
+		doif type name va03 ne 2
+			sets name va03 ""
+		endi
+
 		doif name va03 <> "" and name va03 <> va88
 			new: simp 1 1 35755 "blnk" 1 0 0
 			dbg: outs "RTDMA Created-- CHAT: Message"
@@ -2280,6 +2301,10 @@ scrp 1 1 210 3000
 			adds va04 va02
 			adds va06 va05
 ** Remove them if they are offline.
+			doif type name va04 ne 2
+				sets name va04 ""
+			endi
+
 			doif name va04 <> ""
 				doif stoi caos 0 0 va06 0 game "f_aw_ulin" 0 1 va99 eq 0
 ** Update the Chat with this info!
@@ -2343,6 +2368,10 @@ scrp 1 1 210 1010
 *		"chatterX_UserID"						
 		adds va03 va01
 *		Send to all Chatters, except to yourself!
+		doif type name va03 ne 2
+			sets name va03 ""
+		endi
+
 		doif name va03 <> "" and name va03 <> va88
 			new: simp 1 1 35755 "blnk" 1 0 0
 			dbg: outs "RTDMA Created-- CHAT: Chatter go Bye Bye"
@@ -2355,4 +2384,5 @@ scrp 1 1 210 1010
 	untl va02 = 31
 * close the chat window
 	kill ownr
+
 endm
