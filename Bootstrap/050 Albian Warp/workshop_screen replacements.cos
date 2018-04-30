@@ -494,7 +494,7 @@ endm
 
 
 **This decides what to do with a norn you are warping
-**It needs an AW-specific net:ruso eventually but this is fine for now
+*_p1_ is the creature, _p2_ is (I think) if it's the last creature?
 scrp 1 2 208 1066
 	inst
 	dbg: outs "trying to figure out what to do what a creature"
@@ -685,6 +685,9 @@ scrp 1 2 208 1066
 				rtar 1 1 35700
 				mesg wrt+ targ 1000 va79 va30 0
 **
+			loop
+			wait 1
+			untl va79 eq null
 
 			endi
 
@@ -725,7 +728,6 @@ scrp 1 2 208 1066
 			endi
 		endi
 	endi
-
 
 	doif _p1_ eq 0
 
@@ -858,3 +860,263 @@ scrp 1 2 208 1066
 
 endm
 
+***send lots of creatures button
+scrp 1 2 208 1069
+	inst
+	sndc "yes_"
+
+
+
+*	ID of the portal is in ov15 at the moment
+	setv va00 ov20
+
+*	trash all previous programming game variables for this	
+*	create game variable search string
+	sets va01 "_containment"
+
+*	dbg: outs "TRASH all variables"
+
+	sets va99 ""
+*	outermost loop is because inner loop will only delete
+*	one game variable before exiting
+	loop
+*		flag to say 'I've deleted a variable' ... forces reloop
+		setv va66 0
+
+		loop
+			sets va10 gamn va99
+*	see if game string contains search string
+			setv va20 sins va10 1 va01
+*	it does
+			doif va20 ne -1
+*		delete this game variable
+				delg va10
+*			flag that this is premature exit from inner loop			
+				setv va66 1
+			endi
+			sets va99 va10
+		untl va10 eq ""
+
+	untl va66 eq 0
+
+*	dbg: outs "TRASHED"
+
+*	gonna have to look at the text and create the contact references for them
+*	go through the 'send to' list and send event to contact book
+*	first part to look at is 26
+	setv va01 26
+	loop
+		part va01
+*	look at the text
+		sets va02 ptxt
+
+*	if it's not zero
+		doif va02 ne ""
+*	find user ID from this nickname
+*		start search with "" game variable
+			sets va99 ""
+			loop
+				sets va10 gamn va99
+				doif va10 <> ""
+*		make sure it is a string type game variable
+					doif type game va10 eq 2
+*		check whether it equals name in text box
+						doif game va10 eq va02
+*		if it does then need to chop up variable
+*		set search string to "_nick" - it should have this in it
+							sets va03 "_nick"
+							setv va04 sins va10 1 va03
+*			string is there
+							doif va04 ne -1
+*			chop up so only head remains
+								subv va04 1
+								sets va05 subs va10 1 va04
+*			va05 should now be the user ID
+*			send this to contact book with ID# for which portal
+*			sign of ID# dictates send/recieve, this is send to so +'ve.
+								rtar 1 1 157
+								doif targ ne null
+									mesg wrt+ targ 1000 va05 va00 0
+
+*									dbg: outs "creating contact"
+*									dbg: outs va05
+*									dbg: outv va00
+
+**					make sure contact details have been obtained
+*								setv va84 0
+*								sets va31 va05
+*								adds va31 "_nick"
+*								loop
+*
+*									dbg: outs "searching for .."
+*									dbg: outs va31
+*									doif type game va31 eq 0
+*										dbg: outs "waiting for nick"
+*										delg va31
+*										wait 1
+*									elif type game va31 eq 2
+*										dbg: outs "nickname registered"
+*
+*										setv va84 1
+*									else
+*										wait 1
+*									endi
+*								untl va84 eq 1
+
+
+								endi
+								targ ownr
+*			send 'add to whos wanted' event for this portal							
+								doif ov01 eq 3
+									setv va70 ov20
+									enum 3 9 1
+										doif ov00 eq va70
+											mesg wrt+ targ 1005 va05 0 0
+										endi
+									next
+								endi
+								targ ownr
+
+							endi
+						endi
+					endi
+				endi
+*	set 'previous entry' to current entry
+				sets va99 va10
+			untl va10 eq ""
+		endi
+		addv va01 1
+
+
+	untl va01 eq 32
+
+*&*&*&*&
+*	go through the 'receive from' list and send event to contact book
+*	first part to look at is 32
+	setv va01 32
+*	negate va00 so it sends a 'receive from' paramater to contact book
+	negv va00
+
+	loop
+		part va01
+*	look at the text
+		sets va02 ptxt
+
+*	if it's not zero
+		doif va02 ne ""
+*	find user ID from this nickname
+*		start search with "" game variable
+			sets va99 ""
+			loop
+				sets va10 gamn va99
+
+*		make sure it is a string type game variable
+				doif va10 <> ""
+					doif type game va10 eq 2
+
+*		check whether it equals name in text box
+						doif game va10 eq va02
+*		if it does then need to chop up variable
+*		set search string to "_nick" - it should have this in it
+							sets va03 "_nick"
+							setv va04 sins va10 1 va03
+*			string is there
+							doif va04 ne -1
+*			chop up so only head remains
+								subv va04 1
+								sets va05 subs va10 1 va04
+*			va05 should now be the user ID
+*			send this to contact book with ID# for which portal
+*			sign of ID# dictates send/recieve, this is send to so +'ve.
+								rtar 1 1 157
+								doif targ ne null
+									mesg wrt+ targ 1000 va05 va00 0
+								endi
+								targ ownr
+							endi
+						endi
+					endi
+				endi
+*	set 'previous entry' to current entry
+				sets va99 va10
+			untl va10 eq ""
+		endi
+		addv va01 1
+
+
+	untl va01 eq 38
+
+	lock
+	targ ownr
+	part 5
+*	ptxt "Please wait ..."
+	ptxt read "programming" 20
+	wait 1
+
+
+	setv va67 0
+	seta va66 null
+*	get the chamber ID
+	rtar 1 1 154
+	doif targ ne null
+		seta va66 targ
+	else
+		stop
+	endi
+	inst
+	targ ownr
+*	count the creatures in the chamber
+	enum 4 0 0
+		doif va66 eq carr
+			addv va67 1
+		endi
+	next
+	slow
+*	if there're no creatures then stop
+	doif va67 eq 0
+		part 5
+*		ptxt "There are no creatures in the chamber"
+		ptxt read "chamber" 8
+		tick 50
+		stop
+	endi
+
+	lock
+	setv va99 0
+*	make sure contact book isn't running code at moment
+	loop
+		rtar 1 1 157
+		doif code eq -1
+			setv va99 1
+		else
+			wait 1
+		endi
+	untl va99 eq 1
+	inst
+	targ ownr
+*	repeatedly change selected creature and send it
+	setv va68 0
+	dbg: outs "sending the send all creatures loop until 68 ge 67"
+	dbg: outs "68 is"
+	dbg: outv va68
+	dbg: outs "67 is"
+	dbg: outv va67
+	loop
+		call 1005 0 0
+		addv va68 1
+		doif va68 eq va67
+			setv va00 0
+		else
+			setv va00 1
+		endi
+
+		dbg: outs "gonna send a norn now"
+		dbg: outs "68 is"
+		dbg: outv va68
+		dbg: outs "67 is"
+		dbg: outv va67
+
+		call 1066 va00 1
+	untl va68 ge va67
+	dbg: outs "that's all the creaturesss"
+endm
