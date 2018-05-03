@@ -14,3 +14,6 @@ Bootstrap/*
 !Bootstrap/050 Albian warp/
 Bootstrap/000 Switcher/*
 !Bootstrap/000 Switcher/AW eame vars.cos
+!My Agents/
+My Agents/*
+!My Agents/aw_updater.agent

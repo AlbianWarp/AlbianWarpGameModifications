@@ -1,6 +1,6 @@
 *# Pray-File "aw_updater.agent"
 *# DS-Name "Albian Warp Updater"
-*# desc = "Injecting this will reinject your world with the cosfiles in your Bootstrap/050 Albian Warp folder. To ensure a complete reinjection, make sure you are offline before injecting.\rNote that this agent does nothing by itself! You must have downloaded the Albian Warp Game Modifications and extracted them to your bootstrap folder."
+*# desc = "Injecting this will reinject your world with the cosfiles already present in your Bootstrap/050 Albian Warp folder.\n\nTo ensure a complete reinjection, make sure you are offline before injecting."
 *# Agent Animation File = "blnk.c16"
 *# Agent Animation Gallery = "blnk"
 *# Agent Sprite First Image = 0
