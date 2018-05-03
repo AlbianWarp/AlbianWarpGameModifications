@@ -8,6 +8,10 @@ The Bootstrap directory must be copied into the Docking Station installation dir
 
 The bootstrap should only overwrite one file at most-- the file called 'reinject_updated_agents.cos' in the 'dsbuild 195' directory. A backup of this file is provided in the same directory should you wish to restore it later. Note that restoring the file will disable the functionality of Albian Warp.
 
+The My Agents folder can also be copied into your Docking Station installation directory, but it is not required. It contains only an agent you can use to update already existing worlds to the version of Albian Warp currently in your bootstrap. Please back up worlds that are important to you before injecting it, as it has not been well tested. Newly created worlds will not need this agent.
+
+Unless you are developing, you can ignore the Misc. folder.
+
 ## Usage
 
 The Game Modification by itself are not very useful, as they are only used by the [AlbianWarpClient](https://github.com/AlbianWarp/AlbianWarpClient).
