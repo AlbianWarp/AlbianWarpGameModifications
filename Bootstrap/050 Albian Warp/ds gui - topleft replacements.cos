@@ -38,21 +38,6 @@ scrp 1 2 14 501
 endm
 
 rscr
-** Kill the GUI TopLeft
-enum 1 2 14
-	kill targ
-next
-scrx 1 2 14 1002
-scrx 1 2 14 127
-scrx 1 2 14 8
-scrx 1 2 14 120
-scrx 1 2 14 120
-scrx 1 2 14 1000
-scrx 1 2 14 1001
-scrx 1 2 14 1002
 scrx 1 2 14 1003
-scrx 1 2 14 1004
-scrx 1 2 14 1005
-scrx 1 2 14 76
 scrx 1 2 14 500
 scrx 1 2 14 501

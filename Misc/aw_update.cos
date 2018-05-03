@@ -1,3 +1,84 @@
+*# Pray-File "aw_updater.agent"
+*# DS-Name "Albian Warp Updater"
+*# desc = "Injecting this will reinject your world with the cosfiles in your Bootstrap/050 Albian Warp folder. To ensure a complete reinjection, make sure you are offline before injecting.\rNote that this agent does nothing by itself! You must have downloaded the Albian Warp Game Modifications and extracted them to your bootstrap folder."
+*# Agent Animation File = "blnk.c16"
+*# Agent Animation Gallery = "blnk"
+*# Agent Sprite First Image = 0
+
+* look in your bootstrap folder!
+file glob 1 "../Bootstrap/050 Albian Warp/*"
+sets va98 "Found and injected the following cosfiles: \n\n"
+loop
+sets va00 innl
+*	make sure there's a file there
+	doif va00 ne ""
+*	make sure it's not a cosp file
+		doif lowa subs va00 strl va00 1 eq "s"
+*			grab just the name, not the path
+			setv va04 strl va00
+			setv va05 sins va00 1 "\\Journal\\"
+			doif va05 ne -1
+				addv va05 9
+				subv va04 va05
+				addv va04 1
+				sets va06 subs va00 va05 va04
+*				actually inject it
+				ject va06 7
+				adds va98 va06 
+				adds va98 "\n"
+			endi
+		endi
+	endi
+untl va00 eq ""
+file iclo
+
+adds va98 "\n"
+adds va98 "If any of these scripts were in use at the time of injection, they may not have been updated. If you suspect a script was not updated properly, try closing the Albian Warp Client and injecting again. "
+
+*Make the info window
+new: comp 1 2 5 "useful_screen" 1 0 9000
+attr 304
+* the description text
+pat: fixd 1 "useful_screen" 1 25 59 1 "WhiteOnTransparentChars"
+part 1
+frmt 8 8 8 18 3 0 0
+ptxt va98
+* close button
+pat: butt 2 "useful_screen" 2 2 237 24 0 [] 1000 0
+* title text
+pat: fixd 3 "useful_screen" 12 22 22 1 "WhiteOnTransparentChars"
+part 3
+frmt 8 0 37 0 2 0 8
+ptxt "Albian Warp Updates"
+* pgdn button
+pat: butt 4 "useful_screen" 9 3 238 302 0 [] 1001 0
+* pgup button
+pat: butt 5 "useful_screen" 6 3 20 302 0 [] 1002 0
+* page counter
+pat: fixd 6 "useful_screen" 15 119 306 1 "WhiteOnTransparentChars"
+part 6
+frmt 0 0 0 0 3 0 2
+
+*centering the window on the screen
+setv va90 wndw
+divv va90 2
+setv va91 wndh
+divv va91 2
+setv va92 wdth
+divv va92 2
+setv va93 hght
+divv va93 2
+
+subv va90 va92
+subv va91 va93
+
+flto va90 va91
+
+mesg writ targ 1003
+
+
+stop
+
 ject "gamestart_login replacements.cos" 7
 ject "zzz_aw_gamestart.cos" 7
 ject "ds gui - topleft replacements.cos" 7
@@ -11,4 +92,3 @@ ject "mailgrendel.cos" 7
 ject "aw_chat_replacements.cos" 7
 ject "housekeeper.cos" 7
 ject "workshop_screen replacements.cos" 7
-ject "" 7
