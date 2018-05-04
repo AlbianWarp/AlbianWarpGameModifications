@@ -100,7 +100,7 @@ endm
 
 ***activate 1 (only comes from a creature)
 scrp 3 9 1 1
-*	inst
+	inst
 	lock
 	doif game "aw_status" eq "offline"
 		stop
