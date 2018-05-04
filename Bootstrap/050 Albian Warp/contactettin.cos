@@ -100,7 +100,7 @@ scrp 1 1 157 1000
 *	if comms is in view contacts mode refresh the screen
 		rtar 1 2 210
 		doif targ ne null
-			doif ov00 eq 1
+			doif ov00 eq 1 and visi 0 eq 1
 *			lock
 *			reps 2
 *				mesg writ targ 1000
@@ -109,7 +109,7 @@ scrp 1 1 157 1000
 
 *			mesg wrt+ targ 1011 10 0 5
 *			mesg wrt+ targ 1010 0 0 10
-
+				dbg: outs "Refreshing Contacts from making a new contact"
 				mesg writ targ 1100
 
 			endi
