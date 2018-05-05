@@ -109,9 +109,10 @@ scrp 1 1 157 1000
 
 *			mesg wrt+ targ 1011 10 0 5
 *			mesg wrt+ targ 1010 0 0 10
-				dbg: outs "Refreshing Contacts from making a new contact"
+*				dbg: outs "Refreshing Contacts from making a new contact"
 				mesg writ targ 1100
-
+			else
+*			dbg: outs "not refreshing contacts because you're not looking"
 			endi
 		endi
 *		no parameter - stop

@@ -62,7 +62,8 @@ endm
 
 scrp 1 2 210 1010
 	inst
-	lock
+	dbg: outs "reloading contacts"
+
 *	dbg: outs "displaying parts"
 ****	create the list of known contacts	
 *	ov01	is the part# to use - incremented with each new part
