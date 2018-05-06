@@ -59,6 +59,7 @@ new: simp 1 1 35700 "blnk" 1 0 0
 tick 200
 *ov00 is going to account for RACE-- the time the last tick took in MS
 setv ov00 0
+seta game "aw_housekeeper_agent" targ
 
 
 scrp 1 1 35700 9
@@ -442,6 +443,7 @@ scrp 1 1 35700 1006
 		sets game "!net ruso_status" "online"
 	else
 		sets game "!net ruso_status" "offline"
+*		dbg: outs "no one is online"
 	endi
 endm
 

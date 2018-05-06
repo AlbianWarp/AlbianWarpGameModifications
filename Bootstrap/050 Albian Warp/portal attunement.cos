@@ -35,7 +35,10 @@ scrp 3 9 1 0
 				subv va20 1
 				sets va30 subs va10 1 va20
 				doif va30 eq "!net: ruso"
-					setv va90 1
+*					see if anyone else is online!
+					doif game "!net ruso_status" eq "online"
+						setv va90 1
+					endi
 				elif va30 eq "!friend"
 					gsub friend
 				else
@@ -67,33 +70,14 @@ scrp 3 9 1 0
 
 *	works out if your any of your friends are on
 	subr friend
-*		set first game variable to check
-		sets va98 ""
-*		set search string chunk
-		sets va11 "_group"
-
-		loop
-			sets va12 gamn va98
-*see if string contains search
-			setv va20 sins va12 1 va11
-*	it does
-			doif va20 ne -1
-*			see if this person is a friend
-				doif game va12 eq 2
-*			chop it up to get user ID
-					subv va20 1
-					sets va30 subs va12 1 va20
-
-*	have a look and see if this user is on
-					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
-*	they are, set flag
-						setv va90 1
-					endi
-				endi
-			endi
-*	set 'previous entry' to current entry
-			sets va98 va12
-		untl va12 eq ""
+*		update the special friend contact
+		mesg writ game "aw_housekeeper_agent" 1007
+		doif game "!friend_status" = "online"
+		setv va90 1
+		else
+		setv va90 0
+		dbg: outs "no friends are online"
+		endi
 	retn
 
 endm
@@ -121,6 +105,9 @@ scrp 3 9 1 1
 *	see if this game variable exists
 	doif game va00 gt 0
 *		it exists, cant let creature travel yet
+		sets va67 hist name gtos va66
+		adds va67 " tried to travel through a portal but could not due to Travel Sickness"
+		dbg: outs va67
 		stop
 	else
 *		it probably only exists because of checking for 
