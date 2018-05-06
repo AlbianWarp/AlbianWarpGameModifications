@@ -74,11 +74,6 @@ scrp 1 1 35700 9
 	endi
 	dbg: outs "the housekeeper is running about"
 
-*	not sure if this is a good idea >> but refreshing the contacts list 
-*	should update the online status of the special vars
-*rtar 1 2 210
-*mesg writ targ 1010
-*targ ownr
 	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
 		sets game "aw_status" "offline"
 		sets game "status" "offline"
@@ -88,12 +83,7 @@ scrp 1 1 35700 9
 *		spam you with who's online after you just connected) 
 		setv mv02 2
 
-*		tell all agents you are offline
-		enum 0 0 0
-			mesg writ targ 136
-		next
-
-*make everyone's status offline!
+*set all contacts' status offline!
 		sets va99 ""
 		sets va00 "_status"
 		loop
@@ -119,11 +109,6 @@ scrp 1 1 35700 9
 		sets game "aw_status" "online"
 		sets game "status" "online"
 		dbg: outs "client open/online, going online"
-
-*		tell all agents you are online
-		enum 0 0 0
-			mesg writ targ 135
-		next
 
 *		tell the online indicator you are online		
 		enum 1 2 14

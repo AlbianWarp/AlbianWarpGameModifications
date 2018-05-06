@@ -20,6 +20,11 @@ scrp 1 2 14 500
 	part 7
 	pose 1
 	call 1005 0 0
+
+*	tell all agents you are online
+	enum 0 0 0
+		mesg writ targ 135
+	next
 endm
 
 * Set Online Indicator to OFFLINE
@@ -35,6 +40,12 @@ scrp 1 2 14 501
 		kill targ
 	next
 	call 1005 0 0
+
+*	tell all agents you are offline
+	enum 0 0 0
+		mesg writ targ 136
+	next
+
 endm
 
 rscr
