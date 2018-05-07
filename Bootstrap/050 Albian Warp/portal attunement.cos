@@ -61,9 +61,6 @@ scrp 3 9 1 0
 		endi
 	endi
 
-**	start timer that looks for immigrants
-**	ticks every 1 minutes
-*	tick 1200
 	bhvr 1
 	clac 1
 
@@ -152,7 +149,9 @@ scrp 3 9 1 1
 
 *			see if this is the random user contact	
 			doif va30 eq "!net: ruso"
-				addv va91 1
+				doif game "!net ruso_status" eq "online"
+						addv va91 1
+				endi
 			elif va30 eq "!friend"
 				gsub friendcount
 			else
@@ -191,7 +190,9 @@ scrp 3 9 1 1
 				sets va30 subs va10 1 va20
 
 				doif va30 eq "!net: ruso"
-					addv va91 1
+					doif game "!net ruso_status" eq "online"
+						addv va91 1
+					endi
 				elif va30 eq "!friend"
 					gsub friendcheck
 				else
@@ -217,13 +218,11 @@ scrp 3 9 1 1
 						endi
 
 *!* AW replacement for net: expo
-*!* remove: 
 **
 						seta va79 targ
 						rtar 1 1 35700
 						mesg wrt+ targ 1000 va79 va30 0
 **
-*setv va88 net: expo "warp" va30
 
 *						trigger warning
 						rtar 1 1 300
@@ -256,7 +255,9 @@ scrp 3 9 1 1
 **
 *							trigger contact
 *						but only if you've never come across them before
-						doif game va30 eq 0
+						sets va31 va30
+						adds va31 "_contact"
+						doif game va31 eq 0
 
 							rtar 1 1 157
 							doif targ ne null
@@ -338,9 +339,6 @@ scrp 3 9 1 1
 					sets va30 subs va12 1 va20
 
 *	have a look and see if this user is on
-*					Disabled/treated as online until AW equivlent
-*					is implemented
-
 					doif stoi caos 0 0 va30 0 game "f_aw_ulin" 0 1 va99 eq 1
 *	they are, increment
 						addv va91 1
