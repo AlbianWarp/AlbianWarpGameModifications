@@ -598,7 +598,7 @@ scrp 1 2 208 1066
 					sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 *					if null then there is no one on-line
 						sets va31 va30
-						doif va30 eq ""
+						doif va30 eq game "user_of_this_world"
 							part 5
 							sets va81 read "programming" 12
 							ptxt va81
@@ -1046,11 +1046,11 @@ scrp 1 2 208 1069
 	targ ownr
 *	repeatedly change selected creature and send it
 	setv va68 0
-	dbg: outs "sending the send all creatures loop until 68 ge 67"
-	dbg: outs "68 is"
-	dbg: outv va68
-	dbg: outs "67 is"
-	dbg: outv va67
+*	dbg: outs "sending the send all creatures loop until 68 ge 67"
+*	dbg: outs "68 is"
+*	dbg: outv va68
+*	dbg: outs "67 is"
+*	dbg: outv va67
 	loop
 		call 1005 0 0
 		addv va68 1
@@ -1060,13 +1060,13 @@ scrp 1 2 208 1069
 			setv va00 1
 		endi
 
-		dbg: outs "gonna send a norn now"
-		dbg: outs "68 is"
-		dbg: outv va68
-		dbg: outs "67 is"
-		dbg: outv va67
+*		dbg: outs "gonna send a norn now"
+*		dbg: outs "68 is"
+*		dbg: outv va68
+*		dbg: outs "67 is"
+*		dbg: outv va67
 
 		call 1066 va00 1
 	untl va68 ge va67
-	dbg: outs "that's all the creaturesss"
+*	dbg: outs "that's all the creaturesss"
 endm
