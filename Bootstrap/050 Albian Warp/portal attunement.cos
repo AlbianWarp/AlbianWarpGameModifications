@@ -102,7 +102,7 @@ scrp 3 9 1 1
 *	see if this game variable exists
 	doif game va00 gt 0
 *		it exists, cant let creature travel yet
-		sets va67 hist name gtos va66
+		sets va67 hist name gtos 0
 		adds va67 " tried to travel through a portal but could not due to Travel Sickness"
 		dbg: outs va67
 		stop
