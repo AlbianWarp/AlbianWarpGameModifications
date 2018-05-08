@@ -95,6 +95,16 @@ scrp 3 9 1 1
 *see if this creature is allowed to travel
 *	get the moniker
 	sets va00 gtos 0
+*	first make sure the creature isn't already on disk
+	sets va44 va00
+	adds va44 ".warp"
+	doif pray test va44 eq 1
+		sets va67 hist name gtos 0
+		adds va67 " could not be warped because they already exist on disk. Moniker: "
+		adds va67 gtos 0
+		dbg: outs va67
+		stop
+	endi
 *	store it again because this was added later :-(
 	sets va66 gtos 0
 *	add the _travel tag	
