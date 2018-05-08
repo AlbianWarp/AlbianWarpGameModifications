@@ -220,49 +220,11 @@ scrp 1 2 210 1010
 *				dbg: outs "set friend/foe status"
 
 *	find out whether they are online or not
-*		if random user ...
-				doif va30 eq "!net: ruso"
-*			and you are online ...
-					doif game "aw_status" = "online"
 
-* Choose between the next two lines
-* The first one is slow, but gives
-* the correct display.
-* The second can be inaccurate, but
-* only in the rare case where NOBODY
-* else is online but you.  I don't
-* think we _really_ care about that case.
-*						net: ruso va98
-						sets va98 "yes"
+				setv va45 stoi caos 0 0 va30 0 game "f_aw_ulin" 1 0 va99
+*				dbg: outs va30
+*				dbg: outv va45
 
-						inst
-						doif va98 ne ""
-*				mark contact as on
-							setv va45 1
-						else
-							setv va45 0
-						endi
-*			otherwise your're offline ...
-					else
-*				mark contact as off
-						setv va45 0
-					endi
-				elif va30 eq "!friend"
-					doif game "aw_status" = "offline"
-						setv va45 0
-					else
-						gsub friend
-					endi
-
-					doif va70 eq 1
-						setv va45 1
-					else
-						setv va45 0
-					endi
-				else
-					setv va45 stoi caos 0 0 va30 0 game "f_aw_ulin" 1 0 va99
-					inst
-				endi
 
 *	create the on/off line display
 				pat: dull ov01 "comms" 14 va90 va91 0

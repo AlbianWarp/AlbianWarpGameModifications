@@ -80,7 +80,6 @@ scrp 1 1 35700 9
 	else
 		setv ov00 0
 	endi
-	dbg: outs "the housekeeper is running about"
 
 	doif game "aw_online_indicator" eq 0 and game "aw_status" eq "online"
 		sets game "aw_status" "offline"
@@ -134,6 +133,8 @@ scrp 1 1 35700 9
 	doif game "aw_status" = "offline"
 		stop
 	endi
+
+	dbg: outs "the housekeeper is checking the WWR"
 
 *	Time to check the WWRs:
 *	refresh the special contacts
@@ -447,9 +448,9 @@ scrp 1 1 35700 1006
 	untl va42 eq ""
 	setv game "online_user_count" va45
 	doif va45 gt 0
-		sets game "!net ruso_status" "online"
+		sets game "!net: ruso_status" "online"
 	else
-		sets game "!net ruso_status" "offline"
+		sets game "!net: ruso_status" "offline"
 *		dbg: outs "no one is online"
 	endi
 endm
@@ -568,12 +569,15 @@ endm
 *returns 0 - "offline", 1 - "online", or 2 (contact does not exist)
 *_p1_ is the contact's name
 scrp 1 1 35700 9001
-
 	inst
+
 	sets va00 _p1_
+*	dbg: outs "checking if user is online"
+*	dbg: outs _p1_
 	adds va00 "_status"
 	doif type game va00 ne 2
 		outs "2"
+*		dbg: outs "type is not a string"
 		stop
 	endi
 	doif game va00 eq "online"
