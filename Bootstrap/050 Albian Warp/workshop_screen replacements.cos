@@ -497,7 +497,7 @@ endm
 *_p1_ is the creature, _p2_ is (I think) if it's the last creature?
 scrp 1 2 208 1066
 	inst
-	dbg: outs "trying to figure out what to do what a creature"
+
 *	dbg: outs "SENDING"
 *	dbg: outv _p1_
 
@@ -515,6 +515,7 @@ scrp 1 2 208 1066
 			subv va01 200
 			cmra va00 va01 1
 		endi
+
 *	else if it's containment programming ...		
 	elif ov01 eq 2
 *		see if user is online	
@@ -531,7 +532,6 @@ scrp 1 2 208 1066
 			mesg writ targ 1002
 		endi
 		targ ownr
-
 		sets va81 read "programming" 10
 		sets va00 va81
 		seta va01 ov16
@@ -539,6 +539,19 @@ scrp 1 2 208 1066
 			targ va01
 *			get its moniker	
 			sets va02 gtos 0
+*		first make sure the creature isn't already on disk
+			sets va44 va02
+			adds va44 ".warp"
+			doif pray test va44 eq 1
+				targ ownr
+				part 5
+				sets va81 "Sorry, this creature cannot be warped because it already exists on disk.\n\nTo warp this creature, you must remove the file from your My Creatures folder that contains the moniker: "
+				adds va81 va02
+				ptxt va81
+				dbg: outs "A creature could not be warped"
+				stop
+			endi
+
 *			delete it's immigrant variable if it has one
 			sets va89 va02
 			adds va89 "_immigrant"
@@ -582,7 +595,6 @@ scrp 1 2 208 1066
 
 *			if the user ID is random user, work out the random user					
 					doif va30 eq "!net: ruso"
-*!*					REPLACE THIS WITH AW NET:RUSO EQUIVLENT!
 					sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 *					if null then there is no one on-line
 						sets va31 va30
