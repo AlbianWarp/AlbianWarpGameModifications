@@ -765,31 +765,11 @@ scrp 1 2 208 1066
 *		dbg: outs "FRIEND"
 
 *	first count how many friends you have	
-		sets va40 ""
-		sets va41 "_group"
-		loop
-			sets va42 gamn va40
-*			see if string contains search (portal)
-			setv va43 sins va42 1 va41
-*			if does
-			doif va43 ne -1
-*				see if group value = 2
-				doif game va42 eq 2
-					addv va45 1
-				endi
-			endi
-*			set 'previous entry' to current entry
-			sets va40 va42
-		untl va42 eq ""
-
-*		dbg: outs "found this many friends - "
-*		dbg: outv va45
-
-
+		setv va45 game "online_friend_count"
 		doif va45 eq 0
 *		no friends - better tell them!
 			part 5
-			ptxt "I'm sorry. You don't appear to have any friends.\n\nYou can use the 'View Contacts' section of the Comms area to change this and make some of your contacts friends."
+			ptxt "I'm sorry. You don't appear to have any online friends.\n\nYou can use the 'View Contacts' section of the Comms area to change this and make more of your contacts into friends."
 *			clear state flag
 			setv ov01 0
 *			stop flashing portal icon
@@ -811,50 +791,8 @@ scrp 1 2 208 1066
 			tick 150
 			stop
 		endi
-
-*	randomly choose someone between 1 and #friends
-		setv va46 rand 1 va45
-		setv va47 0
-
-*		dbg: outs "Chosen friend number:"
-*		dbg: outv va46
-
-
-*	now find that one
-		sets va40 ""
-		sets va41 "_group"
-		loop
-			sets va42 gamn va40
-
-*		see if string contains search (portal)
-			setv va43 sins va42 1 va41
-
-*			if does
-			doif va43 ne -1
-*		see if group value = 2
-				doif game va42 eq 2
-*				it does, is this the randomly chosen one?
-					addv va47 1
-					doif va47 eq va46
-*		chop up string so only head remains
-						subv va43 1
-						sets va30 subs va42 1 va43
-						sets va31 va30
-*						dbg: outs "this is the friend"
-					else
-*						dbg: outs "not this friend .."
-*		output it - user ID
-					endi
-				endi
-			endi
-*	set 'previous entry' to current entry
-			sets va40 va42
-
-		untl va42 eq ""
-
-
-*		dbg: outs "Friend routine: va30 is"
-*		dbg: outs va30
+*		actually get the random friend
+		sets va30 caos 0 0 0 0 game "f_aw_frnd" 0 1 va99
 
 	retn
 
