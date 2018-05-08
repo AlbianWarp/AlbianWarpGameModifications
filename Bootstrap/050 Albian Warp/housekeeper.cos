@@ -420,7 +420,7 @@ endm
 
 scrp 1 1 35700 1006
 *sets number of real, actual online contacts into game "online_user_count"
-*also updates game "!net ruso_status"
+*also updates game "!net: ruso_status"
 	inst
 *update the number of contacts you currently have
 	sets va40 ""

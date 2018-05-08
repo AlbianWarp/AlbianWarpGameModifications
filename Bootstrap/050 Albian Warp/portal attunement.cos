@@ -35,7 +35,7 @@ scrp 3 9 1 0
 				sets va30 subs va10 1 va20
 				doif va30 eq "!net: ruso"
 *					see if anyone else is online!
-					doif game "!net ruso_status" eq "online"
+					doif game "!net: ruso_status" eq "online"
 						setv va90 1
 					endi
 				elif va30 eq "!friend"
@@ -160,7 +160,7 @@ scrp 3 9 1 1
 
 *			see if this is the random user contact	
 			doif va30 eq "!net: ruso"
-				doif game "!net ruso_status" eq "online"
+				doif game "!net: ruso_status" eq "online"
 						addv va91 1
 				endi
 			elif va30 eq "!friend"
@@ -203,7 +203,7 @@ scrp 3 9 1 1
 				sets va30 subs va10 1 va20
 
 				doif va30 eq "!net: ruso"
-					doif game "!net ruso_status" eq "online"
+					doif game "!net: ruso_status" eq "online"
 						addv va91 1
 					endi
 				elif va30 eq "!friend"
@@ -481,7 +481,7 @@ scrp 3 9 1 137
 				subv va20 1
 				sets va30 subs va10 1 va20
 				doif va30 eq "!net: ruso"
-					doif game "!net ruso_status" eq "online"
+					doif game "!net: ruso_status" eq "online"
 						setv va90 1
 					endi
 				elif va30 eq "!friend"
