@@ -1,0 +1,268 @@
+*setup CAOS functions
+
+*Returns name of random online user
+*no parameters
+*use with sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
+sets game "f_aw_ruso" sorc 1 1 35700 9000
+setv game "f_aw_ruso:v" 1
+scrx 1 1 35700 9000
+
+*Returns name of random online Friend :D
+*no parameters
+*use with sets va30 caos 0 0 0 0 game "f_aw_frnd" 0 1 va99
+sets game "f_aw_frnd" sorc 1 1 35700 9006
+setv game "f_aw_frnd:v" 1
+scrx 1 1 35700 9006
+
+*Returns if a user is online (net: ulin):
+*0 if offline
+*1 if online
+*2 if there is no such contact
+*_p1_ must be set to the username you are checking
+*use with setv va99 stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99
+sets game "f_aw_ulin" sorc 1 1 35700 9001
+setv game "f_aw_ulin:v" 1
+scrx 1 1 35700 9001
+
+*add user to WWR (net: whon)
+*returns nothing!
+*_p1_ is the username, _p2_ is the agent to get WW messages
+*use with sets va99 caos 0 0 va30 targ game "f_aw_whon" 0 0 va99
+sets game "f_aw_whon" sorc 1 1 35700 9002
+setv game "f_aw_whon:v" 1
+scrx 1 1 35700 9002
+
+*remove user from WWR (net: whof)
+*returns nothing!
+*_p1_ is the username, _p2_ is the agent to get WW messages
+*use with sets va99 caos 0 0 _p1_ targ game "f_aw_whof" 0 0 va99
+sets game "f_aw_whof" sorc 1 1 35700 9003
+setv game "f_aw_whof:v" 1
+scrx 1 1 35700 9003
+
+*clear the WWR for an agent (net: whoz)
+*returns nothing!
+*_p1_ is the agent
+*use with sets vaXX caos 0 0 targ 0 game "f_aw_whoz" 0 0 va99
+sets game "f_aw_whoz" sorc 1 1 35700 9004
+setv game "f_aw_whoz:v" 1
+scrx 1 1 35700 9004
+
+*dump debug info to dbg: outs ( like net: whod but not really)
+*no params
+*use with outs caos 0 0 0 0 game "f_aw_whod" 0 0 va99
+sets game "f_aw_whod" sorc 1 1 35700 9005
+setv game "f_aw_whod:v" 1
+scrx 1 1 35700 9005
+
+*holder script for CAOS functions: 
+*no parameters-- just returns a random user
+scrp 1 1 35700 9000
+	inst
+*	trigger the update contacts script
+*	I don't even think this DOES good in an inst but whatever
+	rtar 1 1 35700
+	mesg writ targ 1006
+	targ ownr
+
+	setv va48 game "online_user_count"
+*	dbg: outs "there are this many contacts"
+*	dbg: outv va48
+
+*	if there's no one, return yourself (this should never happen
+*	but it's better than throwing an error if it does)
+	doif va48 eq 0
+		outs game "user_of_this_world"
+		stop
+	endi
+
+	setv va49 rand 1 va48
+
+*	dbg: outs "random number is:"
+*	dbg: outv va48
+
+	sets va30 ""
+	sets va40 ""
+	sets va47 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*		see if string contains search
+*		and also is an actual contact
+		doif va42 ne ""
+
+			setv va43 sins va42 1 va41
+*							if it does
+			doif va43 ne -1
+				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*					get the actual username from the string
+					setv va46 strl va42
+					subv va46 strl va41
+					sets va47 subs va42 1 va46
+					doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+						dbg: outs va42
+						addv va45 1
+						dbg: outv va45
+						doif va45 eq va49
+							sets va30 va42
+						endi
+					endi
+				endi
+			endi
+
+		endi
+*		set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+
+*					va30 now holds your random contact with "_contact" appended
+*					You need to chop that off
+	setv va66 strl va30
+	subv va66 8
+	sets va30 subs va30 1 va66
+*	dbg: outs "Random contact chosen: "
+*	dbg: outs va30
+	outs va30
+endm
+
+*holder script for CAOS function: 
+*returns 0 - "offline", 1 - "online", or 2 (contact does not exist)
+*_p1_ is the contact's name
+scrp 1 1 35700 9001
+	inst
+
+	sets va00 _p1_
+*	dbg: outs "checking if user is online"
+*	dbg: outs _p1_
+	adds va00 "_status"
+	doif type game va00 ne 2
+		outs "2"
+*		dbg: outs "type is not a string"
+		stop
+	endi
+	doif game va00 eq "online"
+		outs "1"
+		stop
+	elif game va00 eq "offline"
+		outs "0"
+		stop
+	endi
+*if you're still here, the var eq something else for some reason
+*that should never happen but outs it anyway so we at least
+*know what it is!
+	outs game va00
+endm
+
+*NET: WHON Replacement
+*add someone to the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9002
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1002 _p1_ _p2_ 0
+endm
+
+*NET: WHOF Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9003
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1003 _p1_ _p2_ 0
+endm
+
+*NET: WHOZ Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9004
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1004 _p1_ _p2_ 0
+endm
+
+*NET: WHOD Replacement
+*remove someone from the WWR
+*_p1_ (string) is the name, _p2_ (agent) is the agent
+scrp 1 1 35700 9005
+	inst
+	rtar 1 1 35700
+	mesg wrt+ targ 1005 _p1_ _p2_ 0
+endm
+
+*net: frnd (there's no such thing as net: frnd but hey why not.)
+*no parameters-- just returns a random online friend
+scrp 1 1 35700 9006
+	inst
+*	trigger the update contacts script
+*	I don't even think this DOES good in an inst but whatever
+	rtar 1 1 35700
+	mesg writ targ 1007
+	targ ownr
+
+	setv va48 game "online_friend_count"
+*	dbg: outs "there are this many contacts"
+*	dbg: outv va48
+
+*	if there's no one, return yourself (this should never happen
+*	but it's better than throwing an error if it does)
+	doif va48 eq 0
+		outs game "user_of_this_world"
+		stop
+	endi
+
+	setv va49 rand 1 va48
+
+*	dbg: outs "random number is:"
+*	dbg: outv va48
+
+	sets va30 ""
+	sets va40 ""
+	sets va47 ""
+	sets va41 "_contact"
+	setv va45 0
+	loop
+		sets va42 gamn va40
+*		see if string contains search
+*		and also is an actual contact
+		doif va42 ne ""
+
+			setv va43 sins va42 1 va41
+*							if it does
+			doif va43 ne -1
+				doif subs va42 1 1 ne "!" and subs va42 1 1 ne "_"
+*					get the actual username from the string
+					setv va46 strl va42
+					subv va46 strl va41
+					sets va47 subs va42 1 va46
+					doif stoi caos 0 0 va47 0 game "f_aw_ulin" 0 1 va99 eq 1
+						adds va47 "_group"
+						doif game va47 eq 2
+							addv va45 1
+						endi
+						doif va45 eq va49
+							sets va30 va42
+						endi
+					endi
+				endi
+			endi
+
+		endi
+*		set 'previous entry' to current entry
+		sets va40 va42
+	untl va42 eq ""
+
+*					va30 now holds your random contact with "_contact" appended
+*					You need to chop that off
+	setv va66 strl va30
+	subv va66 8
+	sets va30 subs va30 1 va66
+*	dbg: outs "Random contact chosen: "
+*	dbg: outs va30
+	outs va30
+endm
+
+rscr
+enum 1 1 35700
+	kill targ
+next
