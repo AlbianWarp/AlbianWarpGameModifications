@@ -1,0 +1,7 @@
+*who's wanted register agent
+new: simp 1 2 35700 "blnk" 1 0 0
+tick 200
+seta game "aw_wwr_agent" targ
+
+scrp 1 2 35700 9
+endm
