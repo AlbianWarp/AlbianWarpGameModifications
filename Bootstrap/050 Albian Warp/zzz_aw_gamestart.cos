@@ -9,6 +9,8 @@ sets game "status" "offline"
 sets game "aw_status" "offline"
 ** User of this World = Not Set
 sets game "user_of_this_world" ""
+sets game "!net: ruso_status" "offline"
+sets game "!friend_status" "offline"
 
 rgam
 ** Move to Docking Station Hub
