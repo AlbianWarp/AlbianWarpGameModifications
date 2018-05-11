@@ -159,7 +159,7 @@ endm
 *_p1_ (string) is the name, _p2_ (agent) is the agent
 scrp 1 1 35700 9002
 	inst
-	rtar 1 1 35700
+	rtar 1 2 35700
 	mesg wrt+ targ 1002 _p1_ _p2_ 0
 endm
 
@@ -168,7 +168,7 @@ endm
 *_p1_ (string) is the name, _p2_ (agent) is the agent
 scrp 1 1 35700 9003
 	inst
-	rtar 1 1 35700
+	rtar 1 2 35700
 	mesg wrt+ targ 1003 _p1_ _p2_ 0
 endm
 
@@ -177,7 +177,7 @@ endm
 *_p1_ (string) is the name, _p2_ (agent) is the agent
 scrp 1 1 35700 9004
 	inst
-	rtar 1 1 35700
+	rtar 1 2 35700
 	mesg wrt+ targ 1004 _p1_ _p2_ 0
 endm
 
@@ -186,7 +186,7 @@ endm
 *_p1_ (string) is the name, _p2_ (agent) is the agent
 scrp 1 1 35700 9005
 	inst
-	rtar 1 1 35700
+	rtar 1 2 35700
 	mesg wrt+ targ 1005 _p1_ _p2_ 0
 endm
 
@@ -196,7 +196,7 @@ scrp 1 1 35700 9006
 	inst
 *	trigger the update contacts script
 *	I don't even think this DOES good in an inst but whatever
-	rtar 1 1 35700
+	rtar 1 2 35700
 	mesg writ targ 1007
 	targ ownr
 
