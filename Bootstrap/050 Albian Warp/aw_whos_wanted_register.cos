@@ -12,12 +12,13 @@ doif totl 1 2 35700 gt 0
 endi
 
 new: simp 1 2 35700 "blnk" 1 0 0
-tick 200
+tick 100
 seta game "aw_wwr_agent" targ
+setv ov00 0
 
 scrp 1 2 35700 9
 *There are took many tasks for this agent to handle quickly on its own--
-*so it's going to go through a list of tasks and do a different one each time.
+*so it's going to alternate tasks each time
 
 *This is the script that checks all the "_status" game variables and sees if any of them have 
 *changed since the last script-tick.
@@ -26,20 +27,28 @@ scrp 1 2 35700 9
 		stop
 	endi
 
-	dbg: outs "The WWR is doing its best"
+*	dbg: outs "The WWR is doing its best"
 
-*	Time to check the WWRs:
+	doif ov00 eq 1
 *	refresh the special contacts
 	gsub update_special_contacts
+*	dbg: outs "updating special contacts"
+	setv ov00 0
+	else
+*	check the WWRs
 
 *	subtract from the newly-online indicator
 	doif ov02 gt 0
 		subv ov02 1
 	endi
-*dbg: outs "newly online status is"
-*dbg: outv mv02
+*	dbg: outs "newly online status is"
+*	dbg: outv mv02
 
-	targ ownr
+*	dbg: outs "checking the WWR"
+	gsub check_wwr
+	setv ov00 1
+	endi
+
 
 	subr check_wwr
 		setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
