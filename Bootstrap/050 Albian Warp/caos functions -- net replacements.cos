@@ -1,6 +1,6 @@
 *setup CAOS functions
 
-*Returns name of random online user
+*Returns name of random online user (net: ruso)
 *no parameters
 *use with sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 1 va99
 sets game "f_aw_ruso" sorc 1 1 35700 9000

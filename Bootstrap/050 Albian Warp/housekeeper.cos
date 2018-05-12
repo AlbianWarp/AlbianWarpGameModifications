@@ -79,23 +79,6 @@ scrp 1 1 35700 9
 	setv game "aw_online_indicator" 0
 endm
 
-*WWR test entries:
-scrp 1 1 35700 137
-	inst
-	sets va00 "According to the WWR, "
-	adds va00 _p1_
-	adds va00 " has just come online."
-	dbg: outs va00
-endm
-
-scrp 1 1 35700 138
-	inst
-	sets va00 "According to the WWR, "
-	adds va00 _p1_
-	adds va00 " has just gone offline."
-	dbg: outs va00
-endm
-
 ***
 * Warp Creature to other Player
 * _p1_ = creature (creature)

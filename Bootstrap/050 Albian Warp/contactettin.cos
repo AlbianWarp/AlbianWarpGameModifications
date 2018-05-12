@@ -48,8 +48,7 @@ scrp 1 1 157 1000
 		sets game va00 _p1_
 
 *trigger the update contacts script
-		rtar 1 1 35700
-		mesg writ targ 1001
+		mesg writ game "aw_wwr_agent" 1001
 		targ ownr
 
 	endi

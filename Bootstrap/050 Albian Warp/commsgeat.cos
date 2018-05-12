@@ -62,7 +62,7 @@ endm
 
 scrp 1 2 210 1010
 	inst
-	dbg: outs "reloading contacts"
+*	dbg: outs "reloading contacts"
 
 *	dbg: outs "displaying parts"
 ****	create the list of known contacts	

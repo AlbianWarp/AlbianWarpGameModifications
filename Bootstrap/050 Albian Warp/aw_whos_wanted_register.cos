@@ -4,8 +4,9 @@
 * Actually hosts the WWR
 * Adds and remove users from an agent's WWR
 * Sends messages to agents that request online/offline notifications whwn those notifications occur
+* Counts and updates the number of users and friends that are online
 
-*check before continuing... we really don't need more than one of you:
+*check before continuing... we really don't want more than one of you:
 doif totl 1 2 35700 gt 0
 	stop
 endi
@@ -14,28 +15,35 @@ new: simp 1 2 35700 "blnk" 1 0 0
 tick 200
 seta game "aw_wwr_agent" targ
 
-
 scrp 1 2 35700 9
-	lock
+*There are took many tasks for this agent to handle quickly on its own--
+*so it's going to go through a list of tasks and do a different one each time.
+
+*This is the script that checks all the "_status" game variables and sees if any of them have 
+*changed since the last script-tick.
+	inst
 	doif game "aw_status" = "offline"
 		stop
 	endi
 
-	dbg: outs "the housekeeper is checking the WWR"
+	dbg: outs "The WWR is doing its best"
 
 *	Time to check the WWRs:
 *	refresh the special contacts
-	mesg writ ownr 1006
-	mesg writ ownr 1007
+	gsub update_special contacts
 
 *	subtract from the newly-online indicator
-	doif mv02 gt 0
-		subv mv02 1
+	doif ov02 gt 0
+		subv ov02 1
 	endi
 	*dbg: outs "newly online status is"
 	*dbg: outv mv02
 
 	targ ownr
+
+	endi
+
+subr check_wwr
 	setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
 *	dbg: outs "wwrs found"
 *	dbg: outv va02
@@ -91,7 +99,28 @@ scrp 1 2 35700 9
 				endi
 			endi
 		repe
-	endi
+retn
+
+subr update_special contacts
+	mesg writ ownr 1006
+	mesg writ ownr 1007
+endm
+
+*WWR test entries:
+scrp 1 2 35700 137
+	inst
+	sets va00 "According to the WWR, "
+	adds va00 _p1_
+	adds va00 " has just come online."
+	dbg: outs va00
+endm
+
+scrp 1 2 35700 138
+	inst
+	sets va00 "According to the WWR, "
+	adds va00 _p1_
+	adds va00 " has just gone offline."
+	dbg: outs va00
 endm
 
 scrp 1 2 35700 1001
