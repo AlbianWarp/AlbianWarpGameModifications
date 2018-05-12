@@ -30,82 +30,82 @@ scrp 1 2 35700 9
 
 *	Time to check the WWRs:
 *	refresh the special contacts
-	gsub update_special contacts
+	gsub update_special_contacts
 
 *	subtract from the newly-online indicator
 	doif ov02 gt 0
 		subv ov02 1
 	endi
-	*dbg: outs "newly online status is"
-	*dbg: outv mv02
+*dbg: outs "newly online status is"
+*dbg: outv mv02
 
 	targ ownr
 
-	endi
-
-subr check_wwr
-	setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
+	subr check_wwr
+		setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
 *	dbg: outs "wwrs found"
 *	dbg: outv va02
-	doif va02 gt 0
-		setv va01 0
-		reps va02
-			addv va01 1
+		doif va02 gt 0
+			setv va01 0
+			reps va02
+				addv va01 1
 *			get the user namevar:
-			sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 0 0 va99
+				sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 0 0 va99
 *			get the username itself 
-			sets va04 name va03
+				sets va04 name va03
 *			see if your online status has changed!
-			sets va05 va03
-			adds va05 "_status"
-			setv va06 name va05
+				sets va05 va03
+				adds va05 "_status"
+				setv va06 name va05
 *			va06 is now the old status!
 *			see if this has changed! Set the new status
-			setv name va05 stoi caos 0 0 va04 0 game "f_aw_ulin" 0 1 va99
+				setv name va05 stoi caos 0 0 va04 0 game "f_aw_ulin" 0 1 va99
 *				this incorporates the newly online indicator (mv02)
 *				so it doesn't notify you everyone is online when you
 *				just logged in!
-			doif name va05 ne va06 and mv02 le 0
+				doif name va05 ne va06 and mv02 le 0
 *				something is different, gasp
 *				you have to tell your agents!
 *				first make sure you have agents...
-				setv va07 stoi caos 0 0 va03 ownr game "f_LengthofVList" 0 0 va99
-				doif va07 gt 0
-					setv va08 0
-					reps va07
-						addv va08 1
+					setv va07 stoi caos 0 0 va03 ownr game "f_LengthofVList" 0 0 va99
+					doif va07 gt 0
+						setv va08 0
+						reps va07
+							addv va08 1
 *						get the agent name:
-						sets va09 caos 0 1 va03 va08 game "f_GetVarInVList" 0 0 va99
+							sets va09 caos 0 1 va03 va08 game "f_GetVarInVList" 0 0 va99
 *						sets the agent name
-						doif name va09 ne null
-						seta va10 name va09
+							doif name va09 ne null
+								seta va10 name va09
 *						now you gotta tell the agent what's up!
 *						if status is 0, set the "went offline" message
-							doif name va05 eq 0
-								dbg: outs "sending an offline message about"
-								dbg: outs va04
-								mesg wrt+ va10 138 va04 0 0
-							elif name va05 eq 1
+								doif name va05 eq 0
+									dbg: outs "sending an offline message about"
+									dbg: outs va04
+									mesg wrt+ va10 138 va04 0 0
+								elif name va05 eq 1
 *								if status is 1, set the "went online" message!
-								dbg: outs "sending an online message about"
-								dbg: outs va04
-								mesg wrt+ va10 137 va04 0 0
-							endi
+									dbg: outs "sending an online message about"
+									dbg: outs va04
+									mesg wrt+ va10 137 va04 0 0
+								endi
 *							That agent wasn't found!! It must not exist anymore.
-						else
-							
-						endi
-					repe
+							else
+
+							endi
+						repe
+					endi
 				endi
-			endi
-		repe
-retn
+			repe
+		endi
+	retn
 
-subr update_special contacts
-	mesg writ ownr 1006
-	mesg writ ownr 1007
+
+	subr update_special_contacts
+		mesg writ ownr 1006
+		mesg writ ownr 1007
+	retn
 endm
-
 *WWR test entries:
 scrp 1 2 35700 137
 	inst
@@ -161,10 +161,10 @@ scrp 1 2 35700 1002
 	sets va04 caos 0 1 va02 _p2_ game "f_ExAddtoVList" 0 0 va99
 
 *	dbg: outs va03
-*	dbg: outs _p1_
-*	dbg: outs "was added to the wwr for agent:"
-*	targ _p2_
-*	dbg: outv unid
+	dbg: outs _p1_
+	dbg: outs "was added to the wwr for agent:"
+	targ _p2_
+	dbg: outv spcs
 *	dbg: outs "new length:"
 *	dbg: outs caos 0 0 "wwr" ownr game "f_LengthofVList" 1 1 va99
 endm

@@ -23,16 +23,17 @@ scrp 1 1 157 1000
 		stop
 	endi
 
-* make sure we are in WWR, so net: ulin is fast
-* and for warning icon script 1 1 157 137 below
-*	lock
-	sets va99 caos 0 0 _p1_ targ game "f_aw_whon" 0 0 va99
-	inst
 	sets va79 _p1_
 	adds va79 "_contact"
 
-*	check whether this is a new (to you) user
-	doif game va79 eq 0
+*	before continuing: the user must be new, it must not be you, and it must not be a blank space.
+	doif game va79 eq 0	and _p1_ ne game "user_of_this_world" and _p1_ ne ""
+
+*	 make sure we are in WWR
+*	 for warning icon script 1 1 157 137 below
+		sets va99 caos 0 0 _p1_ targ game "f_aw_whon" 0 0 va99
+		inst
+
 *		it is, create the variables
 		inst
 *va79 is [contactname]_contact right now
