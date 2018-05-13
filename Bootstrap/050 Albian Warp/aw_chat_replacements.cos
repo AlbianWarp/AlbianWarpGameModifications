@@ -298,7 +298,7 @@ scrp 1 1 215 5000
 			dbg: outs "Adding chatters to join-existing-chat-invite"
 			dbg: outs va44
 		endi
-	untl va30 = 31 or type name va40 ne 2
+	untl va30 = 31
 *	clear the last namevar
 	doif va30 lt 31
 		sets name va40 ""
@@ -416,7 +416,7 @@ scrp 1 1 213 9
 										setv va99 1
 									endi
 									addv va40 1
-								untl va40 = 31 or va99 = 1
+								untl va40 = 31
 ** 					If you haven't been added, then something has gone wrong!! eek!
 								doif va99 = 0
 									dbg: asrt "invitee accepted" = "couldn't be added"
@@ -459,7 +459,7 @@ scrp 1 1 213 9
 										sets va03 ""
 									endi
 									addv va22 1
-								untl va22 = 31 or va03 = ""
+								untl va22 = 31
 ** 								There's a check for success here but for AW let's just 
 **								Assume we're always sucessful
 								sets va10 "<tint 120 220 250>"
@@ -641,7 +641,7 @@ scrp 1 1 213 9
 						adds va51 va43
 						targ va66
 ** save to "chatterX_Nickname" name variable
-						doif type name va50 eq 2
+						doif type name va50 eq 2 and type name va51 eq 2
 							sets va57 name va50
 							sets va58 name va51
 							targ va56
@@ -1009,7 +1009,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31 or va99 = 1
+							untl va40 = 31
 * I have replaced my debug assert style error with a less intrusive one that will simply
 * tell the user that an error has occured and to report it to Creature Labs.
 *					doif va99 = 0
@@ -1123,7 +1123,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31 or va99 = 1
+							untl va40 = 31
 ** 					If you haven't been added, then something has gone wrong!! eek!
 							doif va99 = 0
 								dbg: asrt "chatter" = "not added"
@@ -1864,7 +1864,7 @@ scrp 1 1 214 1002
 			endi
 * Increment the X (va40)
 			addv va40 1
-		untl va40 = 31 or type mame va50 ne 2
+		untl va40 = 31
 ** Add yourself to this list, somewhere! :o)
 		setv va99 0
 		setv va40 1
@@ -2258,6 +2258,7 @@ scrp 1 1 210 138
 	sets va02 "_UserID"
 	sets va03 "_Nickname"
 	setv va04 1
+		dbg: outs "looking for the offline chatter in the list:"
 	loop
 *		"chatter"
 		sets va05 va01
@@ -2269,7 +2270,9 @@ scrp 1 1 210 138
 		adds va05 va02
 *		"chatterX_Nickname"
 		adds va06 va03
-*		dbg: outs 
+		dbg: outs name va05 
+		dbg: outs "vs:"
+		dbg: outs va00
 		doif name va05 = va00
 			setv va07 va04
 ** Update the Chat with this info!
@@ -2293,11 +2296,9 @@ scrp 1 1 210 138
 			setv va99 1
 		endi
 		addv va04 1
-	untl va04 = 31 or va99 = 1
-	unlk
+	untl va04 = 31 or va99 eq 1
 ** Force an Update to the Contact List
 	setv ov70 0
-	tick 1
 endm
 
 ** Update Chat Contact List
