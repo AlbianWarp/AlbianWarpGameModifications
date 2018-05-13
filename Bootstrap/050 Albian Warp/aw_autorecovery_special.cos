@@ -1,0 +1,23 @@
+*handles detection and autorecovery of special AW-agents
+*like the housekeeper and WWR
+
+new: simp 1 3 35700 "blnk" 1 0 0
+tick 30
+
+scrp 1 3 35700 9
+	inst
+	doif totl 1 1 35700 eq 0
+		dbg: outs "Housekeeper not found-- autorecovery"
+		ject "housekeeper.cos" 7
+	endi
+
+	doif totl 1 2 35700 eq 0
+		dbg: outs "WWR not found-- autorecovery"
+		ject "aw_whos_wanted_register.cos" 7
+	endi
+endm
+
+rscr
+enum 1 3 35700
+	kill targ
+next
