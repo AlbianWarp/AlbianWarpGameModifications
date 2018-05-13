@@ -266,6 +266,7 @@ scrp 1 1 215 5000
 	sets va33 "_UserID"
 	setv va30 1
 	loop
+		dbg: outv va30
 		targ mame "Chat"
 		sets va40 va31
 		adds va40 vtos va30
@@ -294,12 +295,15 @@ scrp 1 1 215 5000
 		doif type va43 eq 2 and type va44 eq 2
 			sets name va40 va43
 			sets name va41 va44
-			dbg: outs "Set these:"
-			dbg: outs va41
-			dbg: outs va40
+			dbg: outs "Adding chatters to join-existing-chat-invite"
+			dbg: outs va44
 		endi
-
 	untl va30 = 31 or type name va40 ne 2
+*	clear the last namevar
+	doif va30 lt 31
+		sets name va40 ""
+
+	endi
 	targ ownr
 	sets name "Result" "Success"
 endm
@@ -403,6 +407,8 @@ scrp 1 1 213 9
 									doif name va50 = "" and va99 = 0
 										sets name va50 va03
 										sets name va51 va04
+										dbg: outs "adding from invitation to chat:"
+										dbg: outs va04
 ** 							add them to your who's wanted register too
 										lock
 										sets va99 caos 0 0 va04 targ game "f_aw_whon" 0 0 va99
@@ -642,6 +648,9 @@ scrp 1 1 213 9
 ** save to "chatterX_UserID" name variable
 							sets name va50 va57
 							sets name va51 va58
+*							debug
+							dbg: outs "Copying Vars from RTDMA to chat invite dialog:"
+							dbg: outs va57
 						else
 *targ va56
 *sets name va50 ""
