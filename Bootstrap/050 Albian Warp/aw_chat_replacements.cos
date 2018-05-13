@@ -447,9 +447,10 @@ scrp 1 1 213 9
 											sets name "aw_recipient" va03
 											sets name "CHAT" "Update"
 											sets name "New Chatter Nickname" va04
+											sets name "ChatID" va02
 										endi
 									else
-										setv va03 0
+										sets va03 ""
 									endi
 									addv va22 1
 								untl va22 = 31 or va03 = ""
@@ -988,6 +989,9 @@ scrp 1 1 209 9
 * 						"chatterX_UserID"
 								adds va51 va43
 ** 						Find the one.. :)
+								doif type name va51 ne 2
+								 sets name va51 ""
+								endi
 								doif name va51 = va83
 									sets name va50 ""
 									sets name va51 ""
@@ -1069,6 +1073,9 @@ scrp 1 1 209 9
 * 						"chatterX_UserID"
 								adds va51 va43
 **						Stop if Chatter is already found!
+								doif type name va51 ne 2
+								 sets name va51 ""
+								endi
 								doif name va51 = va83
 									stop
 								endi
@@ -1837,6 +1844,9 @@ scrp 1 1 214 1002
 *				dbg: outs va51
 *				dbg: outs name va51
 ** Also add to the Who's Wanted register... :o)
+					doif type name va51 ne 2
+					 sets name va51 ""
+					endi				
 				doif name va51 <> ""
 					lock
 					sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
@@ -2232,6 +2242,8 @@ scrp 1 1 210 138
 	endi
 ** Grab the UserID
 	sets va00 _p1_
+	dbg: outs "A chatter has gone offline! It's this one:"
+	dbg: outs va00
 ** Loop through all the Chatters until we find this chatter, and remove them from the Chatter list (and the Who's Wanted Register).
 	sets va01 "chatter"
 	sets va02 "_UserID"
@@ -2248,6 +2260,7 @@ scrp 1 1 210 138
 		adds va05 va02
 *		"chatterX_Nickname"
 		adds va06 va03
+*		dbg: outs 
 		doif name va05 = va00
 			setv va07 va04
 ** Update the Chat with this info!
