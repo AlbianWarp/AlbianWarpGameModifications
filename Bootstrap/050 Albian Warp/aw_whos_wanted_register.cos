@@ -19,9 +19,6 @@ setv ov00 0
 scrp 1 2 35700 9
 *There are took many tasks for this agent to handle quickly on its own--
 *so it's going to alternate tasks each time
-
-*This is the script that checks all the "_status" game variables and sees if any of them have 
-*changed since the last script-tick.
 	inst
 	doif game "aw_status" = "offline"
 		stop
@@ -31,25 +28,26 @@ scrp 1 2 35700 9
 
 	doif ov00 eq 1
 *	refresh the special contacts
-	gsub update_special_contacts
+		gsub update_special_contacts
 *	dbg: outs "updating special contacts"
-	setv ov00 0
+		setv ov00 0
 	else
 *	check the WWRs
 
 *	subtract from the newly-online indicator
-	doif ov02 gt 0
-		subv ov02 1
-	endi
+		doif ov02 gt 0
+			subv ov02 1
+		endi
 *	dbg: outs "newly online status is"
 *	dbg: outv mv02
 
 *	dbg: outs "checking the WWR"
-	gsub check_wwr
-	setv ov00 1
+		gsub check_wwr
+		setv ov00 1
 	endi
 
-
+*This is the script that checks all the "_status" game variables and sees if any of them have 
+*changed since the last script-tick.
 	subr check_wwr
 		setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
 *	dbg: outs "wwrs found"
@@ -346,5 +344,68 @@ scrp 1 2 35700 1007
 		sets game "!friend_status" "online"
 	else
 		sets game "!friend_status" "offline"
+	endi
+endm
+
+*A user has changed status (only to be called by the AW Client)
+* _p1_ is the username, _p2_ is either "online" or "offline" 
+*Example: mesg wrt+ game "aw_wwr_agent" 1008 "Verm" "online" 0
+scrp 1 2 35700 1008
+	inst
+	dbg: outs "Manually Triggered WWR Event for"
+	dbg: outs _p1_
+*	set the gamevar status
+	sets va11 _p1_
+	adds va11 "_status"
+	sets game va11 _p2_
+	dbg: outs va11
+	dbg: outs game va11
+
+*find that username in the WWR:
+	sets va02 caos 0 1 "wwr" _p1_ game "f_SearchVList" 0 0 va99
+*if the username is real:
+	doif va02 ne "#N#"
+*		check your agents!
+		setv va07 stoi caos 0 0 va02 ownr game "f_LengthofVList" 0 0 va99
+		doif va07 gt 0
+			*dbg: outs "User is accountable to this many agents:"
+			*dbg: outv va07
+			setv va08 0
+			reps va07
+				addv va08 1
+*					get the agent name:
+				sets va09 caos 0 1 va02 va08 game "f_GetVarInVList" 0 0 va99
+*					sets the agent name
+				doif name va09 ne null
+					seta va10 name va09
+*					now you gotta tell the agent what's up!
+*					if status is 0, set the "went offline" message
+					doif lowa _p2_ eq "offline"
+						dbg: outs "sending an offline message about"
+						dbg: outs _p1_
+						sets va05 va02
+						adds va05 "_status"
+						setv name va05 0
+						mesg wrt+ va10 138 _p1_ 0 0
+					elif lowa _p2_ eq "online"
+*							if status is 1, set the "went online" message!
+						dbg: outs "sending an online message about"
+						dbg: outs _p1_
+						sets va05 va02
+						adds va05 "_status"
+						setv name va05 1
+						mesg wrt+ va10 137 _p1_ 0 0
+					endi
+*						That agent wasn't found!! It must not exist anymore.
+				else
+
+				endi
+			repe
+		else
+			dbg: outs "This user is not in the WWR for any agents"
+		endi
+
+	else
+		dbg: outs "This user is not in the WWR"
 	endi
 endm
