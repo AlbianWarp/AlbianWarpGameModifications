@@ -277,7 +277,6 @@ scrp 1 1 215 5000
 *		make sure you're only sending names!
 		doif type name va40 eq 2 and type name va41 eq 2
 			doif name va40 ne "" and name va41 ne ""
-				stop
 				sets va43 name va40
 				sets va44 name va41
 			else
@@ -295,9 +294,9 @@ scrp 1 1 215 5000
 		doif type va43 eq 2 and type va44 eq 2
 			sets name va40 va43
 			sets name va41 va44
-*			dbg: outs "Set these:"
-*			dbg: outs va41
-*			dbg: outs va40
+			dbg: outs "Set these:"
+			dbg: outs va41
+			dbg: outs va40
 		endi
 
 	untl va30 = 31 or type name va40 ne 2
