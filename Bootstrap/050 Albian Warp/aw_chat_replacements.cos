@@ -2298,7 +2298,9 @@ scrp 1 1 210 138
 		addv va04 1
 	untl va04 = 31 or va99 eq 1
 ** Force an Update to the Contact List
+	targ ownr
 	setv ov70 0
+	tick 1
 endm
 
 ** Update Chat Contact List
