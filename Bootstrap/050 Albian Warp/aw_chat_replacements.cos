@@ -266,6 +266,7 @@ scrp 1 1 215 5000
 	sets va33 "_UserID"
 	setv va30 1
 	loop
+		dbg: outv va30
 		targ mame "Chat"
 		sets va40 va31
 		adds va40 vtos va30
@@ -277,7 +278,6 @@ scrp 1 1 215 5000
 *		make sure you're only sending names!
 		doif type name va40 eq 2 and type name va41 eq 2
 			doif name va40 ne "" and name va41 ne ""
-				stop
 				sets va43 name va40
 				sets va44 name va41
 			else
@@ -295,12 +295,15 @@ scrp 1 1 215 5000
 		doif type va43 eq 2 and type va44 eq 2
 			sets name va40 va43
 			sets name va41 va44
-*			dbg: outs "Set these:"
-*			dbg: outs va41
-*			dbg: outs va40
+			dbg: outs "Adding chatters to join-existing-chat-invite"
+			dbg: outs va44
 		endi
+	untl va30 = 31
+*	clear the last namevar
+	doif va30 lt 31
+		sets name va40 ""
 
-	untl va30 = 31 or type name va40 ne 2
+	endi
 	targ ownr
 	sets name "Result" "Success"
 endm
@@ -404,6 +407,8 @@ scrp 1 1 213 9
 									doif name va50 = "" and va99 = 0
 										sets name va50 va03
 										sets name va51 va04
+										dbg: outs "adding from invitation to chat:"
+										dbg: outs va04
 ** 							add them to your who's wanted register too
 										lock
 										sets va99 caos 0 0 va04 targ game "f_aw_whon" 0 0 va99
@@ -411,7 +416,7 @@ scrp 1 1 213 9
 										setv va99 1
 									endi
 									addv va40 1
-								untl va40 = 31 or va99 = 1
+								untl va40 = 31 or va99 eq 1
 ** 					If you haven't been added, then something has gone wrong!! eek!
 								doif va99 = 0
 									dbg: asrt "invitee accepted" = "couldn't be added"
@@ -448,12 +453,13 @@ scrp 1 1 213 9
 											sets name "aw_recipient" va03
 											sets name "CHAT" "Update"
 											sets name "New Chatter Nickname" va04
+											sets name "ChatID" va02
 										endi
 									else
-										setv va03 0
+										sets va03 ""
 									endi
 									addv va22 1
-								untl va22 = 31 or va03 = ""
+								untl va22 = 31
 ** 								There's a check for success here but for AW let's just 
 **								Assume we're always sucessful
 								sets va10 "<tint 120 220 250>"
@@ -635,13 +641,16 @@ scrp 1 1 213 9
 						adds va51 va43
 						targ va66
 ** save to "chatterX_Nickname" name variable
-						doif type name va50 eq 2
+						doif type name va50 eq 2 and type name va51 eq 2
 							sets va57 name va50
 							sets va58 name va51
 							targ va56
 ** save to "chatterX_UserID" name variable
 							sets name va50 va57
 							sets name va51 va58
+*							debug
+							dbg: outs "Copying Vars from RTDMA to chat invite dialog:"
+							dbg: outs va57
 						else
 *targ va56
 *sets name va50 ""
@@ -989,6 +998,9 @@ scrp 1 1 209 9
 * 						"chatterX_UserID"
 								adds va51 va43
 ** 						Find the one.. :)
+								doif type name va51 ne 2
+									sets name va51 ""
+								endi
 								doif name va51 = va83
 									sets name va50 ""
 									sets name va51 ""
@@ -997,7 +1009,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31 or va99 = 1
+							untl va40 = 31 or va99 eq 1
 * I have replaced my debug assert style error with a less intrusive one that will simply
 * tell the user that an error has occured and to report it to Creature Labs.
 *					doif va99 = 0
@@ -1070,6 +1082,9 @@ scrp 1 1 209 9
 * 						"chatterX_UserID"
 								adds va51 va43
 **						Stop if Chatter is already found!
+								doif type name va51 ne 2
+									sets name va51 ""
+								endi
 								doif name va51 = va83
 									stop
 								endi
@@ -1108,7 +1123,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31 or va99 = 1
+							untl va40 = 31 or va99 eq 1
 ** 					If you haven't been added, then something has gone wrong!! eek!
 							doif va99 = 0
 								dbg: asrt "chatter" = "not added"
@@ -1838,6 +1853,9 @@ scrp 1 1 214 1002
 *				dbg: outs va51
 *				dbg: outs name va51
 ** Also add to the Who's Wanted register... :o)
+				doif type name va51 ne 2
+					sets name va51 ""
+				endi
 				doif name va51 <> ""
 					lock
 					sets va99 caos 0 0 name va51 targ game "f_aw_whon" 0 0 va99
@@ -1846,7 +1864,7 @@ scrp 1 1 214 1002
 			endi
 * Increment the X (va40)
 			addv va40 1
-		untl va40 = 31 or type mame va50 ne 2
+		untl va40 = 31
 ** Add yourself to this list, somewhere! :o)
 		setv va99 0
 		setv va40 1
@@ -2233,11 +2251,14 @@ scrp 1 1 210 138
 	endi
 ** Grab the UserID
 	sets va00 _p1_
+	dbg: outs "A chatter has gone offline! It's this one:"
+	dbg: outs va00
 ** Loop through all the Chatters until we find this chatter, and remove them from the Chatter list (and the Who's Wanted Register).
 	sets va01 "chatter"
 	sets va02 "_UserID"
 	sets va03 "_Nickname"
 	setv va04 1
+	dbg: outs "looking for the offline chatter in the list:"
 	loop
 *		"chatter"
 		sets va05 va01
@@ -2249,40 +2270,51 @@ scrp 1 1 210 138
 		adds va05 va02
 *		"chatterX_Nickname"
 		adds va06 va03
-		doif name va05 = va00
-			setv va07 va04
+		doif type name va05 eq 2
+			dbg: outs name va05
+			dbg: outs "vs:"
+			dbg: outs va00
+			doif name va05 = va00
+				dbg: outs "found it!"
+				setv va07 va04
 ** Update the Chat with this info!
-			adds name "ChatText" read "Chat Scripts Text" 0
-			adds name "ChatText" "<tint 120 220 250>"
-			adds name "ChatText" name va06
-			adds name "ChatText" read "Chat Scripts Text" 1
-			part 2
-			ptxt name "ChatText"
-			setv va10 npgs
-			subv va10 1
-			page va10
+				adds name "ChatText" read "Chat Scripts Text" 0
+				adds name "ChatText" "<tint 120 220 250>"
+				adds name "ChatText" name va06
+				adds name "ChatText" read "Chat Scripts Text" 1
+				part 2
+				ptxt name "ChatText"
+				setv va10 npgs
+				subv va10 1
+				page va10
 ** Clear the "chatterX_UserID" name variable.
-			sets name va05 ""
-			adds va06 va03
+				sets name va05 ""
+*				adds va06 va03
 ** Clear the "chatterX_Nickname" name variable.
-			sets name va06 ""
+				dbg: outs "now removing"
+				dbg: outs va06 
+				dbg: outs name va06
+				sets name va06 ""
 ** Remove from Who's Wanted Register
-			sets va99 caos 0 0 va00 targ game "f_aw_whof" 0 0 va99
+				sets va99 caos 0 0 va00 targ game "f_aw_whof" 0 0 va99
 ** cut out
-			setv va99 1
+				setv va99 1
+			endi
 		endi
 		addv va04 1
-	untl va04 = 31 or va99 = 1
-	unlk
+	untl va04 = 31 or va99 eq 1
 ** Force an Update to the Contact List
+	targ ownr
 	setv ov70 0
 	tick 1
+	dbg: outs "reloaded contacts"
 endm
 
 ** Update Chat Contact List
 scrp 1 1 210 3000
 	inst
 	lock
+	dbg: outs "reloading chat contacts list"
 	setv va00 21
 	sets va01 "chatter"
 	sets va02 "_Nickname"
@@ -2300,13 +2332,17 @@ scrp 1 1 210 3000
 			sets va06 va04
 			adds va04 va02
 			adds va06 va05
-** Remove them if they are offline.
+
 			doif type name va04 ne 2
 				sets name va04 ""
 			endi
 
 			doif name va04 <> ""
+				dbg: outs "Adding this user to the chat list:"
+				dbg: outs va04
+				dbg: outs name va04
 				doif stoi caos 0 0 va06 0 game "f_aw_ulin" 0 1 va99 eq 0
+** Remove them if they are offline.
 ** Update the Chat with this info!
 					adds name "ChatText" read "Chat Scripts Text" 0
 					adds name "ChatText" "<tint 120 220 250>"
