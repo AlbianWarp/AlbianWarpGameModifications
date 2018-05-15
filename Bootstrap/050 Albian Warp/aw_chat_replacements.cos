@@ -416,7 +416,7 @@ scrp 1 1 213 9
 										setv va99 1
 									endi
 									addv va40 1
-								untl va40 = 31
+								untl va40 = 31 or va99 eq 1
 ** 					If you haven't been added, then something has gone wrong!! eek!
 								doif va99 = 0
 									dbg: asrt "invitee accepted" = "couldn't be added"
@@ -1009,7 +1009,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31
+							untl va40 = 31 or va99 eq 1
 * I have replaced my debug assert style error with a less intrusive one that will simply
 * tell the user that an error has occured and to report it to Creature Labs.
 *					doif va99 = 0
@@ -1123,7 +1123,7 @@ scrp 1 1 209 9
 									setv va99 1
 								endi
 								addv va40 1
-							untl va40 = 31
+							untl va40 = 31 or va99 eq 1
 ** 					If you haven't been added, then something has gone wrong!! eek!
 							doif va99 = 0
 								dbg: asrt "chatter" = "not added"
