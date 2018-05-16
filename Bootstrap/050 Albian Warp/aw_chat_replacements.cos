@@ -2251,14 +2251,14 @@ scrp 1 1 210 138
 	endi
 ** Grab the UserID
 	sets va00 _p1_
-	dbg: outs "A chatter has gone offline! It's this one:"
-	dbg: outs va00
+*	dbg: outs "A chatter has gone offline! It's this one:"
+*	dbg: outs va00
 ** Loop through all the Chatters until we find this chatter, and remove them from the Chatter list (and the Who's Wanted Register).
 	sets va01 "chatter"
 	sets va02 "_UserID"
 	sets va03 "_Nickname"
 	setv va04 1
-	dbg: outs "looking for the offline chatter in the list:"
+*	dbg: outs "looking for the offline chatter in the list:"
 	loop
 *		"chatter"
 		sets va05 va01
@@ -2271,11 +2271,11 @@ scrp 1 1 210 138
 *		"chatterX_Nickname"
 		adds va06 va03
 		doif type name va05 eq 2
-			dbg: outs name va05
-			dbg: outs "vs:"
-			dbg: outs va00
+*			dbg: outs name va05
+*			dbg: outs "vs:"
+*			dbg: outs va00
 			doif name va05 = va00
-				dbg: outs "found it!"
+*				dbg: outs "found it!"
 				setv va07 va04
 ** Update the Chat with this info!
 				adds name "ChatText" read "Chat Scripts Text" 0
@@ -2291,9 +2291,9 @@ scrp 1 1 210 138
 				sets name va05 ""
 *				adds va06 va03
 ** Clear the "chatterX_Nickname" name variable.
-				dbg: outs "now removing"
-				dbg: outs va06 
-				dbg: outs name va06
+*				dbg: outs "now removing"
+*				dbg: outs va06 
+*				dbg: outs name va06
 				sets name va06 ""
 ** Remove from Who's Wanted Register
 				sets va99 caos 0 0 va00 targ game "f_aw_whof" 0 0 va99
@@ -2307,14 +2307,14 @@ scrp 1 1 210 138
 	targ ownr
 	setv ov70 0
 	tick 1
-	dbg: outs "reloaded contacts"
+*	dbg: outs "reloaded contacts"
 endm
 
 ** Update Chat Contact List
 scrp 1 1 210 3000
 	inst
 	lock
-	dbg: outs "reloading chat contacts list"
+*	dbg: outs "reloading chat contacts list"
 	setv va00 21
 	sets va01 "chatter"
 	sets va02 "_Nickname"
@@ -2338,9 +2338,9 @@ scrp 1 1 210 3000
 			endi
 
 			doif name va04 <> ""
-				dbg: outs "Adding this user to the chat list:"
-				dbg: outs va04
-				dbg: outs name va04
+*				dbg: outs "Adding this user to the chat list:"
+*				dbg: outs va04
+*				dbg: outs name va04
 				doif stoi caos 0 0 va06 0 game "f_aw_ulin" 0 1 va99 eq 0
 ** Remove them if they are offline.
 ** Update the Chat with this info!
