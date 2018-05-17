@@ -17,3 +17,6 @@ Bootstrap/000 Switcher/*
 !My Agents/
 My Agents/*
 !My Agents/aw_updater.agent
+!Catalogue/
+Catalogue/*
+!Catalogue/albianwarp_text.catalogue
