@@ -27,7 +27,7 @@ This Documentation is for you!
 
 Most communication done through Albian Warp is made possible by Direct Messaging Agents. These are simply agents that are created with the classifier `1 1 35753` and are set with the NAME variable "aw_recipient" containing the username of the person that the message will be sent to. They contain no scripts, but they can contain any other NAME variables that the recieving scripts need to process the message.
 
-When an outgoing DMA is created, the client picks it up, converts it to a JSON format, and sends it to the server. The server then sends it to the client of the person it is intended to recieve. The client turns the message into an agent and injects it into the recieving game. This agent is classified as `1 1 35754` containing the variables "aw\_sender" containing the username of the sender, and "aw\_date" containing the server date and time it was sent. This in the same format as is returned by the CAOS command `RTIM` and can be parsed with `RTIF`. It also carries over any NAME variables that were defined on that agent by the sender.
+When an outgoing DMA is created, the client picks it up, converts it to a JSON format, and sends it to the server. The server then sends it to the client of the person it is intended to recieve if they are online, or stores the message on the server until the next time that person comes online. Once the recieving client recieves the message, it turns it into an agent and injects it into the game. This agent is classified as `1 1 35754` containing the variables "aw\_sender" containing the username of the sender, and "aw\_date" containing the server date and time it was sent. This in the same format as is returned by the CAOS command `RTIM` and can be parsed with `RTIF`. It also carries over any NAME variables that were defined on that agent by the sender.
 
 Once the DMA is injected into the recipient's game, an agent that is intended to handle that DMA will find it and use the information stored in the NAME variables to do something, such as display a message.
 
@@ -57,3 +57,9 @@ sets name "message" "Here is a message. It is a very good message"
 Although potato won't know the agent has been injected (unless they are staring at the output of their client window), the Message Interpreter Agent (1 1 206, found in 'mailgrendel.cos') runs its timer script every so often to enumerate over agents classed as 1 1 35754 and check if name variable "type" exists and is equal to "mail_message". Once it finds one that is, it uses it to create a Message Agent which shows up in potato's inbox for them to read and reply to if desired.
 
 You can fake a messge to yourself by injecting the second block of code into your game yourself and altering the fields however you wish. Avoid injecting the first block unless necessary for testing purposes, as it is very easy to spam someone this way.
+
+##Real-Time Direct Messaging Agents (RTDMAs)
+
+RTDMAs are very similar to DMAs. They are set with the NAME variable "aw_recipient", and when recieved are stamped with the variables "aw\_sender" containing the username of the sender, and "aw\_date" containing the server date and time it was sent. However, RTDMAs are transmitted using a websocket connection, meaning there is much less delay in sending and recieving them. This makes them more suitable for applications such as chatting. However, unlike DMAs, RTDMAs are not stored on the server for later retrieval by offline users. If an RTDMA is sent to a user who is offline, it simply disappears.
+
+RTDMAs use the classifiers `1 1 35755` for sending and `1 1 35756` for recieving. 
