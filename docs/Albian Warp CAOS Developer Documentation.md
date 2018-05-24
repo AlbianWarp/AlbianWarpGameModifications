@@ -15,13 +15,14 @@ This Documentation is for you!
 * Direct Messaging Agents (DMAs)
 	* Sending Mail
 * Real-Time Direct Messaging Agents (RTDMAs)
-	* Chat Invites and Notifications
-	* Chat Messages
+	* Chatting
 * Send Creature Agents (SCAs)
 * Writing your Own
-	* About NET: Command Replacements
+	* The Who's Wanted Registers
+	* NET: Command Replacement CAOS Functions
 	* Contact Formatting
 	* Other GAME and EAME Variables
+	* Other CAOS Functions
 
 ## Direct Messaging Agents (DMAs)
 
@@ -63,3 +64,9 @@ You can fake a messge to yourself by injecting the second block of code into you
 RTDMAs are very similar to DMAs. They are set with the NAME variable "aw_recipient", and when recieved are stamped with the variables "aw\_sender" containing the username of the sender, and "aw\_date" containing the server date and time it was sent. However, RTDMAs are transmitted using a websocket connection, meaning there is much less delay in sending and recieving them. This makes them more suitable for applications such as chatting. However, unlike DMAs, RTDMAs are not stored on the server for later retrieval by offline users. If an RTDMA is sent to a user who is offline, it simply disappears.
 
 RTDMAs use the classifiers `1 1 35755` for sending and `1 1 35756` for recieving. 
+
+### Chatting
+
+The Chat system was rebuilt in the game using RTDMAs. It is one of the most complex systems in the game, consisting of several different message types.
+
+All RTMDAs used for the Chat system require two additional NAME variables: `ChatID` and either `REQU` or `CHAT`.  `ChatID` is a string that is randomly generated when a player first sends out a chat invitation and is used to identify all messages and notifcations related to that chat session until all chatters have left the session. `CHAT` and `REQU` denote the type of message being sent so the script can direct the contents to the type of script. 
