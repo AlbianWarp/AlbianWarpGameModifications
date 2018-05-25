@@ -70,3 +70,18 @@ RTDMAs use the classifiers `1 1 35755` for sending and `1 1 35756` for recieving
 The Chat system was rebuilt in the game using RTDMAs. It is one of the most complex systems in the game, consisting of several different message types.
 
 All RTMDAs used for the Chat system require two additional NAME variables: `ChatID` and either `REQU` or `CHAT`.  `ChatID` is a string that is randomly generated when a player first sends out a chat invitation and is used to identify all messages and notifcations related to that chat session until all chatters have left the session. `CHAT` and `REQU` denote the type of message being sent so the script can direct the contents to the type of script. 
+
+Incoming `REQU` RTDMAs are intepreted by the timer script of the Chat Request Interpreter (Classified as `1 1 213`). Similarly, incoming `CHAT` RTDMAs are interpreted by the timer script of the Chat Message Interpreter (`1 1 209`). To conserve resources, this agent's tick varies based on whether or not a chat window is open. Both of these scripts can be found in the file "aw_chat_replacements.cos". 
+
+####REQU Messages
+
+There are eight types of `REQU` RTDMAs:
+
+* Request:
+* Accept: 
+* Invite Accept: A user you have invited to an existing chat has accepted your invitation. This will add this user to your chatter list and then push everyone else in the chatroom a `CHAT`: Update RTDMA to ensure that the new chatter is also added to thier lists.
+* Decline: 
+* Invite Decline: A user you have invited to an existing chat has declined your invitation.
+* Timeout:
+* Invite Timeout
+* Join Existing Chat:
