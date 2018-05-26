@@ -77,11 +77,18 @@ Incoming `REQU` RTDMAs are intepreted by the timer script of the Chat Request In
 
 There are eight types of `REQU` RTDMAs:
 
-* Request:
-* Accept: 
-* Invite Accept: A user you have invited to an existing chat has accepted your invitation. This will add this user to your chatter list and then push everyone else in the chatroom a `CHAT`: Update RTDMA to ensure that the new chatter is also added to thier lists.
-* Decline: 
-* Invite Decline: A user you have invited to an existing chat has declined your invitation.
-* Timeout:
-* Invite Timeout
-* Join Existing Chat:
+* **Request**: Recieved when someone requests a chat with the user. This creates the Chat Request Indicator agent (1 1 214) that will appear on the user's screen with a 15 second timer. Depending on the user's response, either an Accept, Decline, or Timeout RTDMA is sent back to the requesting user.
+
+* **Accept**: Recieved when someone accepts a chat request that the user has sent. This creates the Chat Window Agent (1 1 210) and the conversation can begin.
+
+* **Decline**: Recieved when someone declines a chat request that the user has sent. This sets the appropriate message on the comms screen.
+
+* **Timeout**: Recieved when someone ignores a chat request that the user has sent, allowing the 15 second timer to tick down to zero. This sets the appropriate message on the comms screen.
+
+* **Join Existing Chat**: Recieved when someone invites the user to a chat session that is already in progress. Just like a normal Request RTDMA, this creates the Chat Request Indicator agent. However, these RTDMAs can contain several pairs of additional NAME variables named "chatter1\_UserID" and "chatter1\_Nickname" (or chatter2\_UserID", etc) containing the usernames of each chatter that is already in the chat. If the user accepts the invitation, an Invite Accept RTDMA is send back, the Chat Window is created and is populated with the names of the other users in the chat. If the user declines or ignore the invitations, an Invite Decline or Invite Timeout RTDMA is sent back accordingly.
+
+* **Invite Accept**: Recieved when someone the user has invited to an existing chat accepts their invitation. This will add the new chatter to the user's chatter list and then send each other user in the chatroom a `CHAT`: Update RTDMA to ensure that the new chatter is also added to thier lists. 
+
+* **Invite Decline**: Recieved when someone the user has invited to an existing chat has declined the invitation. Prints an appropriate message in the chat window to alert the user.
+
+* **Invite Timeout**: Recieved when someone the user has invited to an existing chat has ignores a chat request that the user has sent, allowing the 15 second timer to tick down to zero. Prints an appropriate message in the chat window to alert the user.
