@@ -12,15 +12,17 @@ This Documentation is for you!
 
 ##Contents
 
+* Contact Functionality
+* NET: Command Replacement CAOS Functions
+* The Who's Wanted Registers
 * Direct Messaging Agents (DMAs)
 	* Sending Mail
 * Real-Time Direct Messaging Agents (RTDMAs)
 	* Chatting
+		* REQU Messages
+		* CHAT Messages
 * Send Creature Agents (SCAs)
 * Writing your Own
-	* The Who's Wanted Registers
-	* NET: Command Replacement CAOS Functions
-	* Contact Formatting
 	* Other GAME and EAME Variables
 	* Other CAOS Functions
 
@@ -92,3 +94,13 @@ There are eight types of `REQU` RTDMAs:
 * **Invite Decline**: Recieved when someone the user has invited to an existing chat has declined the invitation. Prints an appropriate message in the chat window to alert the user.
 
 * **Invite Timeout**: Recieved when someone the user has invited to an existing chat has ignores a chat request that the user has sent, allowing the 15 second timer to tick down to zero. Prints an appropriate message in the chat window to alert the user.
+
+####CHAT Messages
+
+There are three types of `CHAT` RTDMAs:
+
+* **Message**: Recieved when someone the user is in a chat session with sends a message. Contains the text of the message in the NAME variable "Chat Message". Displays the message in the chat window.
+
+* **Chatter go Bye Bye**: Recieved when someone the user is in a chat session with closes the chat window. Removes the user from the chatter list and displays a message that they have left the chat.
+
+* **Update**: Recieved when a new chatter (that the user did not personally invite) joins a chat session that the user is in. Adds the user to the chatter list.
