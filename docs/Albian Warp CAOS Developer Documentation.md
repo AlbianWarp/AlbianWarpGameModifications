@@ -12,7 +12,7 @@ This Documentation is for you!
 
 ##Contents
 
-* Contact Functionality
+* Contact Formatting
 * NET: Command Replacement CAOS Functions
 * The Who's Wanted Registers
 * Direct Messaging Agents (DMAs)
@@ -25,6 +25,22 @@ This Documentation is for you!
 * Writing your Own
 	* Other GAME and EAME Variables
 	* Other CAOS Functions
+
+## Contact Formatting
+
+User Contacts are stored in the engine in GAME Variables.
+
+When a user is added to the contacts list, four GAME variables are created:
+
+* **USER\_contact**, IE Aiko_contact. This is set to a value of 1.
+* **USER\_group**, set to 1 by default. a value of 2 is set if this contact is a friend, 3 if they are a foe.
+* **USER\_nick**, set to the username of the contact. This is a little redundant and should eventually be removed, but it is depended upon by a large amount of warp-related CAOS and in the interest of converting the code to be Albian Warp compatible as quickly as possible, it was left intact.
+
+After the contact has been created, one more contact variable is set:
+
+* **USER_status**, set to "online" or "offline" This value is actually set by the Albian Warp client, rather than a script.
+
+With the exception of the \_group value, these variables should not be modified by the user or third party agents.
 
 ## Direct Messaging Agents (DMAs)
 
