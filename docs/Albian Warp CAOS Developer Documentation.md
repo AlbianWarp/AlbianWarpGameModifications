@@ -10,7 +10,7 @@ So, you're a CAOS Developer who wants to:
 This Documentation is for you!
 
 
-##Contents
+## Contents
 
 * Contact Formatting
 * NET: Command Replacement CAOS Functions
@@ -41,6 +41,28 @@ After the contact has been created, one more contact variable is set:
 * **USER_status**, set to "online" or "offline" This value is actually set by the Albian Warp client, rather than a script.
 
 With the exception of the \_group value, these variables should not be modified by the user or third party agents.
+
+## NET: Command Replacement CAOS Functions
+
+A large portion of the NET: CAOS Commands have been replaced in the Albian Warp code by CAOS Functions. These are portions of code that are loaded from scripts into GAME variable strings upon injection, and then executed with the command, `CAOS`. These can be a bit ugly and annoying to copy-paste, but they are vastly easier to read than copy-paste the entire blocks of code themselves. Attempts were made to keep the CAOS function behavior as close to the original NET: commands as possible, but some of them behave a little differently. 
+
+Use of the CAOS Functions in your own agents is highly encouraged, but avoid editing the CAOS function scripts or strings directly as several agents depend on them to function. If you have found a way to improve the NET: CAOS functions, please consider contributing directly to the Albian Warp project repository so everyone can benefit.
+
+Here are the NET: Commands that have been replaced, along with the CAOS lines that replace them:
+
+* **NET: RUSO**: `net: ruso va30` >> `sets va30 caos 0 0 0 0 game "f_aw_ruso" 0 0 va99`
+	* Sets va30 to the name of a random user
+* **NET: ULIN**: `setv va30 net: ulin "username"` >> `setv va30 stoi caos 0 0 "username" 0 game "f_aw_ulin" 0 1 va99`
+	* Sets va30 to 0 if the user is offline, 1 if they are online, and 2 if there is no such user.
+* **NET: WHON**: `net: whon va30` >> `sets va99 caos 0 0 va30 targ game "f_aw_whon" 0 0 va99`
+	* Adds the user specified in va30 to the Who's Wanted Register for the target agent
+* **NET: WHOF**: `net: whof va30` >> `sets va99 caos 0 0 va30 targ game "f_aw_whof" 0 0 va99`
+	* Removes the user specified in va30 from the Who's Wanted Register for the target agent
+* **NET: WHOZ**: `net: whoz` >> `sets va99 caos 0 0 targ 0 game "f_aw_whoz" 0 0 va99`
+	* Clears all usernames from the Who's Wanted Register for the target agent
+* **NET: WHOD**: `net: whod` >> `outs caos 0 0 0 0 game "f_aw_whod" 0 0 va99`
+	* Dumps debug infomation about the Who's Wanted Register to the debug log
+	* The original version of this command dumped the information to the output stream instead of the debug log
 
 ## Direct Messaging Agents (DMAs)
 
