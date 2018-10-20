@@ -27,7 +27,7 @@ scrp 1 1 215 10000
 		sets va03 va10
 *		"chatterX"
 		adds va03 vtos va02
-*		"chatterX_UserID"						
+*		"chatterX_UserID"
 		adds va03 va01
 
 		doif type name va03 ne 2
@@ -51,7 +51,7 @@ scrp 1 1 215 10000
 	targ ownr
 
 *	va15 is when to start displaying entries
-*	based on page number needed	
+*	based on page number needed
 	setv va15 _p1_
 	mulv va15 11
 *	doif _p1_ <> 0
@@ -59,7 +59,7 @@ scrp 1 1 215 10000
 *	endi
 *	set page number variable
 	setv name "page" _p1_
-*	va16 is how many legit entries had so far	
+*	va16 is how many legit entries had so far
 	setv va16 0
 
 *	show back arrow if this isn't page 1
@@ -308,7 +308,7 @@ scrp 1 1 215 5000
 	sets name "Result" "Success"
 endm
 
-**This is where the real stuff happens: chat - the interpreters 
+**This is where the real stuff happens: chat - the interpreters
 
 ** Chat Request Interpreter
 scrp 1 1 213 9
@@ -321,7 +321,7 @@ scrp 1 1 213 9
 *				dbg: outs "Found a REQU RTDMA"
 *We're in. Save who you are because we need it.
 				seta va66 targ
-**				What ChatID are you waiting on? Why does this matter? A Mystery. 
+**				What ChatID are you waiting on? Why does this matter? A Mystery.
 *				I think this might be an invite that you sent
 *				and are waiting for a reply on?
 				rtar 1 1 211
@@ -352,7 +352,7 @@ scrp 1 1 213 9
 					sets va02 "_group"
 					sets va03 va01
 					adds va03 va02
-*					Are you a foe, little User? ;O)		
+*					Are you a foe, little User? ;O)
 					doif game va03 = 3
 *					Trash the foe's message!
 						kill va66
@@ -437,7 +437,7 @@ scrp 1 1 213 9
 *						"chatterX"
 									adds va03 vtos va22
 *									dbg: outs va03
-*						"chatterX_UserID"						
+*						"chatterX_UserID"
 									adds va03 va01
 *									dbg: outs va03
 									targ va70
@@ -460,7 +460,7 @@ scrp 1 1 213 9
 									endi
 									addv va22 1
 								untl va22 = 31
-** 								There's a check for success here but for AW let's just 
+** 								There's a check for success here but for AW let's just
 **								Assume we're always sucessful
 								sets va10 "<tint 120 220 250>"
 								adds va10 va48
@@ -657,7 +657,7 @@ scrp 1 1 213 9
 *sets name va51 ""
 						endi
 
-** Increment X		
+** Increment X
 						addv va40 1
 					untl va40 = 31
 ** Positioning!
@@ -684,7 +684,7 @@ scrp 1 1 213 9
 *	Convert the Message to a chat request Agent... :o)
 *     =============================================
 					targ va66
-*	Store who it is from... :o) 
+*	Store who it is from... :o)
 					sets va02 name "aw_sender"
 *	Get the Date Sent..
 					sets va03 name "aw_date"
@@ -883,7 +883,7 @@ endm
 
 ************************************
 *** CHAT MESSAGE INTERPRETER SCRIPTS
-************************************ 
+************************************
 * left off 4/26
 
 scrp 1 1 209 9
@@ -934,7 +934,7 @@ scrp 1 1 209 9
 				sets va02 "_group"
 				sets va03 va01
 				adds va03 va02
-*				Are you a foe, little User? ;O)		
+*				Are you a foe, little User? ;O)
 				doif game va03 = 3
 *				Trash the foe's message!
 					kill va66
@@ -1015,7 +1015,7 @@ scrp 1 1 209 9
 *					doif va99 = 0
 *						dbg: asrt "leaving chatter" = "not removed"
 *					endi
-*** Instead I added this error text! A polite Grendel error!  
+*** Instead I added this error text! A polite Grendel error!
 							doif va99 <> 0
 								sets va10 "<tint 120 220 250>"
 								adds va10 va82
@@ -1091,7 +1091,7 @@ scrp 1 1 209 9
 								addv va40 1
 							untl va40 = 31
 ** If it has got this far, the chatter is not already in there.. :)
-** So we need to scan through again and find a spare slot! 
+** So we need to scan through again and find a spare slot!
 							setv va99 0
 							setv va40 1
 							sets va41 "chatter"
@@ -1231,7 +1231,7 @@ scrp 1 1 211 4000
 *	dbg: outv _p1_
 *	dbg: outs "----------------"
 *	va15 is when to start displaying entries
-*	based on page number needed	
+*	based on page number needed
 	setv va15 _p1_
 	mulv va15 11
 *	doif _p1_ <> 0
@@ -1239,7 +1239,7 @@ scrp 1 1 211 4000
 *	endi
 *	set page number variable
 	setv name "page" _p1_
-*	va16 is how many legit entries had so far	
+*	va16 is how many legit entries had so far
 	setv va16 0
 
 *	show back arrow if this isn't page 1
@@ -1775,12 +1775,12 @@ scrp 1 1 214 1002
 		sets va02 name "Sender_UserID"
 		sets va03 name "Sender_Nickname"
 	endi
-*	
+*
 *	Create RTDMA:
 	new: simp 1 1 35755 "blnk" 1 0 0
 	sets name "aw_recipient" va02
 	sets name "ChatID" mame "ChatID"
-*	What are you actually doing here	
+*	What are you actually doing here
 	doif mame "result" = "decline"
 		sets name "REQU" "Decline"
 *		dbg: outs "RTDMA Created-- REQU: Decline"
@@ -2264,7 +2264,7 @@ scrp 1 1 210 138
 		sets va05 va01
 *		"chatterX"
 		adds va05 vtos va04
-*		Copied for Nickname		
+*		Copied for Nickname
 		sets va06 va05
 *		"chatterX_UserID"
 		adds va05 va02
@@ -2292,7 +2292,7 @@ scrp 1 1 210 138
 *				adds va06 va03
 ** Clear the "chatterX_Nickname" name variable.
 *				dbg: outs "now removing"
-*				dbg: outs va06 
+*				dbg: outs va06
 *				dbg: outs name va06
 				sets name va06 ""
 ** Remove from Who's Wanted Register
@@ -2401,7 +2401,7 @@ scrp 1 1 210 1010
 		sets va03 va10
 *		"chatterX"
 		adds va03 vtos va02
-*		"chatterX_UserID"						
+*		"chatterX_UserID"
 		adds va03 va01
 *		Send to all Chatters, except to yourself!
 		doif type name va03 ne 2

@@ -7,13 +7,13 @@ scrp 3 9 1 0
 	sndc "por1"
 	over
 	inst
-*		flag to say you are open	
+*		flag to say you are open
 	setv ov03 1
-*	if you are online ...	
+*	if you are online ...
 	doif game "aw_status" eq "online"
 *		store your ID in temp variable
 		setv va00 ov00
-*		search to see if who you send to or receive from are online	
+*		search to see if who you send to or receive from are online
 
 *		set flag to say user is off/online
 		setv va90 0
@@ -54,7 +54,7 @@ scrp 3 9 1 0
 			sets va99 va10
 		untl va10 eq ""
 
-*		if you found a user who's on then animate	
+*		if you found a user who's on then animate
 		doif va90 eq 1
 
 			call 1000 0 0
@@ -107,7 +107,7 @@ scrp 3 9 1 1
 	endi
 *	store it again because this was added later :-(
 	sets va66 gtos 0
-*	add the _travel tag	
+*	add the _travel tag
 	sets va01 "_travel"
 	adds va00 va01
 *	see if this game variable exists
@@ -118,8 +118,8 @@ scrp 3 9 1 1
 		dbg: outs va67
 		stop
 	else
-*		it probably only exists because of checking for 
-*		its existence (Shroedingers game variable)		
+*		it probably only exists because of checking for
+*		its existence (Shroedingers game variable)
 *		kill it!
 		delg va00
 	endi
@@ -158,7 +158,7 @@ scrp 3 9 1 1
 			subv va20 1
 			sets va30 subs va10 1 va20
 
-*			see if this is the random user contact	
+*			see if this is the random user contact
 			doif va30 eq "!net: ruso"
 				doif game "!net: ruso_status" eq "online"
 						addv va91 1
@@ -337,7 +337,7 @@ scrp 3 9 1 1
 	retn
 
 
-****	
+****
 	subr friendcheck
 *		set first game variable to check
 		sets va98 ""
@@ -460,7 +460,7 @@ scrp 3 9 1 137
 *	store your ID in temp variable
 		setv va00 ov00
 
-*	search to see if who you send to or receive from are online	
+*	search to see if who you send to or receive from are online
 
 *set flag to say user is off/online
 		setv va90 0
@@ -510,14 +510,14 @@ scrp 3 9 1 137
 		endi
 
 
-*if you found a user who's on	
+*if you found a user who's on
 		doif va90 eq 1
 *	and you are not operational
 			doif ov03 eq 1
 *		open up
 				call 1000 0 0
 			endi
-*otherwise if you found no users on			
+*otherwise if you found no users on
 		elif va90 eq 0
 *	and you are operational
 			doif ov03 eq 2

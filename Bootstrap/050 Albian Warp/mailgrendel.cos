@@ -95,7 +95,7 @@ scrp 1 1 206 9
 			dbg: outs "This is not a mail message"
 		endi
 	next
-*	If none found, stop.	
+*	If none found, stop.
 	doif va00 eq null
 		stop
 	endi
@@ -120,7 +120,7 @@ scrp 1 1 206 9
 		sets va02 "_group"
 		sets va03 va01
 		adds va03 va02
-*			Are you a foe, little User? ;O)		
+*			Are you a foe, little User? ;O)
 		doif game va03 = 3
 *				Trash the foe's message!
 			kill va00

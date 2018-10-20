@@ -34,7 +34,7 @@ scrp 1 1 35700 9
 		dbg: outs "client closed/offline, going offline"
 
 * 		set newly online flag in the WWR (this is just so the WWR doesn't
-*		spam you with who's online after you just connected) 
+*		spam you with who's online after you just connected)
 		targ game "aw_wwr_agent"
 		setv ov02 2
 
@@ -65,7 +65,7 @@ scrp 1 1 35700 9
 		sets game "status" "online"
 		dbg: outs "client open/online, going online"
 
-*		tell the online indicator you are online		
+*		tell the online indicator you are online
 		enum 1 2 14
 			mesg writ targ 500
 		next

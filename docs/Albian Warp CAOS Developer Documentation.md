@@ -44,7 +44,7 @@ With the exception of the \_group value, these variables should not be modified 
 
 ## NET: Command Replacement CAOS Functions
 
-A large portion of the NET: CAOS Commands have been replaced in the Albian Warp code by CAOS Functions. These are portions of code that are loaded from scripts into GAME variable strings upon injection, and then executed with the command, `CAOS`. These can be a bit ugly and annoying to copy-paste, but they are vastly easier to read than copy-paste the entire blocks of code themselves. Attempts were made to keep the CAOS function behavior as close to the original NET: commands as possible, but some of them behave a little differently. 
+A large portion of the NET: CAOS Commands have been replaced in the Albian Warp code by CAOS Functions. These are portions of code that are loaded from scripts into GAME variable strings upon injection, and then executed with the command, `CAOS`. These can be a bit ugly and annoying to copy-paste, but they are vastly easier to read than copy-paste the entire blocks of code themselves. Attempts were made to keep the CAOS function behavior as close to the original NET: commands as possible, but some of them behave a little differently.
 
 Use of the CAOS Functions in your own agents is highly encouraged, but avoid editing the CAOS function scripts or strings directly as several agents depend on them to function. If you have found a way to improve the NET: CAOS functions, please consider contributing directly to the Albian Warp project repository so everyone can benefit.
 
@@ -103,15 +103,15 @@ You can fake a messge to yourself by injecting the second block of code into you
 
 RTDMAs are very similar to DMAs. They are set with the NAME variable "aw_recipient", and when recieved are stamped with the variables "aw\_sender" containing the username of the sender, and "aw\_date" containing the server date and time it was sent. However, RTDMAs are transmitted using a websocket connection, meaning there is much less delay in sending and recieving them. This makes them more suitable for applications such as chatting. However, unlike DMAs, RTDMAs are not stored on the server for later retrieval by offline users. If an RTDMA is sent to a user who is offline, it simply disappears.
 
-RTDMAs use the classifiers `1 1 35755` for sending and `1 1 35756` for recieving. 
+RTDMAs use the classifiers `1 1 35755` for sending and `1 1 35756` for recieving.
 
 ### Chatting
 
 The Chat system was rebuilt in the game using RTDMAs. It is one of the most complex systems in the game, consisting of several different message types.
 
-All RTMDAs used for the Chat system require two additional NAME variables: `ChatID` and either `REQU` or `CHAT`.  `ChatID` is a string that is randomly generated when a player first sends out a chat invitation and is used to identify all messages and notifcations related to that chat session until all chatters have left the session. `CHAT` and `REQU` denote the type of message being sent so the script can direct the contents to the type of script. 
+All RTMDAs used for the Chat system require two additional NAME variables: `ChatID` and either `REQU` or `CHAT`.  `ChatID` is a string that is randomly generated when a player first sends out a chat invitation and is used to identify all messages and notifcations related to that chat session until all chatters have left the session. `CHAT` and `REQU` denote the type of message being sent so the script can direct the contents to the type of script.
 
-Incoming `REQU` RTDMAs are intepreted by the timer script of the Chat Request Interpreter (Classified as `1 1 213`). Similarly, incoming `CHAT` RTDMAs are interpreted by the timer script of the Chat Message Interpreter (`1 1 209`). To conserve resources, this agent's tick varies based on whether or not a chat window is open. Both of these scripts can be found in the file "aw_chat_replacements.cos". 
+Incoming `REQU` RTDMAs are intepreted by the timer script of the Chat Request Interpreter (Classified as `1 1 213`). Similarly, incoming `CHAT` RTDMAs are interpreted by the timer script of the Chat Message Interpreter (`1 1 209`). To conserve resources, this agent's tick varies based on whether or not a chat window is open. Both of these scripts can be found in the file "aw_chat_replacements.cos".
 
 ####REQU Messages
 
@@ -127,7 +127,7 @@ There are eight types of `REQU` RTDMAs:
 
 * **Join Existing Chat**: Recieved when someone invites the user to a chat session that is already in progress. Just like a normal Request RTDMA, this creates the Chat Request Indicator agent. However, these RTDMAs can contain several pairs of additional NAME variables named "chatter1\_UserID" and "chatter1\_Nickname" (or chatter2\_UserID", etc) containing the usernames of each chatter that is already in the chat. If the user accepts the invitation, an Invite Accept RTDMA is send back, the Chat Window is created and is populated with the names of the other users in the chat. If the user declines or ignore the invitations, an Invite Decline or Invite Timeout RTDMA is sent back accordingly.
 
-* **Invite Accept**: Recieved when someone the user has invited to an existing chat accepts their invitation. This will add the new chatter to the user's chatter list and then send each other user in the chatroom a `CHAT`: Update RTDMA to ensure that the new chatter is also added to thier lists. 
+* **Invite Accept**: Recieved when someone the user has invited to an existing chat accepts their invitation. This will add the new chatter to the user's chatter list and then send each other user in the chatroom a `CHAT`: Update RTDMA to ensure that the new chatter is also added to thier lists.
 
 * **Invite Decline**: Recieved when someone the user has invited to an existing chat has declined the invitation. Prints an appropriate message in the chat window to alert the user.
 

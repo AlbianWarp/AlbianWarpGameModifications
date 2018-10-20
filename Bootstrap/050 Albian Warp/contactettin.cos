@@ -1,7 +1,7 @@
 *New Albian Warp contact book, aka ContactEttin
 
 ***remove add to contact book from web script
-**This was really clunky in the original netbabel and I think 
+**This was really clunky in the original netbabel and I think
 *we can do way better.
 scrx 1 1 157 2468
 
@@ -86,7 +86,7 @@ scrp 1 1 157 1000
 				mesg wrt+ targ 1005 _p1_ 0 0
 			endi
 		next
-*	otherwise set up who's wanted register for comms screen	
+*	otherwise set up who's wanted register for comms screen
 	elif _p2_ eq 0
 *			dbg: outs "SENT whos wanted info for contact book (nothing to do)"
 *			dbg: outs _p1_
@@ -122,10 +122,10 @@ scrp 1 1 157 1000
 	doif _p2_ lt 0
 *		set temp string to receive
 		sets va02 "receive"
-*		and get absolute value of _p2_		
+*		and get absolute value of _p2_
 		absv _p2_
 	elif _p2_ gt 0
-*		set temp string to send					
+*		set temp string to send
 		sets va02 "send"
 	endi
 
@@ -173,7 +173,7 @@ endm
 
 
 ***owner has just gone online -- originally, this script looped through
-*the contacts book to see if anthing didn't have nickname but that's 
+*the contacts book to see if anthing didn't have nickname but that's
 *kind of irelevent now since all we have are nicknames
 scrp 1 1 157 135
 
@@ -200,7 +200,7 @@ scrp 1 1 157 137
 	doif game va00 eq 2
 *	if this person is classed as a friend ...
 		rtar 1 1 164
-*		tell the warning icon controller about it	
+*		tell the warning icon controller about it
 		doif targ ne null
 			mesg wrt+ targ 1000 4 _p1_ 0
 		endi
@@ -231,7 +231,7 @@ scrp 1 1 157 138
 *		only do this though if you are online
 		doif game "aw_status" eq "online"
 			rtar 1 1 164
-*		tell the warning icon controller about it	
+*		tell the warning icon controller about it
 			doif targ ne null
 				mesg wrt+ targ 1000 6 _p1_ 0
 			endi

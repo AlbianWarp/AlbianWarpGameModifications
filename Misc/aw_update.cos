@@ -24,7 +24,7 @@ sets va00 innl
 				sets va06 subs va00 va05 va04
 *				actually inject it
 				ject va06 7
-				adds va98 va06 
+				adds va98 va06
 				adds va98 "\n"
 			endi
 		endi
