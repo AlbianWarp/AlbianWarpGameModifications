@@ -213,7 +213,7 @@ scrp 1 1 184 9
 
 *	if this a creature someone rejected from you, let it in automatically
 	doif pray agti va01 "Pray Extra reject" 0 ne 0
-*		make sure there is room in chamber	
+*		make sure there is room in chamber
 		gsub chambercheck
 *		check if chamber is free
 		gsub chamberinactive
@@ -318,11 +318,11 @@ scrp 1 1 184 9
 *	don't loose original strings, create copy
 *		start of search string
 		sets va05 va00
-*		add the portal number		
+*		add the portal number
 		adds va05 va03
-*		add the 'receive' string		
+*		add the 'receive' string
 		adds va05 va04
-*	create the final search string		
+*	create the final search string
 		sets va11 "!net: ruso"
 		adds va11 va05
 
@@ -332,7 +332,7 @@ scrp 1 1 184 9
 *	find the portal with this ID
 			enum 3 9 1
 				doif ov00 eq va02
-*		save its TARG ID to variable				
+*		save its TARG ID to variable
 					seta va90 targ
 *		and set variable to jump out of loop, no need to carry on
 					setv va02 10
@@ -370,11 +370,11 @@ scrp 1 1 184 9
 *	don't loose original strings, create copy
 *		start of search string
 		sets va05 va00
-*		add the portal number		
+*		add the portal number
 		adds va05 va03
-*		add the 'receive' string		
+*		add the 'receive' string
 		adds va05 va04
-*	create the final search string		
+*	create the final search string
 		sets va11 "!friend"
 		adds va11 va05
 
@@ -384,7 +384,7 @@ scrp 1 1 184 9
 *	find the portal with this ID
 			enum 3 9 1
 				doif ov00 eq va02
-*		save its TARG ID to variable				
+*		save its TARG ID to variable
 					seta va90 targ
 *		and set variable to jump out of loop, no need to carry on
 					setv va02 10
@@ -439,11 +439,11 @@ scrp 1 1 184 9
 *	don't loose original strings, create copy
 *		start of search string
 		sets va05 va00
-*		add the portal number		
+*		add the portal number
 		adds va05 va03
-*		add the 'receive' string		
+*		add the 'receive' string
 		adds va05 va04
-*	create the final search string		
+*	create the final search string
 		sets va11 va10
 		adds va11 va05
 
@@ -453,7 +453,7 @@ scrp 1 1 184 9
 *	find the portal with this ID
 			enum 3 9 1
 				doif ov00 eq va02
-*		save its TARG ID to variable				
+*		save its TARG ID to variable
 					seta va90 targ
 *		and set variable to jump out of loop, no need to carry on
 					setv va02 10
@@ -475,7 +475,7 @@ scrp 1 1 184 9
 
 *	check containment chamber last
 	sets va00 "_containmentreceive"
-*	va10 is user this creature is from	
+*	va10 is user this creature is from
 	sets va11 va10
 
 
@@ -520,7 +520,7 @@ scrp 1 1 184 9
 *		va11 is user ID
 	sets va59 va11
 	adds va59 "_group"
-*		see if they're a friend	
+*		see if they're a friend
 	doif game va59 eq 2
 *		now look for friend setting in containment chamber
 		sets va59 va11
@@ -534,7 +534,7 @@ scrp 1 1 184 9
 			gsub chamberinactive
 *		first get ID of who it is from
 *		sets va70 net: from va01
-*!* 		AW mod... but really you already have who it's from..? Why.			
+*!* 		AW mod... but really you already have who it's from..? Why.
 			sets va70 va11
 
 *	set game variable such as:
@@ -576,7 +576,7 @@ scrp 1 1 184 9
 		gsub chamberinactive
 *		first get ID of who it is from
 *		sets va70 net: from va01
-*!* 		AW mod... but really you already have who it's from..? Why.			
+*!* 		AW mod... but really you already have who it's from..? Why.
 		sets va70 va11
 
 
@@ -686,7 +686,7 @@ scrp 1 1 184 9
 *	import creature into chamber.
 *	ov03 is moniker of creature, ov00 is pray chunk to use
 	subr chamberimport
-*		
+*
 		sets va62 ov03
 		sets va01 ov00
 *		see if chamber is running code at the moment
@@ -747,7 +747,7 @@ scrp 1 1 184 9
 			endi
 			targ ownr
 		endi
-*		clear 'last creature flag'		
+*		clear 'last creature flag'
 		targ ownr
 		sets ov99 ""
 		adds va68 "Success! It was sent to the containment chamber"
@@ -768,9 +768,9 @@ scrp 1 1 184 9
 		setv va03 posx
 		setv va04 posy
 		addv va04 50
-*		but make sure it's actually open!		
+*		but make sure it's actually open!
 		doif ov03 ne 0
-*			if it's open but not animating, send animate message	
+*			if it's open but not animating, send animate message
 *			doif ov03 eq 1
 *				mesg writ targ 1003
 *				wait 5
@@ -809,7 +809,7 @@ scrp 1 1 184 9
 				inst
 				stim writ targ 95 1
 			endi
-*		clear 'last creature flag'		
+*		clear 'last creature flag'
 			targ ownr
 			sets ov99 ""
 
@@ -852,7 +852,7 @@ scrp 1 1 184 9
 		targ ownr
 	retn
 
-*	routine to return-to-sender creatures that have been in 
+*	routine to return-to-sender creatures that have been in
 *	quarantine too long. On entry targ should be desired creature
 	subr toolong
 

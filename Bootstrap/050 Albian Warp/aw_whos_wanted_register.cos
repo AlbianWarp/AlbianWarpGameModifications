@@ -46,7 +46,7 @@ scrp 1 2 35700 9
 		setv ov00 1
 	endi
 
-*This is the script that checks all the "_status" game variables and sees if any of them have 
+*This is the script that checks all the "_status" game variables and sees if any of them have
 *changed since the last script-tick.
 	subr check_wwr
 		setv va02 stoi caos 0 0 "wwr" targ game "f_LengthofVList" 0 0 va99
@@ -58,7 +58,7 @@ scrp 1 2 35700 9
 				addv va01 1
 *			get the user namevar:
 				sets va03 caos 0 1 "wwr" va01 game "f_GetVarInVList" 0 0 va99
-*			get the username itself 
+*			get the username itself
 				sets va04 name va03
 *			see if your online status has changed!
 				sets va05 va03
@@ -352,7 +352,7 @@ scrp 1 2 35700 1007
 endm
 
 *A user has changed status (only to be called by the AW Client)
-* _p1_ is the username, _p2_ is either "online" or "offline" 
+* _p1_ is the username, _p2_ is either "online" or "offline"
 *Example: mesg wrt+ game "aw_wwr_agent" 1008 "Verm" "online" 0
 scrp 1 2 35700 1008
 	inst

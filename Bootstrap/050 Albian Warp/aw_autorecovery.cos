@@ -95,7 +95,7 @@ scrp 1 202 3 1000
 				addv va13 va12
 *		 		add the string so far to the new string
 				adds va10 subs va00 va11 va13
-*				increment the index to search from 
+*				increment the index to search from
 				setv va11 va13
 *				add the one to add!
 				adds va10 va88

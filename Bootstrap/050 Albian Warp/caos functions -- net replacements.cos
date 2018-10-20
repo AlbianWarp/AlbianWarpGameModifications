@@ -55,7 +55,7 @@ sets game "f_aw_whod" sorc 1 1 35700 9005
 setv game "f_aw_whod:v" 1
 scrx 1 1 35700 9005
 
-*holder script for CAOS functions: 
+*holder script for CAOS functions:
 *no parameters-- just returns a random user
 scrp 1 1 35700 9000
 	inst
@@ -126,7 +126,7 @@ scrp 1 1 35700 9000
 	outs va30
 endm
 
-*holder script for CAOS function: 
+*holder script for CAOS function:
 *returns 0 - "offline", 1 - "online", or 2 (contact does not exist)
 *_p1_ is the contact's name
 scrp 1 1 35700 9001

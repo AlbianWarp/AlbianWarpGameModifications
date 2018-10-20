@@ -1,9 +1,9 @@
 *New Albian Warp comms functions, aka Commsgeat
 *replaces and removes scripts in comms screen.cos
 dbg: outs "injecting commsgeat"
-*Just Went Online: 
-*Checks who is online and offline 
-*Doesn't work right now til AW implements it 
+*Just Went Online:
+*Checks who is online and offline
+*Doesn't work right now til AW implements it
 scrp 1 2 210 135
 	inst
 *if in view contacts mode
@@ -65,7 +65,7 @@ scrp 1 2 210 1010
 *	dbg: outs "reloading contacts"
 
 *	dbg: outs "displaying parts"
-****	create the list of known contacts	
+****	create the list of known contacts
 *	ov01	is the part# to use - incremented with each new part
 	setv ov01 11
 
@@ -91,7 +91,7 @@ scrp 1 2 210 1010
 	setv va03 _p1_
 	mulv va03 20
 	addv va03 1
-*	ov07 is long term record of page number	
+*	ov07 is long term record of page number
 	setv ov07 _p1_
 
 *	work out whether you need to display 'back' button or not
@@ -113,9 +113,9 @@ scrp 1 2 210 1010
 *	va91 is Y offset of any new parts created
 	setv va90 180
 	setv va91 -15
-*	va92 is how many entries displayed so far: 10 per column, 2 columns	
+*	va92 is how many entries displayed so far: 10 per column, 2 columns
 	setv va92 0
-*	va99 is the game variable to seach, starts at ""	
+*	va99 is the game variable to seach, starts at ""
 	sets va99 ""
 *	search string
 	sets va00 "_contact"
@@ -133,7 +133,7 @@ scrp 1 2 210 1010
 *	increase 'possible entry' variable
 			addv va02 1
 			doif va02 ge va03
-*	only go through this hassle if you actually want this page		
+*	only go through this hassle if you actually want this page
 
 *		chop up string so only head remains
 *		this makes va30 the USER ID
@@ -245,9 +245,9 @@ scrp 1 2 210 1010
 				else
 					addv va91 16
 				endi
-*				if there are 10 entries need to start another column				
+*				if there are 10 entries need to start another column
 				doif va92 ge 10
-*					if reached max entries (20) then stop counting and create arrow button				
+*					if reached max entries (20) then stop counting and create arrow button
 					doif va92 eq 20
 						part 9
 						anim [0 0 1 0 1 0 1]
@@ -268,7 +268,7 @@ scrp 1 2 210 1010
 
 *	dbg: outs "end contact search loop"
 
-*	'export contacts' buttons	
+*	'export contacts' buttons
 *	pat: butt ov01 "comms" 34 2 480 -38 1 [] 1013 0
 
 
@@ -421,7 +421,7 @@ scrp 1 2 210 138
 		dbg: outs "WWR - user offline"
 		dbg: outs _p1_
 
-*	if you are in 'view contacts' mode	
+*	if you are in 'view contacts' mode
 		doif ov00 eq 1
 *		build search string
 			sets va00 _p1_

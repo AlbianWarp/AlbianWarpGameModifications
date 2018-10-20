@@ -1,5 +1,5 @@
 **This is a huge, HUGE WIP, most of these are super-untested
-*And still need to be documented 
+*And still need to be documented
 
 sets game "f_ReadFromVList" sorc 1 202 2 1000
 *ex: outs caos 0 1 "listname" 99 game "f_ReadFromVList" 0 0 va99
@@ -28,14 +28,14 @@ scrx 1 202 2 1007
 **_p1_ is always the name of the list, _p2_ is the modifying factor
 **(this could be an index number or the thing you want to add/remove)
 
-*List items are stored in NAME "p1_#" 
+*List items are stored in NAME "p1_#"
 *so like "mylist_1, mylist_2" etc
-*indices begin at 1. 
-*the length is stored in NAME "p1_length" 
+*indices begin at 1.
+*the length is stored in NAME "p1_length"
 
 *"f_ReadFromVList"
 *FROM is the agent
-*P1 (string) id the name of the list. 
+*P1 (string) id the name of the list.
 *P2 (integer) is the index of the item you want to retrive
 *this will return the item in the list in string form,
 *or "#R#" if index is out of range
@@ -79,7 +79,7 @@ endm
 
 *"f_AddtoVList"
 *FROM is the agent
-*P1 (string) id the name of the list. 
+*P1 (string) id the name of the list.
 *P2 (anything) is item you want to add to the list.
 *This will add the item to the end of the list
 *Returns the namevar name containing the newly added item.
@@ -102,7 +102,7 @@ scrp 1 202 2 1001
 	adds va01 "_"
 	adds va01 vtos va02
 *	dbg: outs va01
-*	update the length var	
+*	update the length var
 	sets va03 _p1_
 	adds va03 "_length"
 	setv name va03 va02
@@ -120,8 +120,8 @@ endm
 
 *"f_RemoveFromVList"
 *FROM is the agent
-*P1 (string) is the name of the list. 
-*P2 (integer or string) is either the index or the varname of the item you want to remove) 
+*P1 (string) is the name of the list.
+*P2 (integer or string) is either the index or the varname of the item you want to remove)
 *This will remove the item from the list and shuffle all the index numbers
 *Returns the new length of the list, or "#R#" if index is out of range
 scrp 1 202 2 1002
@@ -192,7 +192,7 @@ scrp 1 202 2 1002
 		setv va09 strl va05
 		sets va06 ""
 		sets va07 ""
-		
+
 
 		loop
 			addv va95 1
@@ -241,7 +241,7 @@ scrp 1 202 2 1002
 	doif va95 gt 1000
 	dbg: outs "stopped due to being too long in looping"
 	endi
-*	update the length var	
+*	update the length var
 	subv va02 1
 	sets va03 _p1_
 	adds va03 "_length"
@@ -253,7 +253,7 @@ endm
 
 *"f_SearchVList"
 *FROM is the agent
-*P1 (string) is the name of the list. 
+*P1 (string) is the name of the list.
 *P2 (anything) is the actual content of the item you are looking for
 *This will return the name variable holding the match of the content specified
 * or "#N#" if no match
@@ -289,7 +289,7 @@ scrp 1 202 2 1003
 		adds va11 vtos va10
 *see if it matches
 		doif type _p2_ eq type name va11
-*if it does, see if the content matches 
+*if it does, see if the content matches
 			doif _p2_ eq name va11
 *if if does, you have a match, so save your index
 				sets va12 va11
@@ -301,9 +301,9 @@ scrp 1 202 2 1003
 endm
 
 *"f_LengthofVList"
-*this one is a little special-- it can be run independently. 
-*If so, it will look for the agent to target in _p2_. 
-*P1 (string) is the name of the list. 
+*this one is a little special-- it can be run independently.
+*If so, it will look for the agent to target in _p2_.
+*P1 (string) is the name of the list.
 *P2 (agent) is the agent to target if FROM is null.
 scrp 1 202 2 1004
 	inst
@@ -321,7 +321,7 @@ scrp 1 202 2 1004
 		endi
 	endi
 	targ va00
-*	dbg: outv unid	
+*	dbg: outv unid
 	sets va01 _p1_
 	adds va01 "_length"
 *	dbg: outs va01
@@ -338,7 +338,7 @@ scrp 1 202 2 1005
 	sets va00 _p1_
 	setv va01 0
 	sets va02 ""
-*	outer loop keeps incrementing the var number until 
+*	outer loop keeps incrementing the var number until
 *	one doesn't exist
 	loop
 		sets va00 "fr_"
@@ -360,7 +360,7 @@ endm
 
 *"f_GetVarInVList"
 *FROM is the agent, TARG also works if run with targ-dependence
-*P1 (string) id the name of the list. 
+*P1 (string) id the name of the list.
 *P2 (integer) is the index of the item you want to retrive
 *this will return the NAME of the Namevar of the item in the list
 *or "#R#" if index is out of range
@@ -391,7 +391,7 @@ endm
 
 *"f_ExAddtoVList"
 *FROM is the agent
-*P1 (string) id the name of the list. 
+*P1 (string) id the name of the list.
 *P2 (anything) is item you want to add to the list.
 *This will first search the list for _p2_-- if it cannot be found
 *it will add the item to the end of the list
@@ -416,7 +416,7 @@ scrp 1 202 2 1007
 *	dbg: outv va02
 *	if the length is 0, skip the search bit:
 	doif va02 gt 0
-*		okay, we're going to search to see if _p2_ is 
+*		okay, we're going to search to see if _p2_ is
 *		already in the list
 *		get the type of the search agent
 		setv va03 type _p2_
@@ -433,7 +433,7 @@ scrp 1 202 2 1007
 *			dbg: outs va11
 *see if it matches
 			doif type _p2_ eq type name va11
-*	if it does, see if the content matches 
+*	if it does, see if the content matches
 				doif _p2_ eq name va11
 *	if if does, you have a match, so save your index
 					sets va12 va11
@@ -457,7 +457,7 @@ scrp 1 202 2 1007
 	adds va01 "_"
 	adds va01 vtos va02
 *	dbg: outs va01
-*	update the length var	
+*	update the length var
 	sets va03 _p1_
 	adds va03 "_length"
 	setv name va03 va02
@@ -476,4 +476,4 @@ endm
 
 ***Functions to add maybe:
 *Wipe an entire list
-*Rename/Move a list 
+*Rename/Move a list
